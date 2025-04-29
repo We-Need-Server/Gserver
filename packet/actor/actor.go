@@ -1,0 +1,65 @@
+package actor
+
+import (
+	"WeNeedGameServer/command"
+	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/packet"
+	"encoding/binary"
+	"fmt"
+	"math"
+)
+
+type PacketActor struct {
+	NextSEQ     uint32
+	QPort       uint32
+	UserAddr    string
+	packetChan  chan *packet.Packet
+	actorPlayer *player.Player
+}
+
+func NewPacketActor(NextSEQ uint32, QPort uint32, UserAddr string, packetChan chan *packet.Packet, actorPlayer *player.Player) *PacketActor {
+	return &PacketActor{NextSEQ, QPort, UserAddr, packetChan, actorPlayer}
+}
+
+func (a *PacketActor) ProcessLoopPacket() {
+	for {
+		pkt := <-a.packetChan
+		fmt.Println(pkt)
+		if pkt.SEQ == a.NextSEQ {
+			a.NextSEQ += uint32(1)
+			a.processCommandPayload(pkt.Payload, pkt.PayloadEndpoint)
+		}
+
+		// 패킷 정보 출력
+		fmt.Printf("패킷 수신 - 사용자: %s, QPort: %d\n", a.UserAddr, a.QPort)
+		fmt.Printf("패킷 내용: %+v\n", pkt)
+	}
+}
+
+func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
+	for i := 0; i < payLoadEndpoint; {
+		payloadCommand := string(payload[i : i+2])
+		switch payloadCommand {
+		case command.FB:
+			xDelta := math.Float32frombits(binary.BigEndian.Uint32(payload[i+2 : i+6]))
+			a.actorPlayer.MoveFoward(xDelta)
+			i += 6
+			break
+		case command.RL:
+			zDelta := math.Float32frombits(binary.BigEndian.Uint32(payload[i+2 : i+6]))
+			a.actorPlayer.MoveSide(zDelta)
+			i += 6
+			break
+		case command.YW:
+			yawDelta := math.Float32frombits(binary.BigEndian.Uint32(payload[i+2 : i+6]))
+			a.actorPlayer.TransferYaw(yawDelta)
+			i += 6
+			break
+		case command.PT:
+			ptDelta := math.Float32frombits(binary.BigEndian.Uint32(payload[i+2 : i+6]))
+			a.actorPlayer.TransferPT(ptDelta)
+			i += 6
+			break
+		}
+	}
+}
