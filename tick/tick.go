@@ -48,15 +48,15 @@ func (gt *GameTick) processTick() {
 		fmt.Println(val)
 		clientAddr, err := net.ResolveUDPAddr("udp", val)
 		if err != nil {
-			fmt.Println("에러1")
+			fmt.Println("ClientAddr Error", err)
 		}
 		UDPServerPoint, resolveErr := net.ResolveUDPAddr("udp", "127.0.0.1:8080")
 		if resolveErr != nil {
-			fmt.Println("에러1")
+			fmt.Println("Resolve Error", resolveErr)
 		}
-		clientConn, err := net.DialUDP("udp", UDPServerPoint, clientAddr)
-		if err != nil {
-			fmt.Println("에러2")
+		clientConn, clientConnErr := net.DialUDP("udp", UDPServerPoint, clientAddr)
+		if clientConnErr != nil {
+			fmt.Println("Client Connection Error", clientConnErr)
 		}
 		defer clientConn.Close() // 연결 종료 보장
 
