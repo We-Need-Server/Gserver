@@ -9,7 +9,7 @@ import (
 func main() {
 	gameInstance := game.NewGame()
 	networkInstance := network.NewNetwork(gameInstance)
-	go networkInstance.Start()
+	go networkInstance.TempStart()
 	gameTickInstance := tick.NewGameTick(1, gameInstance, &networkInstance.IPTable)
 	gameTickInstance.StartGameLoop()
 }

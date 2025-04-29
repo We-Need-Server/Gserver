@@ -3,6 +3,7 @@ package tick
 import (
 	"WeNeedGameServer/game"
 	"fmt"
+	"log"
 	"net"
 	"time"
 )
@@ -48,15 +49,11 @@ func (gt *GameTick) processTick() {
 		fmt.Println(val)
 		clientAddr, err := net.ResolveUDPAddr("udp", val)
 		if err != nil {
-			fmt.Println("ClientAddr Error", err)
+			log.Panicln("ClientAddr Error:", err)
 		}
-		UDPServerPoint, resolveErr := net.ResolveUDPAddr("udp", "127.0.0.1:8080")
-		if resolveErr != nil {
-			fmt.Println("Resolve Error", resolveErr)
-		}
-		clientConn, clientConnErr := net.DialUDP("udp", UDPServerPoint, clientAddr)
+		clientConn, clientConnErr := net.DialUDP("udp", nil, clientAddr)
 		if clientConnErr != nil {
-			fmt.Println("Client Connection Error", clientConnErr)
+			log.Panicln("Client Connection Error:", clientConnErr)
 		}
 		defer clientConn.Close() // 연결 종료 보장
 

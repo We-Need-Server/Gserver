@@ -26,7 +26,7 @@ func NewNetwork(Game *game.Game) *Network {
 	}
 }
 
-func (n *Network) Start() {
+func (n *Network) TempStart() {
 	// 테스트 초기화 부분
 	n.handleNewConnection(32, "127.0.0.1:4284")
 	//n.handleNewConnection(42, "127.0.0.1:3030")
@@ -44,15 +44,15 @@ func (n *Network) Start() {
 		if err != nil {
 			fmt.Println("잘못된 요청")
 		}
-		n.HandlePacket(readBuffer, readCount, addr.String())
+		n.TempHandlePacket(readBuffer, readCount, addr.String())
 	}
 }
 
-func (n *Network) HandlePacket(clientPacket []byte, endPoint int, userAddr string) {
+func (n *Network) TempHandlePacket(clientPacket []byte, endPoint int, userAddr string) {
 	data := packet.ParsePacket(clientPacket, endPoint)
 	fmt.Println(data)
 	fmt.Println(n.ChanTable)
-	n.throwTempData(data)
+	n.TempthrowData(data)
 	//n.throwData(data, userAddr)
 }
 
@@ -62,7 +62,7 @@ func (n *Network) HandlePacket(clientPacket []byte, endPoint int, userAddr strin
 // QPORT
 // PayLoad로 구성한다.
 
-func (n *Network) throwTempData(data *packet.Packet) {
+func (n *Network) TempthrowData(data *packet.Packet) {
 	if data.QPort == 32 || data.QPort == 42 {
 		n.ChanTable[data.QPort] <- data
 	}
