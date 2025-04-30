@@ -29,7 +29,7 @@ func NewNetwork(Game *game.Game) *Network {
 }
 
 func (n *Network) Start() {
-	UDPServerPoint, resolveErr := net.ResolveUDPAddr("udp", "127.0.0.1:8080")
+	UDPServerPoint, resolveErr := net.ResolveUDPAddr("udp", "127.0.0.1:20000")
 	if resolveErr != nil {
 		log.Panicln("네트워크 리졸버 오류")
 	}
