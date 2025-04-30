@@ -2,6 +2,7 @@ package game
 
 import (
 	"WeNeedGameServer/game/player"
+	"strconv"
 )
 
 type Game struct {
@@ -21,25 +22,22 @@ func (g *Game) AddPlayer(QPort uint32) *player.Player {
 	return g.Players[QPort]
 }
 
-func (g Game) GetGameState() player.Player {
+func (g Game) GetGameState() map[string]interface{} {
 	//// 게임 상태를 담을 맵 생성
-	/*
-		gameState := make(map[string]interface{})
-		gameState["playerCount"] = len(g.Players)
+	gameState := make(map[string]interface{})
+	gameState["playerCount"] = len(g.Players)
 
-		//// 플레이어 정보를 담을 맵 생성
+	//// 플레이어 정보를 담을 맵 생성
 
-		//players := make(map[string]player.Player)
-		//
-		//// 각 플레이어 정보 저장
-		//for key, p := range g.Players {
-		//	players[key.IP] = p.GetPlayerInfo()
-		//}
-		//
-		//gameState["players"] = players
-		//
-		//// JSON으로 마샬링하여 바이트 배열로 변환
-		//return json.Marshal(gameState)
-	*/
-	return g.GetPlayer(32)
+	//
+	//// 각 플레이어 정보 저장
+	for key, p := range g.Players {
+		gameState[strconv.Itoa(int(key))] = p
+	}
+	//
+	//gameState["players"] = players
+	//
+	//// JSON으로 마샬링하여 바이트 배열로 변환
+	return gameState
+	//return g.GetPlayer(32)
 }
