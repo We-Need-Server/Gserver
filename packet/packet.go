@@ -1,8 +1,10 @@
 package packet
 
 import (
+	"WeNeedGameServer/game/player"
 	"encoding/binary"
 	"fmt"
+	"time"
 )
 
 type Packet struct {
@@ -12,6 +14,13 @@ type Packet struct {
 	PKind           uint32
 	Payload         []byte
 	PayloadEndpoint int
+}
+
+type TickPacket struct {
+	TickNumber         int                              `json:"tickNumber"`
+	Timestamp          time.Time                        `json:"timestamp"`
+	UserSequenceNumber int                              `json:"userSequenceNumber"`
+	UserPositions      map[string]player.PlayerPosition `json:"-"` // 내부 처리용 맵
 }
 
 func NewPacket(SEQ uint32, ACK uint32, QPort uint32, PKind uint32, Payload []byte, PayloadEndpoint int) *Packet {

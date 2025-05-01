@@ -13,6 +13,14 @@ type Player struct {
 	PTDelta   float32
 }
 
+type PlayerPosition struct {
+	PositionX float32 `json:"positionX"`
+	PositionY float32 `json:"positionY"`
+	PositionZ float32 `json:"positionZ"`
+	YawAngle  float32 `json:"yawAngle"`
+	PTAngle   float32 `json:"ptAngle"`
+}
+
 func NewPlayer() *Player {
 	return &Player{}
 }
