@@ -49,7 +49,7 @@ func (n *Network) Start() {
 
 func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr string) {
 	data := packet.ParsePacket(clientPacket, endPoint)
-	if userAddr := n.IPTable[data.QPort]; userAddr == "" {
+	if QPort := n.QPortTable[userAddr]; QPort == 0 {
 		n.tempHandleNewConnection(data.QPort, userAddr)
 	}
 	//if userAddr := n.IPTable[data.QPort]; userAddr == "" {
@@ -77,7 +77,6 @@ func (n *Network) handleNewConnection(QPort uint32, userAddr string) bool {
 func (n *Network) TempStart() {
 	// 테스트 초기화 부분
 	n.tempHandleNewConnection(32, "127.0.0.1:4284")
-	//n.handleNewConnection(42, "127.0.0.1:3030")
 	UDPServerPoint, resolveErr := net.ResolveUDPAddr("udp", "127.0.0.1:8080")
 	if resolveErr != nil {
 		fmt.Println("네트워크 리졸버 오류")

@@ -51,6 +51,7 @@ func (gt *GameTick) processTick() {
 		if err != nil {
 			log.Panicln("ClientAddr Error:", err)
 		}
+		fmt.Println(clientAddr)
 		clientConn, clientConnErr := net.DialUDP("udp", nil, clientAddr)
 		if clientConnErr != nil {
 			log.Panicln("Client Connection Error:", clientConnErr)
