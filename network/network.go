@@ -50,11 +50,14 @@ func (n *Network) Start() {
 func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr string) {
 	data := packet.ParsePacket(clientPacket, endPoint)
 	if userAddr := n.IPTable[data.QPort]; userAddr == "" {
-		if checkUser := n.handleNewConnection(data.QPort, userAddr); checkUser {
-			log.Println(data.QPort, userAddr, "was denied because of not certificated user")
-			return
-		}
+		n.tempHandleNewConnection(data.QPort, userAddr)
 	}
+	//if userAddr := n.IPTable[data.QPort]; userAddr == "" {
+	//	if checkUser := n.handleNewConnection(data.QPort, userAddr); checkUser {
+	//		log.Println(data.QPort, userAddr, "was denied because of not certificated user")
+	//		return
+	//	}
+	//}
 	n.throwData(data, userAddr)
 }
 
