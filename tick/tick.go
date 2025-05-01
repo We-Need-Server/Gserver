@@ -46,7 +46,6 @@ func (gt *GameTick) StopGameLoop() {
 
 func (gt *GameTick) processTick() {
 	for _, val := range *gt.IPTable {
-		fmt.Println(val)
 		clientAddr, err := net.ResolveUDPAddr("udp", val)
 		if err != nil {
 			log.Panicln("ClientAddr Error:", err)
