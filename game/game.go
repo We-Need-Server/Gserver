@@ -2,6 +2,7 @@ package game
 
 import (
 	"WeNeedGameServer/game/player"
+	"fmt"
 	"strconv"
 )
 
@@ -33,6 +34,8 @@ func (g Game) GetGameState() map[string]player.PlayerPosition {
 	for key, p := range g.Players {
 		gameState[strconv.Itoa(int(key))] = player.NewPlayerPosition(p.PositionX, p.PositionY, p.PositionZ, p.YawAngle, p.PTAngle)
 	}
+
+	fmt.Println(gameState)
 	//
 	//gameState["players"] = players
 	//
