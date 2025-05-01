@@ -17,12 +17,22 @@ type PlayerPosition struct {
 	PositionX float32 `json:"positionX"`
 	PositionY float32 `json:"positionY"`
 	PositionZ float32 `json:"positionZ"`
-	YawAngle  float32 `json:"yawAngle"`
-	PTAngle   float32 `json:"ptAngle"`
+	YawAngle  float32 `json:"yaw"`
+	PTAngle   float32 `json:"pitch"`
 }
 
 func NewPlayer() *Player {
 	return &Player{}
+}
+
+func NewPlayerPosition(positionX float32, positionY float32, positionZ float32, yawAngle float32, ptAngle float32) PlayerPosition {
+	return PlayerPosition{
+		PositionX: positionX,
+		PositionY: positionY,
+		PositionZ: positionZ,
+		YawAngle:  yawAngle,
+		PTAngle:   ptAngle,
+	}
 }
 
 func (p Player) GetPlayerInfo() Player {

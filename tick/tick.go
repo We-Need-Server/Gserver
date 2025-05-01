@@ -3,6 +3,8 @@ package tick
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/network"
+	"WeNeedGameServer/packet"
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -45,35 +47,28 @@ func (gt *GameTick) StopGameLoop() {
 }
 
 func (gt *GameTick) processTick() {
-	// 클라이언트 연결 맵을 유지
-
-	// 모든 클라이언트에 대한 연결 초기화
-	//for _, val := range *gt.IPTable {
-	//	clientAddr, err := net.ResolveUDPAddr("udp", val)
-	//	if err != nil {
-	//		log.Println("ClientAddr Error for", val, ":", err)
-	//		continue // 오류 발생 시 패닉하지 않고 다음 클라이언트로 진행
-	//	}
-	//
-	//	clientConn, clientConnErr := net.DialUDP("udp", nil, clientAddr)
-	//	if clientConnErr != nil {
-	//		log.Println("Client Connection Error for", val, ":", clientConnErr)
-	//		continue // 오류 발생 시 패닉하지 않고 다음 클라이언트로 진행
-	//	}
-	//
-	//	// 연결을 맵에 저장
-	//	clientConns[val] = clientConn
-	//}
 
 	gameState := gt.Game.GetGameState()
-	//fmt.Println(*gt.ConnTable)
-	for key, userAddr := range gt.networkInstance.ConnTable {
-		fmt.Println(key, userAddr)
-		_, err := gt.networkInstance.Ln.WriteToUDP([]byte(gameState), userAddr)
+	tickPacket := packet.TickPacket{
+		TickNumber:         gt.TickTime,
+		Timestamp:          time.Now(),
+		UserSequenceNumber: 0,
+		UserPositions:      gameState,
+	}
+
+	jsonData, err := json.Marshal(tickPacket)
+	if err != nil {
+		log.Println("Failed to marshal tickPacket to JSON:", err)
+		return
+	}
+
+	for _, userAddr := range gt.networkInstance.ConnTable {
+		_, err := gt.networkInstance.Ln.WriteToUDP(jsonData, userAddr)
 		if err != nil {
 			log.Println("Failed to send message:", err)
 		}
 	}
 
+	gt.TickTime += 1
 	fmt.Println("Game state sent to", len(gt.networkInstance.ConnTable), "clients")
 }
