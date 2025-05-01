@@ -10,6 +10,6 @@ func main() {
 	gameInstance := game.NewGame()
 	networkInstance := network.NewNetwork(gameInstance)
 	go networkInstance.Start()
-	gameTickInstance := tick.NewGameTick(1, gameInstance, &networkInstance.ConnTable)
+	gameTickInstance := tick.NewGameTick(1, gameInstance, networkInstance)
 	gameTickInstance.StartGameLoop()
 }

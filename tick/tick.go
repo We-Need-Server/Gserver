@@ -2,27 +2,27 @@ package tick
 
 import (
 	"WeNeedGameServer/game"
+	"WeNeedGameServer/network"
 	"fmt"
 	"log"
-	"net"
 	"time"
 )
 
 type GameTick struct {
-	TickTime  int
-	Ticker    *time.Ticker
-	Game      *game.Game
-	ConnTable *map[uint32]*net.UDPConn
-	stopChan  chan struct{}
+	TickTime        int
+	Ticker          *time.Ticker
+	Game            *game.Game
+	networkInstance *network.Network
+	stopChan        chan struct{}
 }
 
-func NewGameTick(tickTime int, game *game.Game, ConnTable *map[uint32]*net.UDPConn) *GameTick {
+func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network) *GameTick {
 	return &GameTick{
-		TickTime:  tickTime,
-		Ticker:    time.NewTicker(time.Second / time.Duration(tickTime)),
-		Game:      game,
-		ConnTable: ConnTable,
-		stopChan:  make(chan struct{}),
+		TickTime:        tickTime,
+		Ticker:          time.NewTicker(time.Second / time.Duration(tickTime)),
+		Game:            game,
+		networkInstance: networkInstance,
+		stopChan:        make(chan struct{}),
 	}
 }
 
@@ -66,12 +66,14 @@ func (gt *GameTick) processTick() {
 	//}
 
 	gameState := gt.Game.GetGameState()
-	for _, conn := range *gt.ConnTable {
-		_, err := conn.Write([]byte(gameState))
+	//fmt.Println(*gt.ConnTable)
+	for key, userAddr := range gt.networkInstance.ConnTable {
+		fmt.Println(key, userAddr)
+		_, err := gt.networkInstance.Ln.WriteToUDP([]byte(gameState), userAddr)
 		if err != nil {
 			log.Println("Failed to send message:", err)
 		}
 	}
 
-	fmt.Println("Game state sent to", len(*gt.ConnTable), "clients")
+	fmt.Println("Game state sent to", len(gt.networkInstance.ConnTable), "clients")
 }

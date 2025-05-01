@@ -7,17 +7,18 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+	"net"
 )
 
 type PacketActor struct {
 	NextSEQ     uint32
 	QPort       uint32
-	UserAddr    string
+	UserAddr    *net.UDPAddr
 	packetChan  chan *packet.Packet
 	actorPlayer *player.Player
 }
 
-func NewPacketActor(NextSEQ uint32, QPort uint32, UserAddr string, packetChan chan *packet.Packet, actorPlayer *player.Player) *PacketActor {
+func NewPacketActor(NextSEQ uint32, QPort uint32, UserAddr *net.UDPAddr, packetChan chan *packet.Packet, actorPlayer *player.Player) *PacketActor {
 	return &PacketActor{NextSEQ, QPort, UserAddr, packetChan, actorPlayer}
 }
 
