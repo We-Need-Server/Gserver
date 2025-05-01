@@ -45,30 +45,40 @@ func (gt *GameTick) StopGameLoop() {
 }
 
 func (gt *GameTick) processTick() {
+	// 클라이언트 연결 맵을 유지
+	clientConns := make(map[string]*net.UDPConn)
+
+	// 모든 클라이언트에 대한 연결 초기화
 	for _, val := range *gt.IPTable {
 		clientAddr, err := net.ResolveUDPAddr("udp", val)
 		if err != nil {
-			log.Panicln("ClientAddr Error:", err)
+			log.Println("ClientAddr Error for", val, ":", err)
+			continue // 오류 발생 시 패닉하지 않고 다음 클라이언트로 진행
 		}
-		fmt.Println(clientAddr)
+
 		clientConn, clientConnErr := net.DialUDP("udp", nil, clientAddr)
 		if clientConnErr != nil {
-			log.Panicln("Client Connection Error:", clientConnErr)
+			log.Println("Client Connection Error for", val, ":", clientConnErr)
+			continue // 오류 발생 시 패닉하지 않고 다음 클라이언트로 진행
 		}
-		defer clientConn.Close() // 연결 종료 보장
 
-		clientConn.Write([]byte("hello"))
+		// 연결을 맵에 저장
+		clientConns[val] = clientConn
 	}
-	// packetTable 반복문을 통해서 UDP로 getGameState된 결과물 전송
-	// packetTable은 Key는 IP Value로 Port와 QPort가 있는데 이를 활용해서 브로드캐스팅
-	//gameState :=
-	//if err != nil {
-	//	return
-	//}
-	//fmt.Println(gt.PacketTable)
-	//for ip, packetVal := range *gt.PacketTable {
-	//	// UDP 패킷 전송 (실제 UDP 송신 코드는 network 패키지에 있다고 가정)
-	//	network.SendUDPPacket(ip, packetVal, gameState)
-	//}
-	fmt.Println(gt.Game.GetGameState())
+	
+	defer func() {
+		for _, conn := range clientConns {
+			conn.Close()
+		}
+	}()
+
+	gameState := gt.Game.GetGameState()
+	for _, conn := range clientConns {
+		_, err := conn.Write([]byte(gameState))
+		if err != nil {
+			log.Println("Failed to send message:", err)
+		}
+	}
+
+	fmt.Println("Game state sent to", len(clientConns), "clients")
 }

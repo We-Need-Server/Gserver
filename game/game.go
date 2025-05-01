@@ -22,7 +22,7 @@ func (g *Game) AddPlayer(QPort uint32) *player.Player {
 	return g.Players[QPort]
 }
 
-func (g Game) GetGameState() map[string]interface{} {
+func (g Game) GetGameState() string {
 	//// 게임 상태를 담을 맵 생성
 	gameState := make(map[string]interface{})
 	gameState["playerCount"] = len(g.Players)
@@ -38,6 +38,6 @@ func (g Game) GetGameState() map[string]interface{} {
 	//gameState["players"] = players
 	//
 	//// JSON으로 마샬링하여 바이트 배열로 변환
-	return gameState
+	return "test"
 	//return g.GetPlayer(32)
 }
