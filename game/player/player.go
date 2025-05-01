@@ -41,24 +41,24 @@ func (p Player) GetPlayerInfo() Player {
 
 func (p *Player) MoveFoward(XDelta float32) {
 	// 좌표에 값을 넣어두려면 계산 공식을 써야함
-	// p.PositionX += xDelta
-	p.XDelta += XDelta
+	p.PositionX += XDelta
+	//p.XDelta += XDelta
 }
 
 func (p *Player) MoveSide(ZDelta float32) {
 	// 좌표에 값을 넣어두려면 계산 공식을 써야함
-	// p.PositionZ += ZDelta
-	p.ZDelta += ZDelta
+	p.PositionZ += ZDelta
+	//p.ZDelta += ZDelta
 }
 
 func (p *Player) TransferYaw(YawDelta float32) {
 	// 좌표에 값을 넣어두려면 계산 공식을 써야함
-	// p.YawAngle += yawDelta
-	p.YawDelta += YawDelta
+	p.YawAngle += YawDelta
+	//p.YawDelta += YawDelta
 }
 
 func (p *Player) TransferPT(PTDelta float32) {
 	// 좌표에 값을 넣어두려면 계산 공식을 써야함
-	// p.PTAngle += ptDelta
-	p.PTDelta += PTDelta
+	p.PTAngle += PTDelta
+	//p.PTDelta += PTDelta
 }

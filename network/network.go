@@ -10,8 +10,8 @@ import (
 )
 
 type Network struct {
-	IPTable          map[uint32]*net.UDPAddr
-	QPortTable       map[*net.UDPAddr]uint32
+	IPTable map[uint32]*net.UDPAddr
+	//QPortTable       map[*net.UDPAddr]uint32
 	ChanTable        map[uint32]chan *packet.Packet
 	ConnTable        map[uint32]*net.UDPAddr
 	PacketActorTable map[uint32]*actor.PacketActor
@@ -21,8 +21,8 @@ type Network struct {
 
 func NewNetwork(Game *game.Game) *Network {
 	return &Network{
-		IPTable:          make(map[uint32]*net.UDPAddr),
-		QPortTable:       make(map[*net.UDPAddr]uint32),
+		IPTable: make(map[uint32]*net.UDPAddr),
+		//QPortTable:       make(map[*net.UDPAddr]uint32),
 		ChanTable:        make(map[uint32]chan *packet.Packet),
 		ConnTable:        make(map[uint32]*net.UDPAddr),
 		PacketActorTable: make(map[uint32]*actor.PacketActor),
@@ -52,7 +52,7 @@ func (n *Network) Start() {
 
 func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.UDPAddr) {
 	data := packet.ParsePacket(clientPacket, endPoint)
-	if QPort := n.QPortTable[userAddr]; QPort == 0 {
+	if QPort := n.IPTable[data.QPort]; QPort == nil {
 		n.tempHandleNewConnection(data.QPort, userAddr)
 	}
 	//if userAddr := n.IPTable[data.QPort]; userAddr == "" {
@@ -119,7 +119,7 @@ func (n *Network) TempthrowData(data *packet.Packet) {
 }
 
 func (n *Network) throwData(data *packet.Packet, userAddr *net.UDPAddr) {
-	if n.IPTable[data.QPort] == userAddr && n.QPortTable[userAddr] == data.QPort {
+	if n.IPTable[data.QPort] != nil {
 		n.ChanTable[data.QPort] <- data
 	}
 }
@@ -128,7 +128,7 @@ func (n *Network) throwData(data *packet.Packet, userAddr *net.UDPAddr) {
 
 func (n *Network) tempHandleNewConnection(QPort uint32, userAddr *net.UDPAddr) {
 	n.IPTable[QPort] = userAddr
-	n.QPortTable[userAddr] = QPort
+	//n.QPortTable[userAddr] = QPort
 	n.ChanTable[QPort] = make(chan *packet.Packet)
 	//clientAddr, err := net.ResolveUDPAddr("udp", userAddr)
 	//if err != nil {
