@@ -43,25 +43,25 @@ func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int)
 		payloadCommand := string(payload[i : i+2])
 		switch payloadCommand {
 		case command.FB:
-			xDelta := math.Float32frombits(binary.BigEndian.Uint32(payload[i+2 : i+6]))
+			xDelta := math.Float32frombits(binary.LittleEndian.Uint32(payload[i+2 : i+6]))
 			fmt.Println(xDelta)
 			a.actorPlayer.MoveFoward(xDelta)
 			i += 6
 			break
 		case command.RL:
-			zDelta := math.Float32frombits(binary.BigEndian.Uint32(payload[i+2 : i+6]))
+			zDelta := math.Float32frombits(binary.LittleEndian.Uint32(payload[i+2 : i+6]))
 			fmt.Println(zDelta)
 			a.actorPlayer.MoveSide(zDelta)
 			i += 6
 			break
 		case command.YW:
-			yawDelta := math.Float32frombits(binary.BigEndian.Uint32(payload[i+2 : i+6]))
+			yawDelta := math.Float32frombits(binary.LittleEndian.Uint32(payload[i+2 : i+6]))
 			fmt.Println(yawDelta)
 			a.actorPlayer.TransferYaw(yawDelta)
 			i += 6
 			break
 		case command.PT:
-			ptDelta := math.Float32frombits(binary.BigEndian.Uint32(payload[i+2 : i+6]))
+			ptDelta := math.Float32frombits(binary.LittleEndian.Uint32(payload[i+2 : i+6]))
 			fmt.Println(ptDelta)
 			a.actorPlayer.TransferPT(ptDelta)
 			i += 6
