@@ -14,6 +14,7 @@ type Network struct {
 	IPTable          map[uint32]string
 	QPortTable       map[string]uint32
 	ChanTable        map[uint32]chan *packet.Packet
+	ConnTable        map[uint32]*net.UDPConn
 	PacketActorTable map[uint32]*actor.PacketActor
 	Game             *game.Game
 }
@@ -23,6 +24,7 @@ func NewNetwork(Game *game.Game) *Network {
 		IPTable:          make(map[uint32]string),
 		QPortTable:       make(map[string]uint32),
 		ChanTable:        make(map[uint32]chan *packet.Packet),
+		ConnTable:        make(map[uint32]*net.UDPConn),
 		PacketActorTable: make(map[uint32]*actor.PacketActor),
 		Game:             Game,
 	}
@@ -127,6 +129,16 @@ func (n *Network) tempHandleNewConnection(QPort uint32, userAddr string) {
 	n.IPTable[QPort] = userAddr
 	n.QPortTable[userAddr] = QPort
 	n.ChanTable[QPort] = make(chan *packet.Packet)
+	clientAddr, err := net.ResolveUDPAddr("udp", userAddr)
+	if err != nil {
+		log.Println("ClientAddr Error for", userAddr, ":", err)
+	}
+	clientConn, clientConnErr := net.DialUDP("udp", nil, clientAddr)
+	if clientConnErr != nil {
+		log.Println("Client Connection Error for", userAddr, ":", clientConnErr)
+	} else {
+		n.ConnTable[QPort] = clientConn
+	}
 	packetActor := actor.NewPacketActor(1, QPort, userAddr, n.ChanTable[QPort], n.Game.AddPlayer(QPort))
 	n.PacketActorTable[QPort] = packetActor
 	go n.PacketActorTable[QPort].ProcessLoopPacket()

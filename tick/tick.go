@@ -9,20 +9,20 @@ import (
 )
 
 type GameTick struct {
-	TickTime int
-	Ticker   *time.Ticker
-	Game     *game.Game
-	IPTable  *map[uint32]string
-	stopChan chan struct{}
+	TickTime  int
+	Ticker    *time.Ticker
+	Game      *game.Game
+	ConnTable *map[uint32]*net.UDPConn
+	stopChan  chan struct{}
 }
 
-func NewGameTick(tickTime int, game *game.Game, IPTable *map[uint32]string) *GameTick {
+func NewGameTick(tickTime int, game *game.Game, ConnTable *map[uint32]*net.UDPConn) *GameTick {
 	return &GameTick{
-		TickTime: tickTime,
-		Ticker:   time.NewTicker(time.Second / time.Duration(tickTime)),
-		Game:     game,
-		IPTable:  IPTable,
-		stopChan: make(chan struct{}),
+		TickTime:  tickTime,
+		Ticker:    time.NewTicker(time.Second / time.Duration(tickTime)),
+		Game:      game,
+		ConnTable: ConnTable,
+		stopChan:  make(chan struct{}),
 	}
 }
 
@@ -46,39 +46,32 @@ func (gt *GameTick) StopGameLoop() {
 
 func (gt *GameTick) processTick() {
 	// 클라이언트 연결 맵을 유지
-	clientConns := make(map[string]*net.UDPConn)
 
 	// 모든 클라이언트에 대한 연결 초기화
-	for _, val := range *gt.IPTable {
-		clientAddr, err := net.ResolveUDPAddr("udp", val)
-		if err != nil {
-			log.Println("ClientAddr Error for", val, ":", err)
-			continue // 오류 발생 시 패닉하지 않고 다음 클라이언트로 진행
-		}
-
-		clientConn, clientConnErr := net.DialUDP("udp", nil, clientAddr)
-		if clientConnErr != nil {
-			log.Println("Client Connection Error for", val, ":", clientConnErr)
-			continue // 오류 발생 시 패닉하지 않고 다음 클라이언트로 진행
-		}
-
-		// 연결을 맵에 저장
-		clientConns[val] = clientConn
-	}
-	
-	defer func() {
-		for _, conn := range clientConns {
-			conn.Close()
-		}
-	}()
+	//for _, val := range *gt.IPTable {
+	//	clientAddr, err := net.ResolveUDPAddr("udp", val)
+	//	if err != nil {
+	//		log.Println("ClientAddr Error for", val, ":", err)
+	//		continue // 오류 발생 시 패닉하지 않고 다음 클라이언트로 진행
+	//	}
+	//
+	//	clientConn, clientConnErr := net.DialUDP("udp", nil, clientAddr)
+	//	if clientConnErr != nil {
+	//		log.Println("Client Connection Error for", val, ":", clientConnErr)
+	//		continue // 오류 발생 시 패닉하지 않고 다음 클라이언트로 진행
+	//	}
+	//
+	//	// 연결을 맵에 저장
+	//	clientConns[val] = clientConn
+	//}
 
 	gameState := gt.Game.GetGameState()
-	for _, conn := range clientConns {
+	for _, conn := range *gt.ConnTable {
 		_, err := conn.Write([]byte(gameState))
 		if err != nil {
 			log.Println("Failed to send message:", err)
 		}
 	}
 
-	fmt.Println("Game state sent to", len(clientConns), "clients")
+	fmt.Println("Game state sent to", len(*gt.ConnTable), "clients")
 }
