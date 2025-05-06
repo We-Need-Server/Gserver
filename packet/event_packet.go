@@ -1,39 +1,36 @@
 package packet
 
 import (
-	"WeNeedGameServer/game/player"
 	"WeNeedGameServer/util"
 	"fmt"
-	"time"
 )
 
-type Packet struct {
+type EventPacket struct {
+	QPort           uint32
 	SEQ             uint32
 	ACK             uint32
-	QPort           uint32
-	PKind           uint32
 	Payload         []byte
 	PayloadEndpoint int
 }
 
-type TickPacket struct {
-	TickNumber         int                              `json:"tickNumber"`
-	Timestamp          time.Time                        `json:"timestamp"`
-	UserSequenceNumber int                              `json:"userSequenceNumber"`
-	UserPositions      map[string]player.PlayerPosition `json:"userPositions"` // 내부 처리용 맵
+func (EventPacket) GetPacketKind() uint32 {
+	return 46
 }
 
-func NewPacket(SEQ uint32, ACK uint32, QPort uint32, PKind uint32, Payload []byte, PayloadEndpoint int) *Packet {
-	return &Packet{SEQ, ACK, QPort, PKind, Payload, PayloadEndpoint}
+func newEventPacket(QPort uint32, SEQ uint32, ACK uint32, Payload []byte, PayloadEndpoint int) *EventPacket {
+	return &EventPacket{QPort, SEQ, ACK, Payload, PayloadEndpoint}
 }
 
-func ParsePacket(np []byte, endPoint int) *Packet {
-	PKind := util.ConvertBinaryToUint32(np[0:4])
-	SEQ := util.ConvertBinaryToUint32(np[4:8])
-	ACK := util.ConvertBinaryToUint32(np[8:12])
-	QPort := util.ConvertBinaryToUint32(np[12:16])
+func (EventPacket) ParsePacket(np []byte, endPoint int) *EventPacket {
+	QPort := util.ConvertBinaryToUint32(np[4:8])
+	SEQ := util.ConvertBinaryToUint32(np[8:12])
+	ACK := util.ConvertBinaryToUint32(np[12:16])
 	Payload := np[16:endPoint]
 	PayloadEndpoint := endPoint - 16
-	fmt.Println(PKind, SEQ, ACK, QPort, Payload, PayloadEndpoint)
-	return NewPacket(SEQ, ACK, QPort, PKind, Payload, PayloadEndpoint)
+	fmt.Println(QPort, SEQ, ACK, Payload, PayloadEndpoint)
+	return newEventPacket(QPort, SEQ, ACK, Payload, PayloadEndpoint)
+}
+
+func (p EventPacket) GetQPort() uint32 {
+	return p.QPort
 }

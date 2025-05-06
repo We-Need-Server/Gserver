@@ -14,17 +14,24 @@ type PacketActor struct {
 	NextSEQ     uint32
 	QPort       uint32
 	UserAddr    *net.UDPAddr
-	packetChan  chan *packet.Packet
+	packetChan  chan *packet.PacketI
+	processPacketMap map[uint32]*func()
 	actorPlayer *player.Player
 }
 
-func NewPacketActor(NextSEQ uint32, QPort uint32, UserAddr *net.UDPAddr, packetChan chan *packet.Packet, actorPlayer *player.Player) *PacketActor {
-	return &PacketActor{NextSEQ, QPort, UserAddr, packetChan, actorPlayer}
+func NewPacketActor(NextSEQ uint32, QPort uint32, UserAddr *net.UDPAddr, packetChan chan *packet.PacketI, actorPlayer *player.Player) *PacketActor {
+	processPacketMap := initProcessPacketMap()
+	return &PacketActor{NextSEQ, QPort, UserAddr, packetChan, processPacketMap, actorPlayer}
+}
+
+func initProcessPacketMap() map[uint32]*func() {
+	processPacketMap := make(map)
 }
 
 func (a *PacketActor) ProcessLoopPacket() {
 	for {
 		pkt := <-a.packetChan
+		a.processPacketMap[(*pkt).GetPacketKind()]
 		fmt.Println("시퀀스 번호 전", a.NextSEQ, pkt.SEQ)
 		if pkt.SEQ == a.NextSEQ {
 			a.NextSEQ += uint32(1)
