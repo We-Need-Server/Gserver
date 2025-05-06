@@ -2,8 +2,8 @@ package network
 
 import (
 	"WeNeedGameServer/game"
+	"WeNeedGameServer/game/actor"
 	"WeNeedGameServer/packet"
-	"WeNeedGameServer/packet/actor"
 	"fmt"
 	"log"
 	"net"
