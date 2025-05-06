@@ -2,7 +2,7 @@ package packet
 
 import (
 	"WeNeedGameServer/game/player"
-	"encoding/binary"
+	"WeNeedGameServer/util"
 	"fmt"
 	"time"
 )
@@ -28,10 +28,10 @@ func NewPacket(SEQ uint32, ACK uint32, QPort uint32, PKind uint32, Payload []byt
 }
 
 func ParsePacket(np []byte, endPoint int) *Packet {
-	PKind := binary.LittleEndian.Uint32(np[0:4])
-	SEQ := binary.LittleEndian.Uint32(np[4:8])
-	ACK := binary.LittleEndian.Uint32(np[8:12])
-	QPort := binary.LittleEndian.Uint32(np[12:16])
+	PKind := util.ConvertBinaryToUint32(np[0:4])
+	SEQ := util.ConvertBinaryToUint32(np[4:8])
+	ACK := util.ConvertBinaryToUint32(np[8:12])
+	QPort := util.ConvertBinaryToUint32(np[12:16])
 	Payload := np[16:endPoint]
 	PayloadEndpoint := endPoint - 16
 	fmt.Println(PKind, SEQ, ACK, QPort, Payload, PayloadEndpoint)
