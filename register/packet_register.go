@@ -13,7 +13,7 @@ func NewPacketRegister() *PacketRegister {
 	return &PacketRegister{packetRegistry: make(map[string]packet.PropertyMap)}
 }
 
-func (p *PacketRegister) Register(s string, packetMap packet.PropertyMap) (string, error) {
+func (p *PacketRegister) Add(s string, packetMap packet.PropertyMap) (string, error) {
 	if s == "" {
 		return "", fmt.Errorf("packet name cannot be empty")
 	}
