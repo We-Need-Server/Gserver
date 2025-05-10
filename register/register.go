@@ -1,6 +1,6 @@
-package registry
+package register
 
 type Interface interface {
-	Register()
+	Add()
 	Delete()
 }

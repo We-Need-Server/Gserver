@@ -1,4 +1,4 @@
-package registry
+package register
 
 import (
 	"WeNeedGameServer/packet"
@@ -21,7 +21,7 @@ func (p *PacketRegister) Register(s string, packetMap packet.PropertyMap) (strin
 	if packetMap == nil {
 		return s, fmt.Errorf("cannot register nil packet map")
 	}
-	
+
 	if _, exists := p.packetRegistry[s]; !exists {
 		p.packetRegistry[s] = packetMap
 		return s, nil
