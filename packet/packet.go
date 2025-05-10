@@ -1,6 +1,9 @@
 package packet
 
 import (
+	"WeNeedGameServer/packet/eventpacket"
+	"WeNeedGameServer/packet/tickipacket"
+	"WeNeedGameServer/packet/tickrpacket"
 	"WeNeedGameServer/util"
 	"fmt"
 )
@@ -22,14 +25,14 @@ const (
 	TypeBytes
 )
 
-type PacketField struct {
+type Field struct {
 	PropertyName string
 	Offset       uint32
 	PropertyType FieldType
 	// 타입에 대해서
 }
 
-type PropertyMap map[string]PacketField
+type PropertyMap map[string]Field
 
 func ParsePacketByKind(np []byte, endPoint int) (PacketI, error) {
 	if len(np) < 4 {
@@ -40,11 +43,11 @@ func ParsePacketByKind(np []byte, endPoint int) (PacketI, error) {
 
 	switch PKind {
 	case 41:
-		return ParseEventPacket(np, endPoint), nil
+		return eventpacket.ParseEventPacket(np, endPoint), nil
 	case 46:
-		return ParseTickIPacket(np, endPoint), nil
+		return tickipacket.ParseTickIPacket(np, endPoint), nil
 	case 50:
-		return ParseTickRPacket(np, endPoint), nil
+		return tickrpacket.ParseTickRPacket(np, endPoint), nil
 	default:
 		return nil, fmt.Errorf("unknown packet kind: %d", PKind)
 	}

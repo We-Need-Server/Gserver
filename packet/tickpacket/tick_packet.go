@@ -1,4 +1,4 @@
-package packet
+package tickpacket
 
 import (
 	"WeNeedGameServer/game/player"

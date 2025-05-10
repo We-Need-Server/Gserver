@@ -1,4 +1,4 @@
-package packet
+package eventpacket
 
 import (
 	"WeNeedGameServer/util"

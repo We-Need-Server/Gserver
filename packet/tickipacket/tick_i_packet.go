@@ -1,4 +1,4 @@
-package packet
+package tickipacket
 
 import "WeNeedGameServer/util"
 
