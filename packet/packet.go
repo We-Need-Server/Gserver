@@ -29,6 +29,8 @@ type PacketField struct {
 	// 타입에 대해서
 }
 
+type PropertyMap map[string]PacketField
+
 func ParsePacketByKind(np []byte, endPoint int) (PacketI, error) {
 	if len(np) < 4 {
 		return nil, fmt.Errorf("packet too small: %d bytes", len(np))

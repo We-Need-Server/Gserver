@@ -1,6 +1,6 @@
 package registry
 
-type Registertry interface {
+type Interface interface {
 	Register()
 	Delete()
 }
