@@ -1,4 +1,4 @@
-package tickrpacket
+package client
 
 import "WeNeedGameServer/util"
 

@@ -1,9 +1,7 @@
 package packet
 
 import (
-	"WeNeedGameServer/packet/eventpacket"
-	"WeNeedGameServer/packet/tickipacket"
-	"WeNeedGameServer/packet/tickrpacket"
+	"WeNeedGameServer/packet/client"
 	"WeNeedGameServer/util"
 	"fmt"
 )
@@ -43,11 +41,11 @@ func ParsePacketByKind(np []byte, endPoint int) (PacketI, error) {
 
 	switch PKind {
 	case 41:
-		return eventpacket.ParseEventPacket(np, endPoint), nil
+		return client.ParseEventPacket(np, endPoint), nil
 	case 46:
-		return tickipacket.ParseTickIPacket(np, endPoint), nil
+		return client.ParseTickIPacket(np, endPoint), nil
 	case 50:
-		return tickrpacket.ParseTickRPacket(np, endPoint), nil
+		return client.ParseTickRPacket(np, endPoint), nil
 	default:
 		return nil, fmt.Errorf("unknown packet kind: %d", PKind)
 	}

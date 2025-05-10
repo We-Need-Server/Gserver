@@ -3,7 +3,7 @@ package tick
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/network"
-	"WeNeedGameServer/packet/tickpacket"
+	"WeNeedGameServer/packet/server"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -49,7 +49,7 @@ func (gt *GameTick) StopGameLoop() {
 func (gt *GameTick) processTick() {
 
 	gameState := gt.Game.GetGameState()
-	tickPacket := tickpacket.TickPacket{
+	tickPacket := server.TickPacket{
 		TickNumber:         gt.TickTime,
 		Timestamp:          time.Now(),
 		UserSequenceNumber: 0,
