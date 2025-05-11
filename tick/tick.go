@@ -2,6 +2,7 @@ package tick
 
 import (
 	"WeNeedGameServer/game"
+	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/network"
 	"WeNeedGameServer/packet/server"
 	"encoding/json"
@@ -21,6 +22,7 @@ type GameTick struct {
 	Game            *game.Game
 	networkInstance *network.Network
 	stopChan        chan struct{}
+	Mediator        *mediator.Mediator
 	//actorChanMap    map[uint32]chan *ActorStatus
 }
 
@@ -31,8 +33,20 @@ func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network
 		Game:            game,
 		networkInstance: networkInstance,
 		stopChan:        make(chan struct{}),
+		Mediator:        nil,
 		//actorChanMap:    make(map[uint32]chan *ActorStatus),
 	}
+}
+
+func (gt *GameTick) Register(m *mediator.Mediator) {
+	gt.Mediator = m
+}
+
+func (gt *GameTick) Send(receiverName string, message interface{}) {
+	gt.Mediator.Notify("network", receiverName, message)
+}
+
+func (gt *GameTick) Receive(senderName string, message interface{}) {
 }
 
 //func (gt *GameTick) RegisterActorChan(qPort uint32, actorStatusChan chan *ActorStatus) {
