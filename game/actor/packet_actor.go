@@ -3,6 +3,7 @@ package actor
 import (
 	"WeNeedGameServer/command"
 	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/packet"
 	"WeNeedGameServer/packet/client"
 	"WeNeedGameServer/util"
@@ -16,10 +17,22 @@ type PacketActor struct {
 	UserAddr    *net.UDPAddr
 	packetChan  chan packet.PacketI
 	actorPlayer *player.Player
+	Mediator    *mediator.Mediator
 }
 
 func NewPacketActor(QPort uint32, UserAddr *net.UDPAddr, packetChan chan packet.PacketI, actorPlayer *player.Player) *PacketActor {
-	return &PacketActor{QPort, UserAddr, packetChan, actorPlayer}
+	return &PacketActor{QPort, UserAddr, packetChan, actorPlayer, nil}
+}
+
+func (a *PacketActor) Register(m *mediator.Mediator) {
+	a.Mediator = m
+}
+
+func (a *PacketActor) Send(receiverName string, message interface{}) {
+	a.Mediator.Notify("actor", receiverName, message)
+}
+
+func (a *PacketActor) Receive(senderName string, message interface{}) {
 }
 
 func (a *PacketActor) ProcessLoopPacket() {

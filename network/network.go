@@ -99,6 +99,10 @@ func (n *Network) tempHandleNewConnection(QPort uint32, userAddr *net.UDPAddr) {
 	n.ConnTable[QPort] = userAddr
 	n.NextSEQTable[QPort] = 1
 	packetActor := actor.NewPacketActor(QPort, userAddr, n.ChanTable[QPort], n.Game.AddPlayer(QPort))
+	if _, err := n.Mediator.Register("actor", packetActor); err != nil {
+		log.Panicln("메디에이터 등록 실패")
+	}
 	n.PacketActorTable[QPort] = packetActor
+	packetActor.Send("tick", packetActor.QPort)
 	go n.PacketActorTable[QPort].ProcessLoopPacket()
 }

@@ -29,6 +29,10 @@ type ActorStatus struct {
 	RTickNumber uint32
 }
 
+func newActorStatus() *ActorStatus {
+	return &ActorStatus{}
+}
+
 func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network) *GameTick {
 	ticks := [60]map[string]player.PlayerPosition{}
 	for i := range ticks {
@@ -57,11 +61,21 @@ func (gt *GameTick) Send(receiverName string, message interface{}) {
 func (gt *GameTick) Receive(senderName string, message interface{}) {
 	if senderName == "network" {
 		switch pkt := message.(type) {
-		case client.TickIPacket:
-			gt.iActorStatus(&pkt)
-		case client.TickRPacket:
-			gt.rActorStatus(&pkt)
+		case *client.TickIPacket:
+			gt.iActorStatus(pkt)
+		case *client.TickRPacket:
+			gt.rActorStatus(pkt)
 		}
+	} else if senderName == "actor" {
+		if val, ok := message.(uint32); ok {
+			gt.registerActorStatus(val)
+		}
+	}
+}
+
+func (gt *GameTick) registerActorStatus(qPort uint32) {
+	if _, exists := gt.ActorStatusMap[qPort]; !exists {
+		gt.ActorStatusMap[qPort] = newActorStatus()
 	}
 }
 
