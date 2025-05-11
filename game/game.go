@@ -28,16 +28,11 @@ func (g Game) GetGameState() map[string]player.PlayerPosition {
 
 	//// 플레이어 정보를 담을 맵 생성
 
-	//
 	//// 각 플레이어 정보 저장
 	for key, p := range g.Players {
 		//fmt.Println(p)
 		gameState[strconv.Itoa(int(key))] = player.NewPlayerPosition(p.PositionX, p.PositionY, p.PositionZ, p.YawAngle, p.PTAngle)
 	}
 
-	//fmt.Println(gameState)
-	//
-	//gameState["players"] = players
-	//
 	return gameState
 }

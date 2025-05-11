@@ -12,15 +12,14 @@ import (
 )
 
 type PacketActor struct {
-	NextSEQ     uint32
 	QPort       uint32
 	UserAddr    *net.UDPAddr
 	packetChan  chan packet.PacketI
 	actorPlayer *player.Player
 }
 
-func NewPacketActor(NextSEQ uint32, QPort uint32, UserAddr *net.UDPAddr, packetChan chan packet.PacketI, actorPlayer *player.Player) *PacketActor {
-	return &PacketActor{NextSEQ, QPort, UserAddr, packetChan, actorPlayer}
+func NewPacketActor(QPort uint32, UserAddr *net.UDPAddr, packetChan chan packet.PacketI, actorPlayer *player.Player) *PacketActor {
+	return &PacketActor{QPort, UserAddr, packetChan, actorPlayer}
 }
 
 func (a *PacketActor) ProcessLoopPacket() {
@@ -36,14 +35,10 @@ func (a *PacketActor) ProcessLoopPacket() {
 }
 
 func (a *PacketActor) processEventPacket(packet *client.EventPacket) {
-	fmt.Println("시퀀스 번호 전", a.NextSEQ, packet.SEQ)
-	if packet.SEQ == a.NextSEQ {
-		a.NextSEQ += uint32(1)
+	if packet.GetPacketKind() == 41 {
 		a.processCommandPayload(packet.Payload, packet.PayloadEndpoint)
 	}
 
-	// 패킷 정보 출력
-	fmt.Println("시퀀스 번호 후", a.NextSEQ, packet.SEQ)
 	fmt.Printf("패킷 수신 - 사용자: %s, QPort: %d\n", a.UserAddr, a.QPort)
 	fmt.Printf("패킷 내용: %+v\n", packet)
 }
