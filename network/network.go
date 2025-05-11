@@ -4,16 +4,14 @@ import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game/actor"
 	"WeNeedGameServer/packet"
-	"WeNeedGameServer/packet/client"
 	"log"
-	"math"
 	"net"
 )
 
 type Network struct {
 	IPTable map[uint32]*net.UDPAddr
 	//QPortTable       map[*net.UDPAddr]uint32
-	ChanTable        map[uint32]chan *packet.PacketI
+	ChanTable        map[uint32]chan packet.PacketI
 	ConnTable        map[uint32]*net.UDPAddr
 	PacketActorTable map[uint32]*actor.PacketActor
 	Ln               *net.UDPConn
@@ -24,7 +22,7 @@ func NewNetwork(Game *game.Game) *Network {
 	return &Network{
 		IPTable: make(map[uint32]*net.UDPAddr),
 		//QPortTable:       make(map[*net.UDPAddr]uint32),
-		ChanTable:        make(map[uint32]chan *packet.PacketI),
+		ChanTable:        make(map[uint32]chan packet.PacketI),
 		ConnTable:        make(map[uint32]*net.UDPAddr),
 		PacketActorTable: make(map[uint32]*actor.PacketActor),
 		Game:             Game,
@@ -52,18 +50,11 @@ func (n *Network) Start() {
 }
 
 func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.UDPAddr) {
-	pKind, data, err := packet.ParsePacketByKind(clientPacket, endPoint)
-	if err != nil || pKind != uint32(math.MaxUint32) {
+	data, err := packet.ParsePacketByKind(clientPacket, endPoint)
+	if err != nil {
 		log.Panicln("잘못된 요청")
 	}
-	switch pKind {
-	case 41:
-		data = data.(*client.EventPacket)
-	case 46:
-		data = data.(*client.TickIPacket)
-	case 50:
-		data = data.(*client.TickRPacket)
-	}
+
 	if QPort := n.IPTable[data.GetQPort()]; QPort == nil {
 		n.tempHandleNewConnection(data.GetQPort(), userAddr)
 	}
@@ -73,7 +64,7 @@ func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.
 	//		return
 	//	}
 	//}
-	n.throwData(pKind, data, userAddr)
+	n.throwData(data, userAddr)
 }
 
 //func (n *Network) handleNewConnection(QPort uint32, userAddr string) bool {
@@ -132,7 +123,7 @@ func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.
 
 func (n *Network) throwData(data packet.PacketI, userAddr *net.UDPAddr) {
 	if n.IPTable[data.GetQPort()] != nil {
-		n.ChanTable[data.GetQPort()] <- &data
+		n.ChanTable[data.GetQPort()] <- data
 	}
 }
 
@@ -141,7 +132,7 @@ func (n *Network) throwData(data packet.PacketI, userAddr *net.UDPAddr) {
 func (n *Network) tempHandleNewConnection(QPort uint32, userAddr *net.UDPAddr) {
 	n.IPTable[QPort] = userAddr
 	//n.QPortTable[userAddr] = QPort
-	n.ChanTable[QPort] = make(chan *packet.PacketI)
+	n.ChanTable[QPort] = make(chan packet.PacketI)
 	//clientAddr, err := net.ResolveUDPAddr("udp", userAddr)
 	//if err != nil {
 	//	log.Println("ClientAddr Error for", userAddr, ":", err)

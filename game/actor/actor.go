@@ -4,6 +4,7 @@ import (
 	"WeNeedGameServer/command"
 	"WeNeedGameServer/game/player"
 	"WeNeedGameServer/packet"
+	"WeNeedGameServer/packet/client"
 	"WeNeedGameServer/util"
 	"fmt"
 	"math"
@@ -14,12 +15,12 @@ type PacketActor struct {
 	NextSEQ    uint32
 	QPort      uint32
 	UserAddr   *net.UDPAddr
-	packetChan chan *packet.PacketI
+	packetChan chan packet.PacketI
 	//processPacketMap map[uint32]*func()
 	actorPlayer *player.Player
 }
 
-func NewPacketActor(NextSEQ uint32, QPort uint32, UserAddr *net.UDPAddr, packetChan chan *packet.PacketI, actorPlayer *player.Player) *PacketActor {
+func NewPacketActor(NextSEQ uint32, QPort uint32, UserAddr *net.UDPAddr, packetChan chan packet.PacketI, actorPlayer *player.Player) *PacketActor {
 	//processPacketMap := initProcessPacketMap()
 	return &PacketActor{NextSEQ, QPort, UserAddr, packetChan, actorPlayer}
 }
@@ -31,18 +32,38 @@ func NewPacketActor(NextSEQ uint32, QPort uint32, UserAddr *net.UDPAddr, packetC
 func (a *PacketActor) ProcessLoopPacket() {
 	for {
 		pkt := <-a.packetChan
-		a.processPacketMap[(*pkt).GetPacketKind()]
-		fmt.Println("시퀀스 번호 전", a.NextSEQ, pkt.SEQ)
-		if pkt.SEQ == a.NextSEQ {
-			a.NextSEQ += uint32(1)
-			a.processCommandPayload(pkt.Payload, pkt.PayloadEndpoint)
+
+		switch pkt.GetPacketKind() {
+		case 41:
+			a.processEventPacket(pkt.(*client.EventPacket))
+		case 46:
+			a.processTickIPacket(pkt.(*client.TickIPacket))
+		case 50:
+			a.processTickRPacket(pkt.(*client.TickRPacket))
 		}
 
-		// 패킷 정보 출력
-		fmt.Println("시퀀스 번호 후", a.NextSEQ, pkt.SEQ)
-		fmt.Printf("패킷 수신 - 사용자: %s, QPort: %d\n", a.UserAddr, a.QPort)
-		fmt.Printf("패킷 내용: %+v\n", pkt)
 	}
+}
+
+func (a *PacketActor) processEventPacket(packet *client.EventPacket) {
+	fmt.Println("시퀀스 번호 전", a.NextSEQ, packet.SEQ)
+	if packet.SEQ == a.NextSEQ {
+		a.NextSEQ += uint32(1)
+		a.processCommandPayload(packet.Payload, packet.PayloadEndpoint)
+	}
+
+	// 패킷 정보 출력
+	fmt.Println("시퀀스 번호 후", a.NextSEQ, packet.SEQ)
+	fmt.Printf("패킷 수신 - 사용자: %s, QPort: %d\n", a.UserAddr, a.QPort)
+	fmt.Printf("패킷 내용: %+v\n", packet)
+}
+
+func (a *PacketActor) processTickIPacket(packet *client.TickIPacket) {
+
+}
+
+func (a *PacketActor) processTickRPacket(packet *client.TickRPacket) {
+
 }
 
 func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
