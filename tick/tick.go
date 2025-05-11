@@ -2,8 +2,10 @@ package tick
 
 import (
 	"WeNeedGameServer/game"
+	"WeNeedGameServer/game/player"
 	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/network"
+	"WeNeedGameServer/packet/client"
 	"WeNeedGameServer/packet/server"
 	"encoding/json"
 	"fmt"
@@ -18,9 +20,14 @@ type GameTick struct {
 	networkInstance *network.Network
 	stopChan        chan struct{}
 	Mediator        *mediator.Mediator
+	Ticks           [60]map[string]player.PlayerPosition
 }
 
 func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network) *GameTick {
+	ticks := [60]map[string]player.PlayerPosition{}
+	for i := range ticks {
+		ticks[i] = make(map[string]player.PlayerPosition)
+	}
 	return &GameTick{
 		TickTime:        tickTime,
 		Ticker:          time.NewTicker(time.Second / time.Duration(tickTime)),
@@ -28,6 +35,7 @@ func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network
 		networkInstance: networkInstance,
 		stopChan:        make(chan struct{}),
 		Mediator:        nil,
+		Ticks:           ticks,
 	}
 }
 
@@ -40,20 +48,15 @@ func (gt *GameTick) Send(receiverName string, message interface{}) {
 }
 
 func (gt *GameTick) Receive(senderName string, message interface{}) {
+	if senderName == "network" {
+		switch pkt := message.(type) {
+		case client.TickIPacket:
+
+		case client.TickRPacket:
+
+		}
+	}
 }
-
-//func (gt *GameTick) RegisterActorChan(qPort uint32, actorStatusChan chan *ActorStatus) {
-//	gt.actorChanMap[qPort] = actorStatusChan
-//	//go gt.startActorChan(qPort)
-//}
-
-//func (gt *GameTick) startActorChan(qPort uint32) {
-//	for {
-//		select {
-//		//case <-
-//		}
-//	}
-//}
 
 func (gt *GameTick) StartGameLoop() {
 	// 루프 시작 틱이 될때마다 processTick함수 실행

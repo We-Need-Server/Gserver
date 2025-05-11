@@ -9,6 +9,7 @@ import (
 type PacketI interface {
 	GetPacketKind() uint32
 	GetQPort() uint32
+	GetSEQ() uint32
 }
 
 type FieldType int
