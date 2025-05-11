@@ -21,6 +21,12 @@ type GameTick struct {
 	stopChan        chan struct{}
 	Mediator        *mediator.Mediator
 	Ticks           [60]map[string]player.PlayerPosition
+	ActorStatusMap  map[uint32]*ActorStatus
+}
+
+type ActorStatus struct {
+	Flags       uint8
+	RTickNumber uint32
 }
 
 func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network) *GameTick {
@@ -36,6 +42,7 @@ func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network
 		stopChan:        make(chan struct{}),
 		Mediator:        nil,
 		Ticks:           ticks,
+		ActorStatusMap:  make(map[uint32]*ActorStatus),
 	}
 }
 
@@ -51,10 +58,23 @@ func (gt *GameTick) Receive(senderName string, message interface{}) {
 	if senderName == "network" {
 		switch pkt := message.(type) {
 		case client.TickIPacket:
-
+			gt.iActorStatus(&pkt)
 		case client.TickRPacket:
-
+			gt.rActorStatus(&pkt)
 		}
+	}
+}
+
+func (gt *GameTick) iActorStatus(packet *client.TickIPacket) {
+	if _, exists := gt.ActorStatusMap[packet.GetQPort()]; exists {
+		gt.ActorStatusMap[packet.GetQPort()].Flags |= 1 << 7
+	}
+}
+
+func (gt *GameTick) rActorStatus(packet *client.TickRPacket) {
+	if _, exists := gt.ActorStatusMap[packet.GetQPort()]; exists {
+		gt.ActorStatusMap[packet.GetQPort()].Flags |= 1 << 6
+		gt.ActorStatusMap[packet.GetQPort()].RTickNumber = packet.RTickNumber
 	}
 }
 

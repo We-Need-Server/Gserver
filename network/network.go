@@ -98,7 +98,7 @@ func (n *Network) tempHandleNewConnection(QPort uint32, userAddr *net.UDPAddr) {
 	n.ChanTable[QPort] = make(chan packet.PacketI)
 	n.ConnTable[QPort] = userAddr
 	n.NextSEQTable[QPort] = 1
-	packetActor := actor.NewPacketActor(1, QPort, userAddr, n.ChanTable[QPort], n.Game.AddPlayer(QPort))
+	packetActor := actor.NewPacketActor(QPort, userAddr, n.ChanTable[QPort], n.Game.AddPlayer(QPort))
 	n.PacketActorTable[QPort] = packetActor
 	go n.PacketActorTable[QPort].ProcessLoopPacket()
 }
