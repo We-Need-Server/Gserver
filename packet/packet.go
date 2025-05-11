@@ -4,6 +4,7 @@ import (
 	"WeNeedGameServer/packet/client"
 	"WeNeedGameServer/util"
 	"fmt"
+	"math"
 )
 
 type PacketI interface {
@@ -32,21 +33,21 @@ type Field struct {
 
 type PropertyMap map[string]Field
 
-func ParsePacketByKind(np []byte, endPoint int) (PacketI, error) {
+func ParsePacketByKind(np []byte, endPoint int) (uint32, PacketI, error) {
 	if len(np) < 4 {
-		return nil, fmt.Errorf("packet too small: %d bytes", len(np))
+		return uint32(math.MaxUint32), nil, fmt.Errorf("packet too small: %d bytes", len(np))
 	}
 
-	PKind := util.ConvertBinaryToUint32(np[0:4])
+	pKind := util.ConvertBinaryToUint32(np[0:4])
 
-	switch PKind {
+	switch pKind {
 	case 41:
-		return client.ParseEventPacket(np, endPoint), nil
+		return pKind, client.ParseEventPacket(np, endPoint), nil
 	case 46:
-		return client.ParseTickIPacket(np, endPoint), nil
+		return pKind, client.ParseTickIPacket(np, endPoint), nil
 	case 50:
-		return client.ParseTickRPacket(np, endPoint), nil
+		return pKind, client.ParseTickRPacket(np, endPoint), nil
 	default:
-		return nil, fmt.Errorf("unknown packet kind: %d", PKind)
+		return uint32(math.MaxUint32), nil, fmt.Errorf("unknown packet kind: %d", pKind)
 	}
 }

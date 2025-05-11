@@ -11,22 +11,22 @@ import (
 )
 
 type PacketActor struct {
-	NextSEQ     uint32
-	QPort       uint32
-	UserAddr    *net.UDPAddr
-	packetChan  chan *packet.PacketI
-	processPacketMap map[uint32]*func()
+	NextSEQ    uint32
+	QPort      uint32
+	UserAddr   *net.UDPAddr
+	packetChan chan *packet.PacketI
+	//processPacketMap map[uint32]*func()
 	actorPlayer *player.Player
 }
 
 func NewPacketActor(NextSEQ uint32, QPort uint32, UserAddr *net.UDPAddr, packetChan chan *packet.PacketI, actorPlayer *player.Player) *PacketActor {
-	processPacketMap := initProcessPacketMap()
-	return &PacketActor{NextSEQ, QPort, UserAddr, packetChan, processPacketMap, actorPlayer}
+	//processPacketMap := initProcessPacketMap()
+	return &PacketActor{NextSEQ, QPort, UserAddr, packetChan, actorPlayer}
 }
 
-func initProcessPacketMap() map[uint32]*func() {
-	processPacketMap := make(map)
-}
+//func initProcessPacketMap() map[uint32]*func() {
+//	processPacketMap := make(map)
+//}
 
 func (a *PacketActor) ProcessLoopPacket() {
 	for {

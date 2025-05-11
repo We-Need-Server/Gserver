@@ -4,7 +4,9 @@ import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game/actor"
 	"WeNeedGameServer/packet"
+	"WeNeedGameServer/packet/client"
 	"log"
+	"math"
 	"net"
 )
 
@@ -50,9 +52,17 @@ func (n *Network) Start() {
 }
 
 func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.UDPAddr) {
-	data, err := packet.ParsePacketByKind(clientPacket, endPoint)
-	if err != nil {
+	pKind, data, err := packet.ParsePacketByKind(clientPacket, endPoint)
+	if err != nil || pKind != uint32(math.MaxUint32) {
 		log.Panicln("잘못된 요청")
+	}
+	switch pKind {
+	case 41:
+		data = data.(*client.EventPacket)
+	case 46:
+		data = data.(*client.TickIPacket)
+	case 50:
+		data = data.(*client.TickRPacket)
 	}
 	if QPort := n.IPTable[data.GetQPort()]; QPort == nil {
 		n.tempHandleNewConnection(data.GetQPort(), userAddr)
@@ -63,7 +73,7 @@ func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.
 	//		return
 	//	}
 	//}
-	n.throwData(data, userAddr)
+	n.throwData(pKind, data, userAddr)
 }
 
 //func (n *Network) handleNewConnection(QPort uint32, userAddr string) bool {
