@@ -10,12 +10,18 @@ import (
 	"time"
 )
 
+type ActorStatus struct {
+	Flags       uint8
+	RTickNumber uint32
+}
+
 type GameTick struct {
 	TickTime        int
 	Ticker          *time.Ticker
 	Game            *game.Game
 	networkInstance *network.Network
 	stopChan        chan struct{}
+	//actorChanMap    map[uint32]chan *ActorStatus
 }
 
 func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network) *GameTick {
@@ -25,8 +31,22 @@ func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network
 		Game:            game,
 		networkInstance: networkInstance,
 		stopChan:        make(chan struct{}),
+		//actorChanMap:    make(map[uint32]chan *ActorStatus),
 	}
 }
+
+//func (gt *GameTick) RegisterActorChan(qPort uint32, actorStatusChan chan *ActorStatus) {
+//	gt.actorChanMap[qPort] = actorStatusChan
+//	//go gt.startActorChan(qPort)
+//}
+
+//func (gt *GameTick) startActorChan(qPort uint32) {
+//	for {
+//		select {
+//		//case <-
+//		}
+//	}
+//}
 
 func (gt *GameTick) StartGameLoop() {
 	// 루프 시작 틱이 될때마다 processTick함수 실행
