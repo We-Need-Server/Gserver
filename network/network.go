@@ -3,6 +3,7 @@ package network
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game/actor"
+	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/packet"
 	"log"
 	"net"
@@ -16,6 +17,7 @@ type Network struct {
 	PacketActorTable map[uint32]*actor.PacketActor
 	Ln               *net.UDPConn
 	Game             *game.Game
+	Mediator         *mediator.Mediator
 }
 
 func NewNetwork(Game *game.Game) *Network {
@@ -26,6 +28,7 @@ func NewNetwork(Game *game.Game) *Network {
 		ConnTable:        make(map[uint32]*net.UDPAddr),
 		PacketActorTable: make(map[uint32]*actor.PacketActor),
 		Game:             Game,
+		Mediator:         nil,
 	}
 }
 
@@ -47,6 +50,17 @@ func (n *Network) Start() {
 		}
 		n.handlePacket(readBuffer, readCount, addr)
 	}
+}
+
+func (n *Network) Register(m *mediator.Mediator) {
+	n.Mediator = m
+}
+
+func (n *Network) Send(receiverName string, message interface{}) {
+	n.Mediator.Notify("network", receiverName, message)
+}
+
+func (n *Network) Receive(senderName string, message interface{}) {
 }
 
 func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.UDPAddr) {

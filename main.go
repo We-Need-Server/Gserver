@@ -2,13 +2,19 @@ package main
 
 import (
 	"WeNeedGameServer/game"
+	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/network"
 	"WeNeedGameServer/tick"
+	"log"
 )
 
 func main() {
+	mediatorInstance := mediator.NewMediator()
 	gameInstance := game.NewGame()
 	networkInstance := network.NewNetwork(gameInstance)
+	if _, err := mediatorInstance.Register("network", networkInstance); err != nil {
+		log.Panicln("메디에이터 등록 실패")
+	}
 	go networkInstance.Start()
 	gameTickInstance := tick.NewGameTick(1, gameInstance, networkInstance)
 	gameTickInstance.StartGameLoop()
