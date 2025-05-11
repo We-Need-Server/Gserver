@@ -4,6 +4,7 @@ import "fmt"
 
 type Component interface {
 	Register(m *Mediator)
+	Send(receiverName string, message interface{})
 	Receive(senderName string, message interface{})
 }
 
