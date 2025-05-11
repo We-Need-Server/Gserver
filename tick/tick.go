@@ -11,11 +11,6 @@ import (
 	"time"
 )
 
-type ActorStatus struct {
-	Flags       uint8
-	RTickNumber uint32
-}
-
 type GameTick struct {
 	TickTime        int
 	Ticker          *time.Ticker
@@ -23,7 +18,6 @@ type GameTick struct {
 	networkInstance *network.Network
 	stopChan        chan struct{}
 	Mediator        *mediator.Mediator
-	//actorChanMap    map[uint32]chan *ActorStatus
 }
 
 func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network) *GameTick {
@@ -34,7 +28,6 @@ func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network
 		networkInstance: networkInstance,
 		stopChan:        make(chan struct{}),
 		Mediator:        nil,
-		//actorChanMap:    make(map[uint32]chan *ActorStatus),
 	}
 }
 
