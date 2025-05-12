@@ -61,15 +61,15 @@ func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int)
 		payloadCommand := string(payload[i : i+2])
 		switch payloadCommand {
 		case command.FB:
-			xDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
-			fmt.Println(xDelta)
-			a.actorPlayer.MoveForward(xDelta)
+			zDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
+			fmt.Println(zDelta)
+			a.actorPlayer.MoveForward(zDelta)
 			i += 6
 			break
 		case command.RL:
-			zDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
-			fmt.Println(zDelta)
-			a.actorPlayer.MoveSide(zDelta)
+			xDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
+			fmt.Println(xDelta)
+			a.actorPlayer.MoveSide(xDelta)
 			i += 6
 			break
 		case command.YW:

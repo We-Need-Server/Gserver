@@ -45,22 +45,22 @@ func (p *Player) ReflectDeltaValues() {
 	p.ReflectTransferYaw()
 }
 
-func (p *Player) MoveForward(XDelta float32) {
-	p.XDelta += XDelta
-}
-
-func (p *Player) ReflectMoveForward() {
-	p.PositionX += p.XDelta
-	p.XDelta = 0
-}
-
-func (p *Player) MoveSide(ZDelta float32) {
+func (p *Player) MoveForward(ZDelta float32) {
 	p.ZDelta += ZDelta
 }
 
-func (p *Player) ReflectMoveSide() {
+func (p *Player) ReflectMoveForward() {
 	p.PositionZ += p.ZDelta
 	p.ZDelta = 0
+}
+
+func (p *Player) MoveSide(XDelta float32) {
+	p.XDelta += XDelta
+}
+
+func (p *Player) ReflectMoveSide() {
+	p.PositionX += p.XDelta
+	p.XDelta = 0
 }
 
 func (p *Player) TransferYaw(YawDelta float32) {
