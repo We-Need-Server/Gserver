@@ -7,7 +7,7 @@ import (
 )
 
 type PacketI interface {
-	GetPacketKind() uint32
+	GetPacketKind() uint8
 	GetQPort() uint32
 	GetSEQ() uint32
 }
@@ -34,7 +34,7 @@ type Field struct {
 type PropertyMap map[string]Field
 
 func ParsePacketByKind(np []byte, endPoint int) (PacketI, error) {
-	if len(np) < 4 {
+	if len(np) < 1 {
 		return nil, fmt.Errorf("packet too small: %d bytes", len(np))
 	}
 
