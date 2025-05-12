@@ -40,7 +40,7 @@ func (a *PacketActor) ProcessLoopPacket() {
 		pkt := <-a.packetChan
 
 		switch pkt.GetPacketKind() {
-		case 41:
+		case 'N':
 			a.processEventPacket(pkt.(*client.EventPacket))
 		}
 

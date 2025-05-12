@@ -42,11 +42,11 @@ func ParsePacketByKind(np []byte, endPoint int) (PacketI, error) {
 	fmt.Println("pkind", pKind)
 
 	switch pKind {
-	case 41:
+	case 'N':
 		return client.ParseEventPacket(np, endPoint), nil
-	case 46:
+	case 'I':
 		return client.ParseTickIPacket(np, endPoint), nil
-	case 50:
+	case 'R':
 		return client.ParseTickRPacket(np, endPoint), nil
 	default:
 		return nil, fmt.Errorf("unknown packet kind: %d", pKind)
