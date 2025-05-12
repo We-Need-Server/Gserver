@@ -2,6 +2,8 @@ package server
 
 import (
 	"WeNeedGameServer/game/player"
+	"bytes"
+	"encoding/binary"
 )
 
 type TickPacket struct {
@@ -17,5 +19,15 @@ func NewTickPacket(TickNumber int, Timestamp int64, UserSequenceNumber uint32, F
 }
 
 func (p *TickPacket) Serialize() []byte {
-	return []byte{}
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, p.TickNumber)
+	binary.Write(buf, binary.LittleEndian, p.Timestamp)
+	binary.Write(buf, binary.LittleEndian, p.UserSequenceNumber)
+	binary.Write(buf, binary.LittleEndian, p.Flags)
+	for qPort, playerPosition := range p.UserPositions {
+		binary.Write(buf, binary.LittleEndian, "ID")
+		binary.Write(buf, binary.LittleEndian, qPort)
+		binary.Write(buf, binary.LittleEndian, playerPosition)
+	}
+	return buf.Bytes()
 }

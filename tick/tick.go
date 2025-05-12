@@ -120,26 +120,9 @@ func (gt *GameTick) StopGameLoop() {
 }
 
 func (gt *GameTick) processTick() {
-
-	// 최종적으로 게임 객체의 Delta를 업데이트 하고.
-	// 각 유저의 상태에 따라 틱 패킷을 다르게 만들어 보내는 로직을 구현하면 됨.
-	// 추가적으로 60틱 저장 로직도 구현해야 함
 	gameDeltaState := gt.Game.GetGameDeltaState()
 	gt.Ticks[gt.TickTime%60] = gameDeltaState
 	gameState := gt.Game.GetGameState()
-
-	//tickPacket := server.TickPacket{
-	//	TickNumber:         gt.TickTime,
-	//	Timestamp:          time.Now(),
-	//	UserSequenceNumber: 0,
-	//	UserPositions:      gameState,
-	//}
-
-	//jsonData, err := json.Marshal(tickPacket)
-	//if err != nil {
-	//	log.Println("Failed to marshal tickPacket to JSON:", err)
-	//	return
-	//}
 
 	for qPort, userAddr := range gt.networkInstance.ConnTable {
 		actorStatus := gt.ActorStatusMap[qPort]
@@ -149,7 +132,7 @@ func (gt *GameTick) processTick() {
 		} else if (actorStatus.Flags & 1 << 6) != 0 {
 			restoreTickCount := gt.TickTime - actorStatus.RTickNumber
 			if restoreTickCount >= 60 {
-				tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+				tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags&^(1<<6), gameState)
 			} else {
 				cloneGameDeltaState := make(map[uint32]player.PlayerPosition)
 				for k, v := range gameDeltaState {
@@ -164,7 +147,7 @@ func (gt *GameTick) processTick() {
 							pos.PositionZ += playerPosition.PositionZ
 							pos.PTAngle += playerPosition.PTAngle
 							pos.YawAngle += playerPosition.YawAngle
-							cloneGameDeltaState[qPort] = pos // 변경된 값 다시 저장
+							cloneGameDeltaState[qPort] = pos
 						}
 					}
 				}
@@ -173,11 +156,12 @@ func (gt *GameTick) processTick() {
 		} else {
 			tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
 		}
-		// byte 배열로 변환하는 공식 필요
+
 		_, err := gt.networkInstance.Ln.WriteToUDP(tickPacket.Serialize(), userAddr)
 		if err != nil {
 			log.Println("Failed to send message:", err)
 		}
+
 		actorStatus.Flags = 0
 		actorStatus.RTickNumber = 0
 	}
