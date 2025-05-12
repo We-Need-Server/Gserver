@@ -3,35 +3,34 @@ package player
 type Player struct {
 	PositionX float32
 	XDelta    float32
-	PositionY float32
-	YDelta    float32
 	PositionZ float32
 	ZDelta    float32
 	YawAngle  float32
 	YawDelta  float32
 	PTAngle   float32
 	PTDelta   float32
+	JP        bool
 }
 
 type PlayerPosition struct {
 	PositionX float32 `json:"positionX"`
-	PositionY float32 `json:"positionY"`
 	PositionZ float32 `json:"positionZ"`
 	YawAngle  float32 `json:"yaw"`
 	PTAngle   float32 `json:"pitch"`
+	JP        bool
 }
 
 func NewPlayer() *Player {
 	return &Player{}
 }
 
-func NewPlayerPosition(positionX float32, positionY float32, positionZ float32, yawAngle float32, ptAngle float32) PlayerPosition {
+func NewPlayerPosition(positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool) PlayerPosition {
 	return PlayerPosition{
 		PositionX: positionX,
-		PositionY: positionY,
 		PositionZ: positionZ,
 		YawAngle:  yawAngle,
 		PTAngle:   ptAngle,
+		JP:        JP,
 	}
 }
 
@@ -80,4 +79,8 @@ func (p *Player) TransferPT(PTDelta float32) {
 func (p *Player) ReflectTransferPT() {
 	p.PTAngle += p.PTDelta
 	p.PTDelta = 0
+}
+
+func (p *Player) turnJP(jp bool) {
+	p.JP = jp
 }

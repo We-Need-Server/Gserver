@@ -56,19 +56,19 @@ func TestMoveFoward(t *testing.T) {
 	p := NewPlayer()
 
 	// 테스트 케이스 1: 양수 delta 값
-	p.MoveFoward(5.0)
+	p.MoveForward(5.0)
 	if p.XDelta != 5.0 {
 		t.Errorf("MoveFoward(5.0) failed, expected XDelta to be 5.0, got %v", p.XDelta)
 	}
 
 	// 테스트 케이스 2: 음수 delta 값
-	p.MoveFoward(-2.0)
+	p.MoveForward(-2.0)
 	if p.XDelta != 3.0 { // 5.0 + (-2.0) = 3.0
 		t.Errorf("MoveFoward(-2.0) failed, expected XDelta to be 3.0, got %v", p.XDelta)
 	}
 
 	// 테스트 케이스 3: 0 delta 값
-	p.MoveFoward(0.0)
+	p.MoveForward(0.0)
 	if p.XDelta != 3.0 { // 값이 변하지 않아야 함
 		t.Errorf("MoveFoward(0.0) failed, expected XDelta to remain 3.0, got %v", p.XDelta)
 	}
@@ -145,7 +145,7 @@ func TestIntegration(t *testing.T) {
 	p := NewPlayer()
 
 	// 여러 동작 수행
-	p.MoveFoward(10.0)
+	p.MoveForward(10.0)
 	p.MoveSide(5.0)
 	p.TransferYaw(30.0)
 	p.TransferPT(60.0)
@@ -157,7 +157,7 @@ func TestIntegration(t *testing.T) {
 	}
 
 	// 추가 동작 수행 (누적 검증)
-	p.MoveFoward(-5.0)
+	p.MoveForward(-5.0)
 	p.MoveSide(2.0)
 
 	// 결과 검증
