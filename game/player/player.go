@@ -39,6 +39,13 @@ func (p *Player) GetPlayerInfo() *Player {
 	return p
 }
 
+func (p *Player) ReflectDeltaValues() {
+	p.ReflectMoveForward()
+	p.ReflectMoveSide()
+	p.ReflectTransferPT()
+	p.ReflectTransferYaw()
+}
+
 func (p *Player) MoveForward(XDelta float32) {
 	p.XDelta += XDelta
 }
