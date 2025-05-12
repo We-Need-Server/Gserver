@@ -63,7 +63,7 @@ func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int)
 		case command.FB:
 			xDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
 			fmt.Println(xDelta)
-			a.actorPlayer.MoveFoward(xDelta)
+			a.actorPlayer.MoveForward(xDelta)
 			i += 6
 			break
 		case command.RL:

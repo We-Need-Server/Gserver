@@ -22,7 +22,13 @@ func (g *Game) AddPlayer(QPort uint32) *player.Player {
 	return g.Players[QPort]
 }
 
-func (g Game) GetGameState() map[string]player.PlayerPosition {
+func (g *Game) reflateDeltaValue() {
+	for qPort, p := range g.Players {
+
+	}
+}
+
+func (g *Game) GetGameState() map[string]player.PlayerPosition {
 	//// 게임 상태를 담을 맵 생성
 	gameState := make(map[string]player.PlayerPosition)
 

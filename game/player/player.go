@@ -35,30 +35,50 @@ func NewPlayerPosition(positionX float32, positionY float32, positionZ float32, 
 	}
 }
 
-func (p Player) GetPlayerInfo() Player {
+func (p *Player) GetPlayerInfo() *Player {
 	return p
 }
 
-func (p *Player) MoveFoward(XDelta float32) {
+func (p *Player) MoveForward(XDelta float32) {
 	// 좌표에 값을 넣어두려면 계산 공식을 써야함
-	p.PositionX += XDelta
-	//p.XDelta += XDelta
+	//p.PositionX += XDelta
+	p.XDelta += XDelta
+}
+
+func (p *Player) ReflectMoveForward() {
+	p.PositionX += p.XDelta
+	p.XDelta = 0
 }
 
 func (p *Player) MoveSide(ZDelta float32) {
 	// 좌표에 값을 넣어두려면 계산 공식을 써야함
-	p.PositionZ += ZDelta
-	//p.ZDelta += ZDelta
+	//p.PositionZ += ZDelta
+	p.ZDelta += ZDelta
+}
+
+func (p *Player) ReflectMoveSide() {
+	p.PositionZ += p.ZDelta
+	p.ZDelta = 0
 }
 
 func (p *Player) TransferYaw(YawDelta float32) {
 	// 좌표에 값을 넣어두려면 계산 공식을 써야함
-	p.YawAngle += YawDelta
-	//p.YawDelta += YawDelta
+	//p.YawAngle += YawDelta
+	p.YawDelta += YawDelta
+}
+
+func (p *Player) ReflectTransferYaw() {
+	p.YawAngle += p.YawDelta
+	p.YawDelta = 0
 }
 
 func (p *Player) TransferPT(PTDelta float32) {
 	// 좌표에 값을 넣어두려면 계산 공식을 써야함
-	p.PTAngle += PTDelta
-	//p.PTDelta += PTDelta
+	//p.PTAngle += PTDelta
+	p.PTDelta += PTDelta
+}
+
+func (p *Player) ReflectTransferPT() {
+	p.PTAngle = p.PTDelta
+	p.PTDelta = 0
 }
