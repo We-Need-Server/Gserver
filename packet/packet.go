@@ -2,7 +2,6 @@ package packet
 
 import (
 	"WeNeedGameServer/packet/client"
-	"WeNeedGameServer/util"
 	"fmt"
 )
 
@@ -38,7 +37,9 @@ func ParsePacketByKind(np []byte, endPoint int) (PacketI, error) {
 		return nil, fmt.Errorf("packet too small: %d bytes", len(np))
 	}
 
-	pKind := util.ConvertBinaryToUint32(np[0:4])
+	pKind := np[0]
+
+	fmt.Println("pkind", pKind)
 
 	switch pKind {
 	case 41:
