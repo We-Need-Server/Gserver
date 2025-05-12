@@ -1,39 +1,53 @@
 package packet
 
 import (
-	"WeNeedGameServer/game/player"
-	"encoding/binary"
+	"WeNeedGameServer/packet/client"
+	"WeNeedGameServer/util"
 	"fmt"
-	"time"
 )
 
-type Packet struct {
-	SEQ             uint32
-	ACK             uint32
-	QPort           uint32
-	PKind           uint32
-	Payload         []byte
-	PayloadEndpoint int
+type PacketI interface {
+	GetPacketKind() uint32
+	GetQPort() uint32
+	GetSEQ() uint32
 }
 
-type TickPacket struct {
-	TickNumber         int                              `json:"tickNumber"`
-	Timestamp          time.Time                        `json:"timestamp"`
-	UserSequenceNumber int                              `json:"userSequenceNumber"`
-	UserPositions      map[string]player.PlayerPosition `json:"userPositions"` // 내부 처리용 맵
+type FieldType int
+
+const (
+	TypeUint8 FieldType = iota
+	TypeUint16
+	TypeUint32
+	TypeString
+	TypeFloat32
+	TypeFloat64
+	TypeBytes
+)
+
+type Field struct {
+	PropertyName string
+	Offset       uint32
+	PropertyType FieldType
+	// 타입에 대해서
 }
 
-func NewPacket(SEQ uint32, ACK uint32, QPort uint32, PKind uint32, Payload []byte, PayloadEndpoint int) *Packet {
-	return &Packet{SEQ, ACK, QPort, PKind, Payload, PayloadEndpoint}
-}
+type PropertyMap map[string]Field
 
-func ParsePacket(np []byte, endPoint int) *Packet {
-	PKind := binary.LittleEndian.Uint32(np[0:4])
-	SEQ := binary.LittleEndian.Uint32(np[4:8])
-	ACK := binary.LittleEndian.Uint32(np[8:12])
-	QPort := binary.LittleEndian.Uint32(np[12:16])
-	Payload := np[16:endPoint]
-	PayloadEndpoint := endPoint - 16
-	fmt.Println(PKind, SEQ, ACK, QPort, Payload, PayloadEndpoint)
-	return NewPacket(SEQ, ACK, QPort, PKind, Payload, PayloadEndpoint)
+func ParsePacketByKind(np []byte, endPoint int) (PacketI, error) {
+	if len(np) < 4 {
+		return nil, fmt.Errorf("packet too small: %d bytes", len(np))
+	}
+
+	pKind := util.ConvertBinaryToUint32(np[0:4])
+
+	switch pKind {
+	case 41:
+		return client.ParseEventPacket(np, endPoint), nil
+	case 46:
+		return client.ParseTickIPacket(np, endPoint), nil
+	case 50:
+		return client.ParseTickRPacket(np, endPoint), nil
+	default:
+		return nil, fmt.Errorf("unknown packet kind: %d", pKind)
+	}
 }
