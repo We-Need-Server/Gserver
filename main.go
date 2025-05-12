@@ -16,7 +16,7 @@ func main() {
 		log.Panicln("메디에이터 등록 실패")
 	}
 	go networkInstance.Start()
-	gameTickInstance := tick.NewGameTick(1, gameInstance, networkInstance)
+	gameTickInstance := tick.NewGameTick(0, gameInstance, networkInstance)
 	if _, err := mediatorInstance.Register("tick", gameTickInstance); err != nil {
 		log.Panicln("메디에이터 등록 실패")
 	}

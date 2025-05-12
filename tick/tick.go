@@ -8,7 +8,6 @@ import (
 	"WeNeedGameServer/network"
 	"WeNeedGameServer/packet/client"
 	"WeNeedGameServer/packet/server"
-	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -21,14 +20,14 @@ type GameTick struct {
 	networkInstance *network.Network
 	stopChan        chan struct{}
 	Mediator        *mediator.Mediator
-	Ticks           [60]map[string]player.PlayerPosition
+	Ticks           [60]map[uint32]player.PlayerPosition
 	ActorStatusMap  map[uint32]*ActorStatus
 }
 
 type ActorStatus struct {
 	Flags       uint8
 	UserSEQ     uint32
-	RTickNumber uint32
+	RTickNumber int
 }
 
 func newActorStatus() *ActorStatus {
@@ -36,13 +35,13 @@ func newActorStatus() *ActorStatus {
 }
 
 func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network) *GameTick {
-	ticks := [60]map[string]player.PlayerPosition{}
+	ticks := [60]map[uint32]player.PlayerPosition{}
 	for i := range ticks {
-		ticks[i] = make(map[string]player.PlayerPosition)
+		ticks[i] = make(map[uint32]player.PlayerPosition)
 	}
 	return &GameTick{
 		TickTime:        tickTime,
-		Ticker:          time.NewTicker(time.Second / time.Duration(tickTime)),
+		Ticker:          time.NewTicker(time.Second / time.Duration(60)),
 		Game:            game,
 		networkInstance: networkInstance,
 		stopChan:        make(chan struct{}),
@@ -125,25 +124,62 @@ func (gt *GameTick) processTick() {
 	// 최종적으로 게임 객체의 Delta를 업데이트 하고.
 	// 각 유저의 상태에 따라 틱 패킷을 다르게 만들어 보내는 로직을 구현하면 됨.
 	// 추가적으로 60틱 저장 로직도 구현해야 함
+	gameDeltaState := gt.Game.GetGameDeltaState()
+	gt.Ticks[gt.TickTime%60] = gameDeltaState
 	gameState := gt.Game.GetGameState()
-	tickPacket := server.TickPacket{
-		TickNumber:         gt.TickTime,
-		Timestamp:          time.Now(),
-		UserSequenceNumber: 0,
-		UserPositions:      gameState,
-	}
 
-	jsonData, err := json.Marshal(tickPacket)
-	if err != nil {
-		log.Println("Failed to marshal tickPacket to JSON:", err)
-		return
-	}
+	//tickPacket := server.TickPacket{
+	//	TickNumber:         gt.TickTime,
+	//	Timestamp:          time.Now(),
+	//	UserSequenceNumber: 0,
+	//	UserPositions:      gameState,
+	//}
 
-	for _, userAddr := range gt.networkInstance.ConnTable {
-		_, err := gt.networkInstance.Ln.WriteToUDP(jsonData, userAddr)
+	//jsonData, err := json.Marshal(tickPacket)
+	//if err != nil {
+	//	log.Println("Failed to marshal tickPacket to JSON:", err)
+	//	return
+	//}
+
+	for qPort, userAddr := range gt.networkInstance.ConnTable {
+		actorStatus := gt.ActorStatusMap[qPort]
+		var tickPacket *server.TickPacket
+		if (actorStatus.Flags & 1 << 7) != 0 {
+			tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+		} else if (actorStatus.Flags & 1 << 6) != 0 {
+			restoreTickCount := gt.TickTime - actorStatus.RTickNumber
+			if restoreTickCount >= 60 {
+				tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+			} else {
+				cloneGameDeltaState := make(map[uint32]player.PlayerPosition)
+				for k, v := range gameDeltaState {
+					cloneGameDeltaState[k] = v
+				}
+				for i := actorStatus.RTickNumber; i < gt.TickTime; i++ {
+					tickIdx := i % 60
+					for qPort, playerPosition := range gt.Ticks[tickIdx] {
+						if pos, exists := cloneGameDeltaState[qPort]; exists {
+							pos.PositionX += playerPosition.PositionX
+							pos.PositionY += playerPosition.PositionY
+							pos.PositionZ += playerPosition.PositionZ
+							pos.PTAngle += playerPosition.PTAngle
+							pos.YawAngle += playerPosition.YawAngle
+							cloneGameDeltaState[qPort] = pos // 변경된 값 다시 저장
+						}
+					}
+				}
+				tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+			}
+		} else {
+			tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
+		}
+		// byte 배열로 변환하는 공식 필요
+		_, err := gt.networkInstance.Ln.WriteToUDP(tickPacket.Serialize(), userAddr)
 		if err != nil {
 			log.Println("Failed to send message:", err)
 		}
+		actorStatus.Flags = 0
+		actorStatus.RTickNumber = 0
 	}
 
 	gt.TickTime += 1
