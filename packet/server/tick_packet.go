@@ -26,27 +26,31 @@ func (p *TickPacket) Serialize() []byte {
 	binary.Write(buf, binary.LittleEndian, p.UserSequenceNumber)
 	binary.Write(buf, binary.LittleEndian, p.Flags)
 	for qPort, playerPosition := range p.UserPositions {
-		binary.Write(buf, binary.LittleEndian, 'I')
-		binary.Write(buf, binary.LittleEndian, 'D')
+		buf.WriteByte('I')
+		buf.WriteByte('D')
 		binary.Write(buf, binary.LittleEndian, qPort)
 		if playerPosition.PositionX != 0 {
-			binary.Write(buf, binary.LittleEndian, "FB")
+			buf.WriteByte('F')
+			buf.WriteByte('B')
 			binary.Write(buf, binary.LittleEndian, playerPosition.PositionX)
 		}
 		if playerPosition.PositionZ != 0 {
-			binary.Write(buf, binary.LittleEndian, "LR")
+			buf.WriteByte('L')
+			buf.WriteByte('R')
 			binary.Write(buf, binary.LittleEndian, playerPosition.PositionZ)
 		}
 		if playerPosition.PTAngle != 0 {
-			binary.Write(buf, binary.LittleEndian, "PT")
+			buf.WriteByte('P')
+			buf.WriteByte('T')
 			binary.Write(buf, binary.LittleEndian, playerPosition.PTAngle)
 		}
 		if playerPosition.YawAngle != 0 {
-			binary.Write(buf, binary.LittleEndian, "YW")
+			buf.WriteByte('Y')
+			buf.WriteByte('W')
 			binary.Write(buf, binary.LittleEndian, playerPosition.YawAngle)
 		}
-		binary.Write(buf, binary.LittleEndian, 'J')
-		binary.Write(buf, binary.LittleEndian, "P")
+		buf.WriteByte('J')
+		buf.WriteByte('P')
 		binary.Write(buf, binary.LittleEndian, playerPosition.JP)
 	}
 	fmt.Println(buf.Bytes())
