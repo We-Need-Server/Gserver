@@ -24,6 +24,7 @@ func NewNetwork(Game *game.Game) *Network {
 	return &Network{
 		ChanTable:        make(map[uint32]chan packet.PacketI),
 		ConnTable:        make(map[uint32]*net.UDPAddr),
+		NextSEQTable:     make(map[uint32]uint32),
 		PacketActorTable: make(map[uint32]*actor.PacketActor),
 		Game:             Game,
 		Mediator:         nil,
