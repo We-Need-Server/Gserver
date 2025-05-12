@@ -48,7 +48,7 @@ func (a *PacketActor) ProcessLoopPacket() {
 }
 
 func (a *PacketActor) processEventPacket(packet *client.EventPacket) {
-	if packet.GetPacketKind() == 41 {
+	if packet.GetPacketKind() == 'N' {
 		a.processCommandPayload(packet.Payload, packet.PayloadEndpoint)
 	}
 
