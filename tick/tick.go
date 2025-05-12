@@ -123,7 +123,6 @@ func (gt *GameTick) processTick() {
 	gameDeltaState := gt.Game.GetGameDeltaState()
 	gt.Ticks[gt.TickTime%60] = gameDeltaState
 	gameState := gt.Game.GetGameState()
-
 	for qPort, userAddr := range gt.networkInstance.ConnTable {
 		actorStatus := gt.ActorStatusMap[qPort]
 		var tickPacket *server.TickPacket

@@ -4,6 +4,7 @@ import (
 	"WeNeedGameServer/game/player"
 	"bytes"
 	"encoding/binary"
+	"fmt"
 )
 
 type TickPacket struct {
@@ -25,6 +26,7 @@ func (p *TickPacket) Serialize() []byte {
 	binary.Write(buf, binary.LittleEndian, p.UserSequenceNumber)
 	binary.Write(buf, binary.LittleEndian, p.Flags)
 	for qPort, playerPosition := range p.UserPositions {
+		fmt.Println(qPort, playerPosition)
 		binary.Write(buf, binary.LittleEndian, "ID")
 		binary.Write(buf, binary.LittleEndian, qPort)
 		if playerPosition.PositionX != 0 {
