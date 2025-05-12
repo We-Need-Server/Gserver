@@ -29,15 +29,15 @@ func (p *TickPacket) Serialize() []byte {
 		buf.WriteByte('I')
 		buf.WriteByte('D')
 		binary.Write(buf, binary.LittleEndian, qPort)
-		if playerPosition.PositionX != 0 {
+		if playerPosition.PositionZ != 0 {
 			buf.WriteByte('F')
 			buf.WriteByte('B')
-			binary.Write(buf, binary.LittleEndian, playerPosition.PositionX)
+			binary.Write(buf, binary.LittleEndian, playerPosition.PositionZ)
 		}
-		if playerPosition.PositionZ != 0 {
+		if playerPosition.PositionX != 0 {
 			buf.WriteByte('L')
 			buf.WriteByte('R')
-			binary.Write(buf, binary.LittleEndian, playerPosition.PositionZ)
+			binary.Write(buf, binary.LittleEndian, playerPosition.PositionX)
 		}
 		if playerPosition.PTAngle != 0 {
 			buf.WriteByte('P')
