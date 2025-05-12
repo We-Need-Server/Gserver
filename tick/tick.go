@@ -3,7 +3,7 @@ package tick
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game/player"
-	"WeNeedGameServer/internal"
+	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/network"
 	"WeNeedGameServer/packet/client"
@@ -67,7 +67,7 @@ func (gt *GameTick) Receive(senderName string, message interface{}) {
 			gt.iActorStatus(pkt)
 		case *client.TickRPacket:
 			gt.rActorStatus(pkt)
-		case *internal.SEQData:
+		case *internal_type.SEQData:
 			gt.updateUserSEQ(pkt)
 		}
 	} else if senderName == "actor" {
@@ -96,7 +96,7 @@ func (gt *GameTick) rActorStatus(packet *client.TickRPacket) {
 	}
 }
 
-func (gt *GameTick) updateUserSEQ(seqData *internal.SEQData) {
+func (gt *GameTick) updateUserSEQ(seqData *internal_type.SEQData) {
 	if val, exists := gt.ActorStatusMap[seqData.QPort]; exists && val.UserSEQ+1 == seqData.SEQ {
 		gt.ActorStatusMap[seqData.QPort].UserSEQ = seqData.SEQ
 	}
@@ -122,6 +122,9 @@ func (gt *GameTick) StopGameLoop() {
 
 func (gt *GameTick) processTick() {
 
+	// 최종적으로 게임 객체의 Delta를 업데이트 하고.
+	// 각 유저의 상태에 따라 틱 패킷을 다르게 만들어 보내는 로직을 구현하면 됨.
+	// 추가적으로 60틱 저장 로직도 구현해야 함
 	gameState := gt.Game.GetGameState()
 	tickPacket := server.TickPacket{
 		TickNumber:         gt.TickTime,

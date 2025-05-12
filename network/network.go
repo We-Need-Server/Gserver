@@ -3,7 +3,7 @@ package network
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game/actor"
-	"WeNeedGameServer/internal"
+	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/packet"
 	"log"
@@ -89,7 +89,7 @@ func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.
 func (n *Network) throwData(data packet.PacketI, userAddr *net.UDPAddr) {
 	if n.ConnTable[data.GetQPort()] != nil || n.NextSEQTable[data.GetQPort()] == data.GetSEQ() {
 		n.NextSEQTable[data.GetQPort()] += 1
-		n.Send("tick", internal.NewSEQData(data.GetQPort(), data.GetSEQ()))
+		n.Send("tick", internal_type.NewSEQData(data.GetQPort(), data.GetSEQ()))
 		n.ChanTable[data.GetQPort()] <- data
 	}
 }
