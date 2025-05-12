@@ -14,7 +14,7 @@ import (
 )
 
 type GameTick struct {
-	TickTime        int
+	TickTime        uint32
 	Ticker          *time.Ticker
 	Game            *game.Game
 	networkInstance *network.Network
@@ -27,14 +27,14 @@ type GameTick struct {
 type ActorStatus struct {
 	Flags       uint8
 	UserSEQ     uint32
-	RTickNumber int
+	RTickNumber uint32
 }
 
 func newActorStatus() *ActorStatus {
 	return &ActorStatus{}
 }
 
-func NewGameTick(tickTime int, game *game.Game, networkInstance *network.Network) *GameTick {
+func NewGameTick(tickTime uint32, game *game.Game, networkInstance *network.Network) *GameTick {
 	ticks := [60]map[uint32]player.PlayerPosition{}
 	for i := range ticks {
 		ticks[i] = make(map[uint32]player.PlayerPosition)
