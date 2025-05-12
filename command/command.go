@@ -2,7 +2,7 @@ package command
 
 const (
 	FB string = "FB"
-	RL        = "RL"
+	LR        = "LR"
 	YW        = "YW"
 	PT        = "PT"
 	//JP  	  = "JP"
