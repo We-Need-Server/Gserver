@@ -81,6 +81,6 @@ func (p *Player) ReflectTransferPT() {
 	p.PTDelta = 0
 }
 
-func (p *Player) turnJP(jp bool) {
+func (p *Player) TurnJP(jp bool) {
 	p.JP = jp
 }

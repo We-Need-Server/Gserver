@@ -84,6 +84,12 @@ func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int)
 			a.actorPlayer.TransferPT(ptDelta)
 			i += 6
 			break
+		case command.JP:
+			jp := util.ByteToBool(payload[i+2])
+			fmt.Println(jp)
+			a.actorPlayer.TurnJP(jp)
+			i += 3
+			break
 		}
 	}
 }

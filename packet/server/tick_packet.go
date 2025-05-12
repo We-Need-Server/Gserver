@@ -2,6 +2,7 @@ package server
 
 import (
 	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/util"
 	"bytes"
 	"encoding/binary"
 	"fmt"
@@ -51,7 +52,7 @@ func (p *TickPacket) Serialize() []byte {
 		}
 		buf.WriteByte('J')
 		buf.WriteByte('P')
-		binary.Write(buf, binary.LittleEndian, playerPosition.JP)
+		buf.WriteByte(util.BoolToByte(playerPosition.JP))
 	}
 	fmt.Println(buf.Bytes())
 	return buf.Bytes()

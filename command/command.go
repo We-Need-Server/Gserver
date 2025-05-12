@@ -5,5 +5,5 @@ const (
 	LR        = "LR"
 	YW        = "YW"
 	PT        = "PT"
-	//JP  	  = "JP"
+	JP        = "JP"
 )
