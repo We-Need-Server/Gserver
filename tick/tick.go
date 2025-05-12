@@ -3,6 +3,7 @@ package tick
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/internal"
 	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/network"
 	"WeNeedGameServer/packet/client"
@@ -66,9 +67,8 @@ func (gt *GameTick) Receive(senderName string, message interface{}) {
 			gt.iActorStatus(pkt)
 		case *client.TickRPacket:
 			gt.rActorStatus(pkt)
-			// 네트워크 객체에서 받은 시퀀스 넘버에 대해서 갱신해야 되는 케이스를 추가해야 한다.
-		case uint32:
-
+		case *internal.SEQData:
+			gt.updateUserSEQ(pkt)
 		}
 	} else if senderName == "actor" {
 		if val, ok := message.(uint32); ok {
@@ -93,6 +93,12 @@ func (gt *GameTick) rActorStatus(packet *client.TickRPacket) {
 	if _, exists := gt.ActorStatusMap[packet.GetQPort()]; exists {
 		gt.ActorStatusMap[packet.GetQPort()].Flags |= 1 << 6
 		gt.ActorStatusMap[packet.GetQPort()].RTickNumber = packet.RTickNumber
+	}
+}
+
+func (gt *GameTick) updateUserSEQ(seqData *internal.SEQData) {
+	if val, exists := gt.ActorStatusMap[seqData.QPort]; exists && val.UserSEQ+1 == seqData.SEQ {
+		gt.ActorStatusMap[seqData.QPort].UserSEQ = seqData.SEQ
 	}
 }
 
