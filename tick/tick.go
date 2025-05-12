@@ -26,6 +26,7 @@ type GameTick struct {
 
 type ActorStatus struct {
 	Flags       uint8
+	UserSEQ     uint32
 	RTickNumber uint32
 }
 
@@ -65,6 +66,9 @@ func (gt *GameTick) Receive(senderName string, message interface{}) {
 			gt.iActorStatus(pkt)
 		case *client.TickRPacket:
 			gt.rActorStatus(pkt)
+			// 네트워크 객체에서 받은 시퀀스 넘버에 대해서 갱신해야 되는 케이스를 추가해야 한다.
+		case uint32:
+
 		}
 	} else if senderName == "actor" {
 		if val, ok := message.(uint32); ok {
