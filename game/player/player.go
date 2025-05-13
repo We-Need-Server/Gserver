@@ -1,6 +1,8 @@
 package player
 
 type Player struct {
+	HP        int16
+	HPDelta   int16
 	PositionX float32
 	XDelta    float32
 	PositionZ float32
@@ -10,22 +12,25 @@ type Player struct {
 	PTAngle   float32
 	PTDelta   float32
 	JP        bool
+	IsAlive   bool
 }
 
 type PlayerPosition struct {
-	PositionX float32 `json:"positionX"`
-	PositionZ float32 `json:"positionZ"`
-	YawAngle  float32 `json:"yaw"`
-	PTAngle   float32 `json:"pitch"`
+	HP        int16
+	PositionX float32
+	PositionZ float32
+	YawAngle  float32
+	PTAngle   float32
 	JP        bool
 }
 
 func NewPlayer() *Player {
-	return &Player{}
+	return &Player{IsAlive: true}
 }
 
-func NewPlayerPosition(positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool) PlayerPosition {
+func NewPlayerPosition(hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool) PlayerPosition {
 	return PlayerPosition{
+		HP:        hp,
 		PositionX: positionX,
 		PositionZ: positionZ,
 		YawAngle:  yawAngle,
@@ -83,4 +88,16 @@ func (p *Player) ReflectTransferPT() {
 
 func (p *Player) TurnJP(jp bool) {
 	p.JP = jp
+}
+
+func (p *Player) DamageHP(hpDelta int16) {
+	p.HPDelta += hpDelta
+}
+
+func (p *Player) ReflectDamageHP() {
+	p.HP -= p.HPDelta
+	if p.HP <= 0 {
+		p.IsAlive = false
+	}
+	p.HPDelta = 0
 }

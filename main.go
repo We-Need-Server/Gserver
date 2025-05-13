@@ -4,9 +4,12 @@ import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/network"
+	"WeNeedGameServer/register"
 	"WeNeedGameServer/tick"
 	"log"
 )
+
+var PacketRegisterInstance = make(register.PacketRegister)
 
 func main() {
 	mediatorInstance := mediator.NewMediator()
