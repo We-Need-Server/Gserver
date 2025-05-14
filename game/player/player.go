@@ -1,18 +1,18 @@
 package player
 
 type Player struct {
-	HP                  int16
-	HPDelta             int16
-	PositionX           float32
-	XDelta              float32
-	PositionZ           float32
-	ZDelta              float32
-	YawAngle            float32
-	YawDelta            float32
-	PTAngle             float32
-	PTDelta             float32
-	JP                  bool
-	IsAlive             bool
+	HP        int16
+	HPDelta   int16
+	PositionX float32
+	XDelta    float32
+	PositionZ float32
+	ZDelta    float32
+	YawAngle  float32
+	YawDelta  float32
+	PTAngle   float32
+	PTDelta   float32
+	JP        bool
+
 	IsShoot             bool
 	ShootHitInformation map[uint32]int16
 }
@@ -33,7 +33,7 @@ type PlayerPosition struct {
 }
 
 func NewPlayer() *Player {
-	return &Player{HP: 100, IsAlive: true, ShootHitInformation: make(map[uint32]int16)}
+	return &Player{HP: 100, ShootHitInformation: make(map[uint32]int16)}
 }
 
 func NewPlayerPosition(hp *int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool, isShoot bool) PlayerPosition {
@@ -107,9 +107,9 @@ func (p *Player) DamageHP(hpDelta int16) {
 
 func (p *Player) ReflectDamageHP() {
 	p.HP -= p.HPDelta
-	if p.HP <= 0 {
-		p.IsAlive = false
-	}
+	//if p.HP <= 0 {
+	//	p.IsAlive = false
+	//}
 	p.HPDelta = 0
 }
 
