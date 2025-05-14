@@ -57,6 +57,8 @@ func (p *Player) ReflectDeltaValues() {
 	p.ReflectMoveSide()
 	p.ReflectTransferPT()
 	p.ReflectTransferYaw()
+	p.ReflectHitInformation()
+	p.ReflectIsShoot()
 }
 
 func (p *Player) MoveForward(ZDelta float32) {

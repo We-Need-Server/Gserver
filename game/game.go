@@ -23,7 +23,6 @@ func (g *Game) GetGameDeltaState() map[uint32]player.PlayerPosition {
 		for key, val := range p.ShootHitInformation {
 			g.Players[key].HPDelta += val
 		}
-		p.ReflectHitInformation()
 		gameDeltaState[qPort] = player.NewPlayerPosition(&p.HPDelta, p.XDelta, p.ZDelta, p.YawDelta, p.PTDelta, p.JP, p.IsShoot)
 		p.ReflectDeltaValues()
 	}
