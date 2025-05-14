@@ -87,18 +87,20 @@ func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int)
 			break
 		case command.JP:
 			jp := util.ByteToBool(payload[i+2])
-			fmt.Println(jp)
 			a.actorPlayer.TurnJP(jp)
+			fmt.Println("JP", jp)
 			i += 3
 			break
 		case command.SH:
 			a.actorPlayer.TurnIsShoot()
+			fmt.Println("SH")
 			i += 2
 			break
 		case command.HT:
 			userQPort := util.ConvertBinaryToUint32(payload[i+2 : i+6])
 			hpDelta := util.ConvertBinaryToInt16(payload[i+6 : i+8])
 			a.actorPlayer.StoreHitInformation(userQPort, hpDelta)
+			fmt.Println("HT", userQPort, hpDelta)
 			i += 8
 			break
 		}

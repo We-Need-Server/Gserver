@@ -34,6 +34,7 @@ func (p *TickPacket) Serialize() []byte {
 			buf.WriteByte('H')
 			buf.WriteByte('T')
 			binary.Write(buf, binary.LittleEndian, *playerPosition.HP)
+			fmt.Println("HT-Tick", *playerPosition.HP)
 		}
 		if playerPosition.PositionZ != 0 {
 			buf.WriteByte('F')
@@ -58,10 +59,11 @@ func (p *TickPacket) Serialize() []byte {
 		buf.WriteByte('J')
 		buf.WriteByte('P')
 		buf.WriteByte(util.BoolToByte(playerPosition.JP))
-		
+
 		if playerPosition.IsShoot {
 			buf.WriteByte('S')
 			buf.WriteByte('H')
+			fmt.Println("SH-Tick")
 		}
 	}
 	fmt.Println(buf.Bytes())
