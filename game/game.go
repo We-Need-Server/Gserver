@@ -41,6 +41,6 @@ func (g *Game) GetGameState() map[uint32]player.PlayerPosition {
 
 func (g *Game) ResetHPDelta() {
 	for _, p := range g.Players {
-		p.HPDelta = 0
+		p.ReflectDamageHP()
 	}
 }
