@@ -90,6 +90,16 @@ func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int)
 			a.actorPlayer.TurnJP(jp)
 			i += 3
 			break
+		case command.SH:
+			a.actorPlayer.TurnIsShoot()
+			i += 2
+			break
+		case command.HT:
+			userQPort := util.ConvertBinaryToUint32(payload[i+2 : i+6])
+			hpDelta := util.ConvertBinaryToInt16(payload[i+6 : i+10])
+			a.actorPlayer.StoreHitInformation(userQPort, hpDelta)
+			i += 10
+			break
 		}
 	}
 }

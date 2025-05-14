@@ -1,41 +1,52 @@
 package player
 
 type Player struct {
-	HP        int16
-	HPDelta   int16
-	PositionX float32
-	XDelta    float32
-	PositionZ float32
-	ZDelta    float32
-	YawAngle  float32
-	YawDelta  float32
-	PTAngle   float32
-	PTDelta   float32
-	JP        bool
-	IsAlive   bool
+	HP                  int16
+	HPDelta             int16
+	PositionX           float32
+	XDelta              float32
+	PositionZ           float32
+	ZDelta              float32
+	YawAngle            float32
+	YawDelta            float32
+	PTAngle             float32
+	PTDelta             float32
+	JP                  bool
+	IsAlive             bool
+	IsShoot             bool
+	ShootHitInformation map[uint32]HitInformationField
+}
+
+type HitInformationField struct {
+	HP      int16
+	HPDelta int16
 }
 
 type PlayerPosition struct {
-	HP        int16
-	PositionX float32
-	PositionZ float32
-	YawAngle  float32
-	PTAngle   float32
-	JP        bool
+	HP                  int16
+	PositionX           float32
+	PositionZ           float32
+	YawAngle            float32
+	PTAngle             float32
+	JP                  bool
+	IsShoot             bool
+	ShootHitInformation *map[uint32]HitInformationField
 }
 
 func NewPlayer() *Player {
-	return &Player{IsAlive: true}
+	return &Player{HP: 100, IsAlive: true, ShootHitInformation: make(map[uint32]HitInformationField)}
 }
 
-func NewPlayerPosition(hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool) PlayerPosition {
+func NewPlayerPosition(hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool, isShoot bool, shootHitInformation *map[uint32]HitInformationField) PlayerPosition {
 	return PlayerPosition{
-		HP:        hp,
-		PositionX: positionX,
-		PositionZ: positionZ,
-		YawAngle:  yawAngle,
-		PTAngle:   ptAngle,
-		JP:        JP,
+		HP:                  hp,
+		PositionX:           positionX,
+		PositionZ:           positionZ,
+		YawAngle:            yawAngle,
+		PTAngle:             ptAngle,
+		JP:                  JP,
+		IsShoot:             isShoot,
+		ShootHitInformation: shootHitInformation,
 	}
 }
 
@@ -100,4 +111,29 @@ func (p *Player) ReflectDamageHP() {
 		p.IsAlive = false
 	}
 	p.HPDelta = 0
+}
+
+func (p *Player) TurnIsShoot() {
+	p.IsShoot = true
+}
+
+func (p *Player) ReflectIsShoot() {
+	p.IsShoot = false
+}
+
+func (p *Player) StoreHitInformation(qPort uint32, hpDelta int16) {
+	// 키가 존재하는지 확인
+	if field, exists := p.ShootHitInformation[qPort]; exists {
+		field.HPDelta += hpDelta
+		p.ShootHitInformation[qPort] = field
+	} else {
+		p.ShootHitInformation[qPort] = HitInformationField{HPDelta: hpDelta}
+	}
+}
+
+func (p *Player) ReflectHitInformation() {
+	for _, field := range p.ShootHitInformation {
+		field.HP += field.HPDelta
+		field.HPDelta = 0
+	}
 }
