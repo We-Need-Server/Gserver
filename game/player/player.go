@@ -14,7 +14,7 @@ type Player struct {
 	JP                  bool
 	IsAlive             bool
 	IsShoot             bool
-	ShootHitInformation map[uint32]HitInformationField
+	ShootHitInformation map[uint32]int16
 }
 
 type HitInformationField struct {
@@ -23,30 +23,28 @@ type HitInformationField struct {
 }
 
 type PlayerPosition struct {
-	HP                  int16
-	PositionX           float32
-	PositionZ           float32
-	YawAngle            float32
-	PTAngle             float32
-	JP                  bool
-	IsShoot             bool
-	ShootHitInformation *map[uint32]HitInformationField
+	HP        *int16
+	PositionX float32
+	PositionZ float32
+	YawAngle  float32
+	PTAngle   float32
+	JP        bool
+	IsShoot   bool
 }
 
 func NewPlayer() *Player {
-	return &Player{HP: 100, IsAlive: true, ShootHitInformation: make(map[uint32]HitInformationField)}
+	return &Player{HP: 100, IsAlive: true, ShootHitInformation: make(map[uint32]int16)}
 }
 
-func NewPlayerPosition(hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool, isShoot bool, shootHitInformation *map[uint32]HitInformationField) PlayerPosition {
+func NewPlayerPosition(hp *int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool, isShoot bool) PlayerPosition {
 	return PlayerPosition{
-		HP:                  hp,
-		PositionX:           positionX,
-		PositionZ:           positionZ,
-		YawAngle:            yawAngle,
-		PTAngle:             ptAngle,
-		JP:                  JP,
-		IsShoot:             isShoot,
-		ShootHitInformation: shootHitInformation,
+		HP:        hp,
+		PositionX: positionX,
+		PositionZ: positionZ,
+		YawAngle:  yawAngle,
+		PTAngle:   ptAngle,
+		JP:        JP,
+		IsShoot:   isShoot,
 	}
 }
 
@@ -123,17 +121,16 @@ func (p *Player) ReflectIsShoot() {
 
 func (p *Player) StoreHitInformation(qPort uint32, hpDelta int16) {
 	// 키가 존재하는지 확인
-	if field, exists := p.ShootHitInformation[qPort]; exists {
-		field.HPDelta += hpDelta
-		p.ShootHitInformation[qPort] = field
-	} else {
-		p.ShootHitInformation[qPort] = HitInformationField{HPDelta: hpDelta}
-	}
+	p.ShootHitInformation[qPort] += hpDelta
+	//if _, exists := p.ShootHitInformation[qPort]; exists {
+	//
+	//} else {
+	//	p.ShootHitInformation[qPort] = HitInformationField{HPDelta: hpDelta}
+	//}
 }
 
 func (p *Player) ReflectHitInformation() {
-	for _, field := range p.ShootHitInformation {
-		field.HP += field.HPDelta
-		field.HPDelta = 0
+	for key, _ := range p.ShootHitInformation {
+		p.ShootHitInformation[key] = 0
 	}
 }
