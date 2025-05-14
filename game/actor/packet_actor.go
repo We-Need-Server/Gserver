@@ -62,7 +62,7 @@ func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int)
 		switch payloadCommand {
 		case command.FB:
 			zDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
-			fmt.Println(zDelta)
+			fmt.Println("FB", zDelta)
 			a.actorPlayer.MoveForward(zDelta)
 			i += 6
 			break
@@ -70,18 +70,19 @@ func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int)
 			xDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
 			fmt.Println(xDelta)
 			a.actorPlayer.MoveSide(xDelta)
+			fmt.Println("LB", xDelta)
 			i += 6
 			break
 		case command.YW:
 			yawDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
-			fmt.Println(yawDelta)
 			a.actorPlayer.TransferYaw(yawDelta)
+			fmt.Println("YW", yawDelta)
 			i += 6
 			break
 		case command.PT:
 			ptDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
-			fmt.Println(ptDelta)
 			a.actorPlayer.TransferPT(ptDelta)
+			fmt.Println("PT", ptDelta)
 			i += 6
 			break
 		case command.JP:
@@ -96,9 +97,9 @@ func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int)
 			break
 		case command.HT:
 			userQPort := util.ConvertBinaryToUint32(payload[i+2 : i+6])
-			hpDelta := util.ConvertBinaryToInt16(payload[i+6 : i+10])
+			hpDelta := util.ConvertBinaryToInt16(payload[i+6 : i+8])
 			a.actorPlayer.StoreHitInformation(userQPort, hpDelta)
-			i += 10
+			i += 8
 			break
 		}
 	}

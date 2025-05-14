@@ -58,6 +58,7 @@ func (p *TickPacket) Serialize() []byte {
 		buf.WriteByte('J')
 		buf.WriteByte('P')
 		buf.WriteByte(util.BoolToByte(playerPosition.JP))
+		
 		if playerPosition.IsShoot {
 			buf.WriteByte('S')
 			buf.WriteByte('H')
