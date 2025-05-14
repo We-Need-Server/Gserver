@@ -2,6 +2,7 @@ package game
 
 import (
 	"WeNeedGameServer/game/player"
+	"fmt"
 )
 
 type Game struct {
@@ -24,6 +25,7 @@ func (g *Game) GetGameDeltaState() map[uint32]player.PlayerPosition {
 			g.Players[key].HPDelta += val
 		}
 		gameDeltaState[qPort] = player.NewPlayerPosition(&p.HPDelta, p.XDelta, p.ZDelta, p.YawDelta, p.PTDelta, p.JP, p.IsShoot)
+		fmt.Println(*gameDeltaState[qPort].HP)
 		p.ReflectDeltaValues()
 	}
 	return gameDeltaState
