@@ -34,8 +34,13 @@ func (g *Game) GetGameDeltaState() map[uint32]player.PlayerPosition {
 func (g *Game) GetGameState() map[uint32]player.PlayerPosition {
 	gameState := make(map[uint32]player.PlayerPosition)
 	for qPort, p := range g.Players {
-		p.ReflectDamageHP()
 		gameState[qPort] = player.NewPlayerPosition(&p.HP, p.PositionX, p.PositionZ, p.YawAngle, p.PTAngle, p.JP, p.IsShoot)
 	}
 	return gameState
+}
+
+func (g *Game) ResetHPDelta() {
+	for _, p := range g.Players {
+		p.HPDelta = 0
+	}
 }

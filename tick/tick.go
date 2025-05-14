@@ -166,7 +166,7 @@ func (gt *GameTick) processTick() {
 		actorStatus.Flags = 0
 		actorStatus.RTickNumber = 0
 	}
-
+	gt.Game.ResetHPDelta()
 	gt.TickTime += 1
 	fmt.Println("Game state sent to", len(gt.networkInstance.ConnTable), "clients")
 }
