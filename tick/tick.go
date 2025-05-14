@@ -41,7 +41,7 @@ func NewGameTick(tickTime uint32, game *game.Game, networkInstance *network.Netw
 	}
 	return &GameTick{
 		TickTime:        tickTime,
-		Ticker:          time.NewTicker(time.Second / time.Duration(5)),
+		Ticker:          time.NewTicker(time.Second / time.Duration(60)),
 		Game:            game,
 		networkInstance: networkInstance,
 		stopChan:        make(chan struct{}),
