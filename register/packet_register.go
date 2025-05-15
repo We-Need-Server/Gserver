@@ -7,8 +7,6 @@ import (
 
 type PacketRegister map[string]packet.PropertyMap
 
-var PacketRegisterInstance = make(PacketRegister)
-
 func (p PacketRegister) Add(s string, packetMap packet.PropertyMap) (string, error) {
 	if s == "" {
 		return "", fmt.Errorf("packet name cannot be empty")

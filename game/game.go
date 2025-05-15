@@ -2,6 +2,7 @@ package game
 
 import (
 	"WeNeedGameServer/game/player"
+	"fmt"
 )
 
 type Game struct {
@@ -20,7 +21,11 @@ func (g *Game) AddPlayer(QPort uint32) *player.Player {
 func (g *Game) GetGameDeltaState() map[uint32]player.PlayerPosition {
 	gameDeltaState := make(map[uint32]player.PlayerPosition)
 	for qPort, p := range g.Players {
-		gameDeltaState[qPort] = player.NewPlayerPosition(p.XDelta, p.ZDelta, p.YawDelta, p.PTDelta, p.JP)
+		for key, val := range p.ShootHitInformation {
+			g.Players[key].HPDelta += val
+		}
+		gameDeltaState[qPort] = player.NewPlayerPosition(&p.HPDelta, p.XDelta, p.ZDelta, p.YawDelta, p.PTDelta, p.JP, p.IsShoot)
+		fmt.Println(*gameDeltaState[qPort].HP)
 		p.ReflectDeltaValues()
 	}
 	return gameDeltaState
@@ -29,8 +34,13 @@ func (g *Game) GetGameDeltaState() map[uint32]player.PlayerPosition {
 func (g *Game) GetGameState() map[uint32]player.PlayerPosition {
 	gameState := make(map[uint32]player.PlayerPosition)
 	for qPort, p := range g.Players {
-		gameState[qPort] = player.NewPlayerPosition(p.PositionX, p.PositionZ, p.YawAngle, p.PTAngle, p.JP)
+		gameState[qPort] = player.NewPlayerPosition(&p.HP, p.PositionX, p.PositionZ, p.YawAngle, p.PTAngle, p.JP, p.IsShoot)
 	}
-
 	return gameState
+}
+
+func (g *Game) ResetHPDelta() {
+	for _, p := range g.Players {
+		p.ReflectDamageHP()
+	}
 }

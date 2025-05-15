@@ -13,6 +13,14 @@ func ConvertBinaryToUint32(b []byte) uint32 {
 	}
 }
 
+func ConvertBinaryToInt16(b []byte) int16 {
+	if runtime.GOARCH == "arm64" {
+		return int16(binary.BigEndian.Uint16(b))
+	} else {
+		return int16(binary.LittleEndian.Uint16(b))
+	}
+}
+
 func ByteToBool(b byte) bool {
 	return b != 0
 }

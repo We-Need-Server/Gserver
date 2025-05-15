@@ -1,6 +1,8 @@
 package player
 
 type Player struct {
+	HP        int16
+	HPDelta   int16
 	PositionX float32
 	XDelta    float32
 	PositionZ float32
@@ -10,27 +12,39 @@ type Player struct {
 	PTAngle   float32
 	PTDelta   float32
 	JP        bool
+
+	IsShoot             bool
+	ShootHitInformation map[uint32]int16
+}
+
+type HitInformationField struct {
+	HP      int16
+	HPDelta int16
 }
 
 type PlayerPosition struct {
-	PositionX float32 `json:"positionX"`
-	PositionZ float32 `json:"positionZ"`
-	YawAngle  float32 `json:"yaw"`
-	PTAngle   float32 `json:"pitch"`
+	HP        *int16
+	PositionX float32
+	PositionZ float32
+	YawAngle  float32
+	PTAngle   float32
 	JP        bool
+	IsShoot   bool
 }
 
 func NewPlayer() *Player {
-	return &Player{}
+	return &Player{HP: 100, ShootHitInformation: make(map[uint32]int16)}
 }
 
-func NewPlayerPosition(positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool) PlayerPosition {
+func NewPlayerPosition(hp *int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool, isShoot bool) PlayerPosition {
 	return PlayerPosition{
+		HP:        hp,
 		PositionX: positionX,
 		PositionZ: positionZ,
 		YawAngle:  yawAngle,
 		PTAngle:   ptAngle,
 		JP:        JP,
+		IsShoot:   isShoot,
 	}
 }
 
@@ -43,6 +57,8 @@ func (p *Player) ReflectDeltaValues() {
 	p.ReflectMoveSide()
 	p.ReflectTransferPT()
 	p.ReflectTransferYaw()
+	p.ReflectHitInformation()
+	p.ReflectIsShoot()
 }
 
 func (p *Player) MoveForward(ZDelta float32) {
@@ -83,4 +99,40 @@ func (p *Player) ReflectTransferPT() {
 
 func (p *Player) TurnJP(jp bool) {
 	p.JP = jp
+}
+
+func (p *Player) DamageHP(hpDelta int16) {
+	p.HPDelta += hpDelta
+}
+
+func (p *Player) ReflectDamageHP() {
+	p.HP -= p.HPDelta
+	//if p.HP <= 0 {
+	//	p.IsAlive = false
+	//}
+	p.HPDelta = 0
+}
+
+func (p *Player) TurnIsShoot() {
+	p.IsShoot = true
+}
+
+func (p *Player) ReflectIsShoot() {
+	p.IsShoot = false
+}
+
+func (p *Player) StoreHitInformation(qPort uint32, hpDelta int16) {
+	// 키가 존재하는지 확인
+	p.ShootHitInformation[qPort] += hpDelta
+	//if _, exists := p.ShootHitInformation[qPort]; exists {
+	//
+	//} else {
+	//	p.ShootHitInformation[qPort] = HitInformationField{HPDelta: hpDelta}
+	//}
+}
+
+func (p *Player) ReflectHitInformation() {
+	for key, _ := range p.ShootHitInformation {
+		p.ShootHitInformation[key] = 0
+	}
 }

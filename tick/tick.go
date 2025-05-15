@@ -41,7 +41,7 @@ func NewGameTick(tickTime uint32, game *game.Game, networkInstance *network.Netw
 	}
 	return &GameTick{
 		TickTime:        tickTime,
-		Ticker:          time.NewTicker(time.Second / time.Duration(10)),
+		Ticker:          time.NewTicker(time.Second / time.Duration(60)),
 		Game:            game,
 		networkInstance: networkInstance,
 		stopChan:        make(chan struct{}),
@@ -141,11 +141,13 @@ func (gt *GameTick) processTick() {
 					tickIdx := i % 60
 					for qPort, playerPosition := range gt.Ticks[tickIdx] {
 						if pos, exists := cloneGameDeltaState[qPort]; exists {
+							*pos.HP += *playerPosition.HP
 							pos.PositionX += playerPosition.PositionX
 							pos.PositionZ += playerPosition.PositionZ
 							pos.PTAngle += playerPosition.PTAngle
 							pos.YawAngle += playerPosition.YawAngle
 							pos.JP = playerPosition.JP
+							pos.IsShoot = playerPosition.IsShoot
 							cloneGameDeltaState[qPort] = pos
 						}
 					}
@@ -164,7 +166,7 @@ func (gt *GameTick) processTick() {
 		actorStatus.Flags = 0
 		actorStatus.RTickNumber = 0
 	}
-
+	gt.Game.ResetHPDelta()
 	gt.TickTime += 1
 	fmt.Println("Game state sent to", len(gt.networkInstance.ConnTable), "clients")
 }

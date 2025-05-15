@@ -6,4 +6,6 @@ const (
 	YW        = "YW"
 	PT        = "PT"
 	JP        = "JP"
+	SH        = "SH"
+	HT        = "HT"
 )
