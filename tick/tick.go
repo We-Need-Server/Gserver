@@ -121,6 +121,7 @@ func (gt *GameTick) StopGameLoop() {
 
 func (gt *GameTick) processTick() {
 	gameDeltaState := gt.Game.GetGameDeltaState()
+
 	gt.Ticks[gt.TickTime%60] = gameDeltaState
 	gameState := gt.Game.GetGameState()
 	for qPort, userAddr := range gt.networkInstance.ConnTable {
@@ -141,12 +142,12 @@ func (gt *GameTick) processTick() {
 					tickIdx := i % 60
 					for qPort, playerPosition := range gt.Ticks[tickIdx] {
 						if pos, exists := cloneGameDeltaState[qPort]; exists {
-							*pos.HP += *playerPosition.HP
+							*pos.Hp += *playerPosition.Hp
 							pos.PositionX += playerPosition.PositionX
 							pos.PositionZ += playerPosition.PositionZ
-							pos.PTAngle += playerPosition.PTAngle
+							pos.PtAngle += playerPosition.PtAngle
 							pos.YawAngle += playerPosition.YawAngle
-							pos.JP = playerPosition.JP
+							pos.Jp = playerPosition.Jp
 							pos.IsShoot = playerPosition.IsShoot
 							cloneGameDeltaState[qPort] = pos
 						}

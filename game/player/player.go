@@ -1,55 +1,59 @@
 package player
 
 type Player struct {
-	HP        int16
-	HPDelta   int16
-	PositionX float32
-	XDelta    float32
-	PositionZ float32
-	ZDelta    float32
-	YawAngle  float32
-	YawDelta  float32
-	PTAngle   float32
-	PTDelta   float32
-	JP        bool
-
-	IsShoot             bool
+	hp                  int16
+	hpDelta             int16
+	positionX           float32
+	xDelta              float32
+	positionZ           float32
+	zDelta              float32
+	yawAngle            float32
+	yawDelta            float32
+	ptAngle             float32
+	ptDelta             float32
+	jp                  bool
+	isAlive             bool
+	isShoot             bool
 	ShootHitInformation map[uint32]int16
 }
 
 type HitInformationField struct {
-	HP      int16
-	HPDelta int16
+	hp      int16
+	hpDelta int16
 }
 
 type PlayerPosition struct {
-	HP        *int16
+	Hp        *int16
 	PositionX float32
 	PositionZ float32
 	YawAngle  float32
-	PTAngle   float32
-	JP        bool
+	PtAngle   float32
+	Jp        bool
 	IsShoot   bool
 }
 
 func NewPlayer() *Player {
-	return &Player{HP: 100, ShootHitInformation: make(map[uint32]int16)}
+	return &Player{hp: 100, ShootHitInformation: make(map[uint32]int16)}
 }
 
-func NewPlayerPosition(hp *int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, JP bool, isShoot bool) PlayerPosition {
+func NewPlayerPosition(hp *int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool) PlayerPosition {
 	return PlayerPosition{
-		HP:        hp,
+		Hp:        hp,
 		PositionX: positionX,
 		PositionZ: positionZ,
 		YawAngle:  yawAngle,
-		PTAngle:   ptAngle,
-		JP:        JP,
+		PtAngle:   ptAngle,
+		Jp:        jp,
 		IsShoot:   isShoot,
 	}
 }
 
-func (p *Player) GetPlayerInfo() *Player {
-	return p
+func (p *Player) GetPlayerDeltaState() PlayerPosition {
+	return NewPlayerPosition(&p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
+}
+
+func (p *Player) GetPlayerState() PlayerPosition {
+	return NewPlayerPosition(&p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot)
 }
 
 func (p *Player) ReflectDeltaValues() {
@@ -61,64 +65,67 @@ func (p *Player) ReflectDeltaValues() {
 	p.ReflectIsShoot()
 }
 
-func (p *Player) MoveForward(ZDelta float32) {
-	p.ZDelta += ZDelta
+func (p *Player) MoveForward(zDelta float32) {
+	p.zDelta += zDelta
 }
 
 func (p *Player) ReflectMoveForward() {
-	p.PositionZ += p.ZDelta
-	p.ZDelta = 0
+	p.positionZ += p.zDelta
+	p.zDelta = 0
 }
 
-func (p *Player) MoveSide(XDelta float32) {
-	p.XDelta += XDelta
+func (p *Player) MoveSide(xDelta float32) {
+	p.xDelta += xDelta
 }
 
 func (p *Player) ReflectMoveSide() {
-	p.PositionX += p.XDelta
-	p.XDelta = 0
+	p.positionX += p.xDelta
+	p.xDelta = 0
 }
 
-func (p *Player) TransferYaw(YawDelta float32) {
-	p.YawDelta += YawDelta
+func (p *Player) TransferYaw(yawDelta float32) {
+	p.yawDelta += yawDelta
 }
 
 func (p *Player) ReflectTransferYaw() {
-	p.YawAngle += p.YawDelta
-	p.YawDelta = 0
+	p.yawAngle += p.yawDelta
+	p.yawDelta = 0
 }
 
-func (p *Player) TransferPT(PTDelta float32) {
-	p.PTDelta += PTDelta
+func (p *Player) TransferPT(ptDelta float32) {
+	p.ptDelta += ptDelta
 }
 
 func (p *Player) ReflectTransferPT() {
-	p.PTAngle += p.PTDelta
-	p.PTDelta = 0
+	p.ptAngle += p.ptDelta
+	p.ptDelta = 0
 }
 
 func (p *Player) TurnJP(jp bool) {
-	p.JP = jp
+	p.jp = jp
 }
 
 func (p *Player) DamageHP(hpDelta int16) {
-	p.HPDelta += hpDelta
+	p.hpDelta += hpDelta
 }
 
 func (p *Player) ReflectDamageHP() {
-	p.HP -= p.HPDelta
-	//if p.HP <= 0 {
-	//	p.IsAlive = false
-	//}
-	p.HPDelta = 0
+	p.hp -= p.hpDelta
+	if p.hp <= 0 {
+		p.isAlive = false
+	}
+	p.hpDelta = 0
 }
 
+// false
+// true
+
 func (p *Player) TurnIsShoot() {
-	p.IsShoot = true
+	p.isShoot = true
 }
 
 func (p *Player) ReflectIsShoot() {
-	p.IsShoot = false
+	p.isShoot = false
 }
 
 func (p *Player) StoreHitInformation(qPort uint32, hpDelta int16) {
@@ -136,3 +143,6 @@ func (p *Player) ReflectHitInformation() {
 		p.ShootHitInformation[key] = 0
 	}
 }
+
+// 이게 그러면 tick 패킷이 만들어질 때 다 락킹이 걸린다.
+// 락킹을 하고 싶지 않아
