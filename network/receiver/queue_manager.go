@@ -6,18 +6,18 @@ import (
 )
 
 type QueueManager struct {
-	QChan chan *packet.PacketI
-	queue *internal_type.Queue[*packet.PacketI]
+	QmChan chan *packet.PacketI
+	queue  *internal_type.Queue[*packet.PacketI]
 }
 
 func NewQueueManager(queue *internal_type.Queue[*packet.PacketI]) *QueueManager {
-	return &QueueManager{QChan: make(chan *packet.PacketI), queue: queue}
+	return &QueueManager{QmChan: make(chan *packet.PacketI), queue: queue}
 }
 
 func (qm *QueueManager) StartQueueManager() {
 	for {
 		select {
-		case p := <-qm.QChan:
+		case p := <-qm.QmChan:
 			// 채널에서 패킷을 받아서 큐에 추가
 			if p != nil {
 				qm.queue.Enqueue(p)

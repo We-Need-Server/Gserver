@@ -23,7 +23,7 @@ type HitInformationField struct {
 }
 
 type PlayerPosition struct {
-	Hp        *int16
+	Hp        int16
 	PositionX float32
 	PositionZ float32
 	YawAngle  float32
@@ -36,7 +36,7 @@ func NewPlayer() *Player {
 	return &Player{hp: 100, ShootHitInformation: make(map[uint32]int16)}
 }
 
-func NewPlayerPosition(hp *int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool) PlayerPosition {
+func NewPlayerPosition(hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool) PlayerPosition {
 	return PlayerPosition{
 		Hp:        hp,
 		PositionX: positionX,
@@ -49,11 +49,11 @@ func NewPlayerPosition(hp *int16, positionX float32, positionZ float32, yawAngle
 }
 
 func (p *Player) GetPlayerDeltaState() PlayerPosition {
-	return NewPlayerPosition(&p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
+	return NewPlayerPosition(p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
 }
 
 func (p *Player) GetPlayerState() PlayerPosition {
-	return NewPlayerPosition(&p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot)
+	return NewPlayerPosition(p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot)
 }
 
 func (p *Player) ReflectDeltaValues() {

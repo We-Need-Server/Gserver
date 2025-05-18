@@ -87,7 +87,7 @@ func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.
 //	return checkUser
 //}
 
-func (n *Network) throwData(data packet.PacketI, userAddr *net.UDPAddr) {
+func (n *Network) throwData(data packet.ClientPacketI, userAddr *net.UDPAddr) {
 	if n.ConnTable[data.GetQPort()] != nil || n.nextSEQTable[data.GetQPort()] == data.GetSEQ() {
 		n.nextSEQTable[data.GetQPort()] += 1
 		n.Send("tick", internal_type.NewSEQData(data.GetQPort(), data.GetSEQ()))

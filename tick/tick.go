@@ -142,7 +142,7 @@ func (gt *GameTick) processTick() {
 					tickIdx := i % 60
 					for qPort, playerPosition := range gt.Ticks[tickIdx] {
 						if pos, exists := cloneGameDeltaState[qPort]; exists {
-							*pos.Hp += *playerPosition.Hp
+							pos.Hp += playerPosition.Hp
 							pos.PositionX += playerPosition.PositionX
 							pos.PositionZ += playerPosition.PositionZ
 							pos.PtAngle += playerPosition.PtAngle

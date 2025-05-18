@@ -10,22 +10,24 @@ import (
 )
 
 type Network struct {
-	connTable  map[uint32]*net.UDPAddr
-	nQueue     *internal_type.Queue[*packet.PacketI]
-	ur         *receiver.Receiver
-	us         *sender.Sender
-	udpConn    *net.UDPConn
-	listenAddr string
+	connTable    map[uint32]*net.UDPAddr
+	nextSeqTable map[uint32]uint32
+	nQueue       *internal_type.Queue[*packet.PacketI]
+	ur           *receiver.Receiver
+	us           *sender.Sender
+	udpConn      *net.UDPConn
+	listenAddr   string
 }
 
 func NewNetwork(listenAddr string) *Network {
 	return &Network{
-		connTable:  make(map[uint32]*net.UDPAddr),
-		nQueue:     internal_type.NewQueue[*packet.PacketI](),
-		ur:         nil,
-		us:         nil,
-		udpConn:    nil,
-		listenAddr: listenAddr,
+		connTable:    make(map[uint32]*net.UDPAddr),
+		nextSeqTable: make(map[uint32]uint32),
+		nQueue:       internal_type.NewQueue[*packet.PacketI](),
+		ur:           nil,
+		us:           nil,
+		udpConn:      nil,
+		listenAddr:   listenAddr,
 	}
 }
 
@@ -39,7 +41,7 @@ func (n *Network) ReadyUDP() (*receiver.Receiver, *sender.Sender) {
 		log.Panicln("리슨 오류")
 	}
 	n.udpConn = ln
-	n.ur = receiver.NewReceiver(&n.connTable, n.nQueue, n.udpConn)
-	n.us = sender.NewSender(&n.connTable, n.nQueue, n.udpConn)
+	n.ur = receiver.NewReceiver(&n.connTable, &n.nextSeqTable, n.nQueue, n.udpConn)
+	n.us = sender.NewSender(&n.connTable, &n.nextSeqTable, n.nQueue, n.udpConn)
 	return n.ur, n.us
 }
