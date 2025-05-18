@@ -142,11 +142,11 @@ func (gt *GameTick) processTick() {
 		actorStatus := gt.actorStatusMap[qPort]
 		var tickPacket *server.TickPacket
 		if (actorStatus.Flags & 1 << 7) != 0 {
-			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort], actorStatus.Flags, gameState)
 		} else if (actorStatus.Flags & 1 << 6) != 0 {
 			restoreTickCount := gt.tickTime - actorStatus.RTickNumber
 			if restoreTickCount >= 60 {
-				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags&^(1<<6), gameState)
+				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort], actorStatus.Flags&^(1<<6), gameState)
 			} else {
 				cloneGameDeltaState := make(map[uint32]player.PlayerPosition)
 				for k, v := range *gt.playerPositionMap {
@@ -167,11 +167,11 @@ func (gt *GameTick) processTick() {
 						}
 					}
 				}
-				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort], actorStatus.Flags, gameState)
 			}
 		} else {
 			fmt.Println("tick packet", *((*gt).playerPositionMap))
-			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, *gt.playerPositionMap)
+			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort], actorStatus.Flags, *gt.playerPositionMap)
 		}
 
 		_, err := gt.us.SendUDPPacket(tickPacket.Serialize(), userAddr)
