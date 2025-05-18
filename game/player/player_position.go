@@ -30,7 +30,7 @@ func (p *PlayerPosition) CalculatePlayerPosition(calP *PlayerPosition) {
 	p.Hp += calP.Hp
 	p.PtAngle += calP.PtAngle
 	p.YawAngle += calP.YawAngle
-	p.IsShoot = p.IsShoot || calP.IsShoot
+	p.Jp = p.Jp || calP.Jp
 	p.IsShoot = p.IsShoot || calP.IsShoot
 	p.IsReload = p.IsReload || calP.IsReload
 }
