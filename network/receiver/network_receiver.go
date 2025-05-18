@@ -59,7 +59,11 @@ func (r *Receiver) throwData(data packet.ClientPacketI) {
 		(*r.nextSeqTable)[data.GetQPort()] += 1
 		fmt.Println("R 패킷 왔니")
 		fmt.Println(data.GetPacketKind())
-		r.chanTable[data.GetQPort()] <- data
+		if data.GetPacketKind() == 'N' {
+			r.chanTable[data.GetQPort()] <- data
+		} else {
+			*r.nChan <- data
+		}
 	}
 }
 
