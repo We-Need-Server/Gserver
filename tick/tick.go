@@ -159,7 +159,7 @@ func (gt *GameTick) processTick() {
 			tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
 		}
 
-		_, err := gt.networkInstance.Ln.WriteToUDP(tickPacket.Serialize(), userAddr)
+		_, err := gt.networkInstance.SendUDPPacket(tickPacket.Serialize(), userAddr)
 		if err != nil {
 			log.Println("Failed to send message:", err)
 		}
