@@ -5,7 +5,7 @@ import (
 	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/network/legacy"
 	"WeNeedGameServer/register"
-	"WeNeedGameServer/tick"
+	legacy2 "WeNeedGameServer/tick/legacy"
 	"log"
 )
 
@@ -19,7 +19,7 @@ func main() {
 		log.Panicln("메디에이터 등록 실패")
 	}
 	go networkInstance.Start()
-	gameTickInstance := tick.NewGameTick(0, gameInstance, networkInstance)
+	gameTickInstance := legacy2.NewGameTick(0, gameInstance, networkInstance)
 	if _, err := mediatorInstance.Register("tick", gameTickInstance); err != nil {
 		log.Panicln("메디에이터 등록 실패")
 	}
