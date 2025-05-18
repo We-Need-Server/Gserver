@@ -31,36 +31,36 @@ func (p *TickPacket) Serialize() []byte {
 		buf.WriteByte('I')
 		buf.WriteByte('D')
 		binary.Write(buf, binary.LittleEndian, qPort)
-		if playerPosition.Hp != 0 {
+		if (*playerPosition).Hp != 0 {
 			buf.WriteByte('H')
 			buf.WriteByte('T')
-			binary.Write(buf, binary.LittleEndian, playerPosition.Hp)
+			binary.Write(buf, binary.LittleEndian, (*playerPosition).Hp)
 		}
-		if playerPosition.PositionZ != 0 {
+		if (*playerPosition).PositionZ != 0 {
 			buf.WriteByte('F')
 			buf.WriteByte('B')
-			binary.Write(buf, binary.LittleEndian, playerPosition.PositionZ)
+			binary.Write(buf, binary.LittleEndian, (*playerPosition).PositionZ)
 		}
-		if playerPosition.PositionX != 0 {
+		if (*playerPosition).PositionX != 0 {
 			buf.WriteByte('L')
 			buf.WriteByte('R')
-			binary.Write(buf, binary.LittleEndian, playerPosition.PositionX)
+			binary.Write(buf, binary.LittleEndian, (*playerPosition).PositionX)
 		}
-		if playerPosition.PtAngle != 0 {
+		if (*playerPosition).PtAngle != 0 {
 			buf.WriteByte('P')
 			buf.WriteByte('T')
-			binary.Write(buf, binary.LittleEndian, playerPosition.PtAngle)
+			binary.Write(buf, binary.LittleEndian, (*playerPosition).PtAngle)
 		}
-		if playerPosition.YawAngle != 0 {
+		if (*playerPosition).YawAngle != 0 {
 			buf.WriteByte('Y')
 			buf.WriteByte('W')
-			binary.Write(buf, binary.LittleEndian, playerPosition.YawAngle)
+			binary.Write(buf, binary.LittleEndian, (*playerPosition).YawAngle)
 		}
 		buf.WriteByte('J')
 		buf.WriteByte('P')
-		buf.WriteByte(util.BoolToByte(playerPosition.Jp))
+		buf.WriteByte(util.BoolToByte((*playerPosition).Jp))
 
-		if playerPosition.IsShoot {
+		if (*playerPosition).IsShoot {
 			buf.WriteByte('S')
 			buf.WriteByte('H')
 			fmt.Println("SH-Tick")
