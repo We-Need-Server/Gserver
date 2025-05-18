@@ -5,7 +5,7 @@ import (
 	"WeNeedGameServer/game/player"
 	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/mediator"
-	"WeNeedGameServer/network"
+	"WeNeedGameServer/network/legacy"
 	"WeNeedGameServer/packet/client"
 	"WeNeedGameServer/packet/server"
 	"fmt"
@@ -17,7 +17,7 @@ type GameTick struct {
 	TickTime        uint32
 	Ticker          *time.Ticker
 	Game            *game.Game
-	networkInstance *network.Network
+	networkInstance *legacy.Network
 	stopChan        chan struct{}
 	Mediator        *mediator.Mediator
 	Ticks           [60]map[uint32]player.PlayerPosition
@@ -34,7 +34,7 @@ func newActorStatus() *ActorStatus {
 	return &ActorStatus{}
 }
 
-func NewGameTick(tickTime uint32, game *game.Game, networkInstance *network.Network) *GameTick {
+func NewGameTick(tickTime uint32, game *game.Game, networkInstance *legacy.Network) *GameTick {
 	ticks := [60]map[uint32]player.PlayerPosition{}
 	for i := range ticks {
 		ticks[i] = make(map[uint32]player.PlayerPosition)

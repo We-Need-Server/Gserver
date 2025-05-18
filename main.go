@@ -3,7 +3,7 @@ package main
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/mediator"
-	"WeNeedGameServer/network"
+	"WeNeedGameServer/network/legacy"
 	"WeNeedGameServer/register"
 	"WeNeedGameServer/tick"
 	"log"
@@ -14,7 +14,7 @@ var PacketRegisterInstance = make(register.PacketRegister)
 func main() {
 	mediatorInstance := mediator.NewMediator()
 	gameInstance := game.NewGame()
-	networkInstance := network.NewNetwork(gameInstance)
+	networkInstance := legacy.NewNetwork(gameInstance)
 	if _, err := mediatorInstance.Register("network", networkInstance); err != nil {
 		log.Panicln("메디에이터 등록 실패")
 	}
