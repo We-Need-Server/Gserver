@@ -146,11 +146,12 @@ func (gt *GameTick) processTick() {
 		} else if (actorStatus.Flags & 1 << 6) != 0 {
 			restoreTickCount := gt.tickTime - actorStatus.RTickNumber
 			if restoreTickCount >= 60 {
-				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort]-1, actorStatus.Flags&^(1<<6), gameState)
+				actorStatus.Flags = (actorStatus.Flags &^ (1 << 6)) | (1 << 7)
+				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
 			} else {
-				cloneGameDeltaState := make(map[uint32]player.PlayerPosition)
+				cloneGameDeltaState := make(map[uint32]*player.PlayerPosition)
 				for k, v := range *gt.playerPositionMap {
-					cloneGameDeltaState[k] = *v
+					cloneGameDeltaState[k] = v
 				}
 				for i := actorStatus.RTickNumber; i < gt.tickTime; i++ {
 					tickIdx := i % 60
@@ -167,7 +168,7 @@ func (gt *GameTick) processTick() {
 						}
 					}
 				}
-				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
+				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
 			}
 		} else {
 			fmt.Println("tick packet", *((*gt).playerPositionMap))
