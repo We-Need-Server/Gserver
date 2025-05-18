@@ -1,7 +1,6 @@
 package sender
 
 import (
-	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/packet"
 	"net"
 )
@@ -9,15 +8,15 @@ import (
 type Sender struct {
 	connTable    *map[uint32]*net.UDPAddr
 	nextSeqTable *map[uint32]uint32
-	nQueue       *internal_type.Queue[packet.PacketI]
+	nChan        *chan packet.PacketI
 	udpConn      *net.UDPConn
 }
 
-func NewSender(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nQueue *internal_type.Queue[packet.PacketI], udpConn *net.UDPConn) *Sender {
+func NewSender(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nChan *chan packet.PacketI, udpConn *net.UDPConn) *Sender {
 	return &Sender{
 		connTable:    connTable,
 		nextSeqTable: nextSeqTable,
-		nQueue:       nQueue,
+		nChan:        nChan,
 		udpConn:      udpConn,
 	}
 }

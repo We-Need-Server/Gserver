@@ -1,7 +1,6 @@
 package receiver
 
 import (
-	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/network/actor"
 	"WeNeedGameServer/packet"
 	"log"
@@ -13,25 +12,25 @@ type Receiver struct {
 	connTable         *map[uint32]*net.UDPAddr
 	networkActorTable map[uint32]*actor.NetworkActor
 	nextSeqTable      *map[uint32]uint32
-	nQueue            *internal_type.Queue[packet.PacketI]
-	nQueueManager     *QueueManager
+	nChan             *chan packet.PacketI
+	nChanManager      *ChanManager
 	udpConn           *net.UDPConn
 }
 
-func NewReceiver(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nQueue *internal_type.Queue[packet.PacketI], udpConn *net.UDPConn) *Receiver {
+func NewReceiver(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nChan *chan packet.PacketI, udpConn *net.UDPConn) *Receiver {
 	return &Receiver{
 		chanTable:         make(map[uint32]chan packet.PacketI),
 		connTable:         connTable,
 		networkActorTable: make(map[uint32]*actor.NetworkActor),
 		nextSeqTable:      nextSeqTable,
-		nQueue:            nQueue,
-		nQueueManager:     NewQueueManager(nQueue),
+		nChan:             nChan,
+		nChanManager:      NewChanManager(nChan),
 		udpConn:           udpConn,
 	}
 }
 
 func (r *Receiver) StartUDP() {
-	go r.nQueueManager.StartQueueManager()
+	go r.nChanManager.StartChanManager()
 	readBuffer := make([]byte, 2048)
 	for {
 		readCount, addr, err := r.udpConn.ReadFromUDP(readBuffer)
@@ -65,7 +64,7 @@ func (r *Receiver) tempHandleNewConnection(qPort uint32, userAddr *net.UDPAddr) 
 	r.chanTable[qPort] = make(chan packet.PacketI)
 	(*r.connTable)[qPort] = userAddr
 	(*r.nextSeqTable)[qPort] = 1
-	networkActor := actor.NewNetworkActor(qPort, userAddr, r.chanTable[qPort], &r.nQueueManager.QmChan)
+	networkActor := actor.NewNetworkActor(qPort, userAddr, r.chanTable[qPort], &r.nChanManager.CmChan)
 	r.networkActorTable[qPort] = networkActor
 	go r.networkActorTable[qPort].ProcessLoopPacket()
 }

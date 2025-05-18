@@ -31,10 +31,10 @@ func (p *TickPacket) Serialize() []byte {
 		buf.WriteByte('I')
 		buf.WriteByte('D')
 		binary.Write(buf, binary.LittleEndian, qPort)
-		if *playerPosition.Hp != 0 {
+		if playerPosition.Hp != 0 {
 			buf.WriteByte('H')
 			buf.WriteByte('T')
-			binary.Write(buf, binary.LittleEndian, *playerPosition.Hp)
+			binary.Write(buf, binary.LittleEndian, playerPosition.Hp)
 		}
 		if playerPosition.PositionZ != 0 {
 			buf.WriteByte('F')

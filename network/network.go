@@ -1,7 +1,6 @@
 package network
 
 import (
-	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/network/receiver"
 	"WeNeedGameServer/network/sender"
 	"WeNeedGameServer/packet"
@@ -12,7 +11,7 @@ import (
 type Network struct {
 	connTable    map[uint32]*net.UDPAddr
 	nextSeqTable map[uint32]uint32
-	nQueue       *internal_type.Queue[packet.PacketI]
+	nChan        chan packet.PacketI
 	ur           *receiver.Receiver
 	us           *sender.Sender
 	udpConn      *net.UDPConn
@@ -23,7 +22,7 @@ func NewNetwork(listenAddr string) *Network {
 	return &Network{
 		connTable:    make(map[uint32]*net.UDPAddr),
 		nextSeqTable: make(map[uint32]uint32),
-		nQueue:       internal_type.NewQueue[packet.PacketI](),
+		nChan:        make(chan packet.PacketI),
 		ur:           nil,
 		us:           nil,
 		udpConn:      nil,
@@ -41,7 +40,7 @@ func (n *Network) ReadyUDP() (*receiver.Receiver, *sender.Sender) {
 		log.Panicln("리슨 오류")
 	}
 	n.udpConn = ln
-	n.ur = receiver.NewReceiver(&n.connTable, &n.nextSeqTable, n.nQueue, n.udpConn)
-	n.us = sender.NewSender(&n.connTable, &n.nextSeqTable, n.nQueue, n.udpConn)
+	n.ur = receiver.NewReceiver(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
+	n.us = sender.NewSender(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
 	return n.ur, n.us
 }
