@@ -80,9 +80,9 @@ func (na *NetworkActor) processCommandPayload(payload []byte, payLoadEndpoint in
 			i += 6
 			break
 		case command.JP:
-			jp := util.ByteToBool(payload[i+2])
+			//jp := util.ByteToBool(payload[i+2])
 			//a.actorPlayer.TurnJP(jp)
-			fmt.Println("JP", jp)
+			fmt.Println("JP")
 			playerPosition.Jp = true
 			i += 2
 			break
