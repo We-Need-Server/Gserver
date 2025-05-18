@@ -162,6 +162,7 @@ func (gt *GameTick) processTick() {
 				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
 			}
 		} else {
+			fmt.Println("tick packet", *gt.playerPositionMap)
 			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, *gt.playerPositionMap)
 		}
 

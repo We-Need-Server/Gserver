@@ -124,7 +124,6 @@ func (p *Player) ReflectPlayerPosition(playerPosition *PlayerPosition) {
 	p.isShoot = (*playerPosition).IsShoot
 	p.ptAngle += (*playerPosition).PtAngle
 	p.yawAngle += (*playerPosition).YawAngle
-
 }
 
 // 이게 그러면 tick 패킷이 만들어질 때 다 락킹이 걸린다.
