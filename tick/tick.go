@@ -130,6 +130,7 @@ func (gt *GameTick) processTick() {
 	gameState := gt.game.GetGameState()
 
 	for qPort, userAddr := range *gt.us.ConnTable {
+		gt.registerActorStatus(qPort)
 		actorStatus := gt.actorStatusMap[qPort]
 		var tickPacket *server.TickPacket
 		if (actorStatus.Flags & 1 << 7) != 0 {
