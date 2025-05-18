@@ -1,32 +1,32 @@
 package receiver
 
 import (
-	"WeNeedGameServer/game/legacy/actor"
 	"WeNeedGameServer/internal_type"
+	"WeNeedGameServer/network/actor"
 	"WeNeedGameServer/packet"
 	"log"
 	"net"
 )
 
 type Receiver struct {
-	chanTable        map[uint32]chan packet.PacketI
-	connTable        *map[uint32]*net.UDPAddr
-	packetActorTable map[uint32]*actor.PacketActor
-	nextSeqTable     *map[uint32]uint32
-	nQueue           *internal_type.Queue[*packet.PacketI]
-	nQueueManager    *QueueManager
-	udpConn          *net.UDPConn
+	chanTable         map[uint32]chan packet.PacketI
+	connTable         *map[uint32]*net.UDPAddr
+	networkActorTable map[uint32]*actor.NetworkActor
+	nextSeqTable      *map[uint32]uint32
+	nQueue            *internal_type.Queue[packet.PacketI]
+	nQueueManager     *QueueManager
+	udpConn           *net.UDPConn
 }
 
-func NewReceiver(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nQueue *internal_type.Queue[*packet.PacketI], udpConn *net.UDPConn) *Receiver {
+func NewReceiver(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nQueue *internal_type.Queue[packet.PacketI], udpConn *net.UDPConn) *Receiver {
 	return &Receiver{
-		chanTable:        make(map[uint32]chan packet.PacketI),
-		connTable:        connTable,
-		packetActorTable: make(map[uint32]*actor.PacketActor),
-		nextSeqTable:     nextSeqTable,
-		nQueue:           nQueue,
-		nQueueManager:    NewQueueManager(nQueue),
-		udpConn:          udpConn,
+		chanTable:         make(map[uint32]chan packet.PacketI),
+		connTable:         connTable,
+		networkActorTable: make(map[uint32]*actor.NetworkActor),
+		nextSeqTable:      nextSeqTable,
+		nQueue:            nQueue,
+		nQueueManager:     NewQueueManager(nQueue),
+		udpConn:           udpConn,
 	}
 }
 
@@ -65,7 +65,7 @@ func (r *Receiver) tempHandleNewConnection(qPort uint32, userAddr *net.UDPAddr) 
 	r.chanTable[qPort] = make(chan packet.PacketI)
 	(*r.connTable)[qPort] = userAddr
 	(*r.nextSeqTable)[qPort] = 1
-	packetActor := actor.NewPacketActor(qPort, userAddr, r.chanTable[qPort])
-	r.packetActorTable[qPort] = packetActor
-	go r.packetActorTable[qPort].ProcessLoopPacket()
+	networkActor := actor.NewNetworkActor(qPort, userAddr, r.chanTable[qPort], &r.nQueueManager.QmChan)
+	r.networkActorTable[qPort] = networkActor
+	go r.networkActorTable[qPort].ProcessLoopPacket()
 }

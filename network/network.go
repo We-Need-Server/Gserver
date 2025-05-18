@@ -12,7 +12,7 @@ import (
 type Network struct {
 	connTable    map[uint32]*net.UDPAddr
 	nextSeqTable map[uint32]uint32
-	nQueue       *internal_type.Queue[*packet.PacketI]
+	nQueue       *internal_type.Queue[packet.PacketI]
 	ur           *receiver.Receiver
 	us           *sender.Sender
 	udpConn      *net.UDPConn
@@ -23,7 +23,7 @@ func NewNetwork(listenAddr string) *Network {
 	return &Network{
 		connTable:    make(map[uint32]*net.UDPAddr),
 		nextSeqTable: make(map[uint32]uint32),
-		nQueue:       internal_type.NewQueue[*packet.PacketI](),
+		nQueue:       internal_type.NewQueue[packet.PacketI](),
 		ur:           nil,
 		us:           nil,
 		udpConn:      nil,

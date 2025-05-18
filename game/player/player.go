@@ -17,11 +17,6 @@ type Player struct {
 	ShootHitInformation map[uint32]int16
 }
 
-type HitInformationField struct {
-	hp      int16
-	hpDelta int16
-}
-
 type PlayerPosition struct {
 	Hp        int16
 	PositionX float32

@@ -6,12 +6,12 @@ import (
 )
 
 type QueueManager struct {
-	QmChan chan *packet.PacketI
-	queue  *internal_type.Queue[*packet.PacketI]
+	QmChan chan packet.PacketI
+	queue  *internal_type.Queue[packet.PacketI]
 }
 
-func NewQueueManager(queue *internal_type.Queue[*packet.PacketI]) *QueueManager {
-	return &QueueManager{QmChan: make(chan *packet.PacketI), queue: queue}
+func NewQueueManager(queue *internal_type.Queue[packet.PacketI]) *QueueManager {
+	return &QueueManager{QmChan: make(chan packet.PacketI), queue: queue}
 }
 
 func (qm *QueueManager) StartQueueManager() {
@@ -30,6 +30,6 @@ func (qm *QueueManager) StartQueueManager() {
 }
 
 // origin EnQueue but, EnManagedQueue lol
-func (qm *QueueManager) EnManagedQueue(p *packet.PacketI) {
+func (qm *QueueManager) EnManagedQueue(p packet.PacketI) {
 	qm.queue.Enqueue(p)
 }
