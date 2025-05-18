@@ -58,13 +58,15 @@ func (gt *GameTick) registerActorStatus(qPort uint32) {
 
 func (gt *GameTick) iActorStatus(packet *client.TickIPacket) {
 	gt.registerActorStatus(packet.GetQPort())
-	gt.actorStatusMap[packet.GetQPort()].Flags |= 1 << 7
+	gt.actorStatusMap[packet.GetQPort()].Flags = 1 << 7
 }
 
 func (gt *GameTick) rActorStatus(packet *client.TickRPacket) {
 	gt.registerActorStatus(packet.GetQPort())
-	gt.actorStatusMap[packet.GetQPort()].Flags |= 1 << 6
+	gt.actorStatusMap[packet.GetQPort()].Flags = 1 << 6
 	gt.actorStatusMap[packet.GetQPort()].RTickNumber = packet.RTickNumber
+	fmt.Println("비트 테스트")
+	fmt.Println(gt.actorStatusMap[packet.GetQPort()].Flags)
 }
 
 func (gt *GameTick) updateUserSEQ(seqData *internal_type.SEQData) {
