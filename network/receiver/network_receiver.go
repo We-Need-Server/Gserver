@@ -3,6 +3,7 @@ package receiver
 import (
 	"WeNeedGameServer/network/actor"
 	"WeNeedGameServer/packet"
+	"fmt"
 	"log"
 	"net"
 )
@@ -56,6 +57,8 @@ func (r *Receiver) handlePacket(clientPacket []byte, endPoint int, userAddr *net
 func (r *Receiver) throwData(data packet.ClientPacketI) {
 	if (*r.connTable)[data.GetQPort()] != nil || (*r.nextSeqTable)[data.GetQPort()] == data.GetSEQ() {
 		(*r.nextSeqTable)[data.GetQPort()] += 1
+		fmt.Println("R 패킷 왔니")
+		fmt.Println(data.GetPacketKind())
 		r.chanTable[data.GetQPort()] <- data
 	}
 }

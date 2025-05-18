@@ -101,6 +101,7 @@ func (gt *GameTick) dequeuePacket() {
 			}
 			break
 		case 'R':
+			fmt.Println("왔다잉 재전송 패킷")
 			if p, ok := p.(*client.TickRPacket); ok {
 				gt.rActorStatus(p)
 			}
@@ -129,12 +130,12 @@ func (gt *GameTick) dequeuePacket() {
 func (gt *GameTick) processTick() {
 	*gt.us.NChan <- server.NewStopPacket()
 	for gt.playerPositionMap == nil {
-		fmt.Println("while", gt.playerPositionMap)
+		//fmt.Println("while", gt.playerPositionMap)
 	}
-	fmt.Println("out", *gt.playerPositionMap)
+	//fmt.Println("out", *gt.playerPositionMap)
 	gt.ticks[gt.tickTime%60] = *gt.playerPositionMap
 	gt.game.ReflectPlayers(gt.playerPositionMap)
-	fmt.Println("out2", *gt.playerPositionMap)
+	//fmt.Println("out2", *gt.playerPositionMap)
 	gameState := gt.game.GetGameState()
 
 	for qPort, userAddr := range *gt.us.ConnTable {
@@ -146,9 +147,11 @@ func (gt *GameTick) processTick() {
 		} else if (actorStatus.Flags & 1 << 6) != 0 {
 			restoreTickCount := gt.tickTime - actorStatus.RTickNumber
 			if restoreTickCount >= 60 {
+				fmt.Println("좌표값 패킷 발사")
 				actorStatus.Flags = (actorStatus.Flags &^ (1 << 6)) | (1 << 7)
 				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
 			} else {
+				fmt.Println("재전송 패킷 발사")
 				cloneGameDeltaState := make(map[uint32]*player.PlayerPosition)
 				for k, v := range *gt.playerPositionMap {
 					cloneGameDeltaState[k] = v
@@ -183,7 +186,7 @@ func (gt *GameTick) processTick() {
 		actorStatus.Flags = 0
 		actorStatus.RTickNumber = 0
 	}
-	fmt.Println("Game state sent to", len(*gt.us.ConnTable), "clients")
+	//fmt.Println("Game state sent to", len(*gt.us.ConnTable), "clients")
 	gt.playerPositionMap = nil
 	gt.tickTime += 1
 }
