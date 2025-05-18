@@ -14,6 +14,7 @@ type Player struct {
 	jp                  bool
 	isAlive             bool
 	isShoot             bool
+	isReload            bool
 	ShootHitInformation map[uint32]int16
 }
 
@@ -25,7 +26,7 @@ func NewPlayer() *Player {
 //		return NewPlayerPosition(p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
 //	}
 func (p *Player) GetPlayerState() *PlayerPosition {
-	return NewPlayerPosition(p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot)
+	return NewPlayerPosition(p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
 }
 
 func (p *Player) ReflectDeltaValues() {
@@ -122,6 +123,7 @@ func (p *Player) ReflectPlayerPosition(playerPosition *PlayerPosition) {
 	p.hp -= (*playerPosition).Hp
 	p.jp = (*playerPosition).Jp
 	p.isShoot = (*playerPosition).IsShoot
+	p.isReload = playerPosition.IsReload
 	p.ptAngle += (*playerPosition).PtAngle
 	p.yawAngle += (*playerPosition).YawAngle
 }

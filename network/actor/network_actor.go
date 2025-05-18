@@ -100,6 +100,10 @@ func (na *NetworkActor) processCommandPayload(payload []byte, payLoadEndpoint in
 			hitInformationMap[userQPort] += hpDelta
 			i += 8
 			break
+		case command.RE:
+			playerPosition.IsReload = true
+			i += 2
+			break
 		}
 	}
 

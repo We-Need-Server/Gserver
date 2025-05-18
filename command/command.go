@@ -14,6 +14,7 @@ const (
 	JP         = "JP" // bool
 	SH         = "SH" // bool
 	HT         = "HT" // uint32, int16이 합쳐져서 총 6바이트를 나눠서 쪼갬
+	RE         = "RE"
 )
 
 type CommandMap map[Command]interface{}
@@ -35,7 +36,7 @@ func (cm *CommandMap) SetCommand(c Command) {
 	case FB, LR, YW, PT:
 		// uint32 타입의 기본값은 0
 		(*cm)[c] = uint32(0)
-	case JP, SH:
+	case JP, SH, RE:
 		// bool 타입의 기본값은 false
 		(*cm)[c] = true
 	case HT:

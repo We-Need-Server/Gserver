@@ -67,6 +67,11 @@ func (p *TickPacket) Serialize() []byte {
 			buf.WriteByte('H')
 			fmt.Println("SH-Tick")
 		}
+		if (*playerPosition).IsReload {
+			buf.WriteByte('R')
+			buf.WriteByte('E')
+			fmt.Println("RE-Tick")
+		}
 	}
 	fmt.Println(buf.Bytes())
 	return buf.Bytes()
