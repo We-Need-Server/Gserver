@@ -1,7 +1,7 @@
 package receiver
 
 import (
-	"WeNeedGameServer/game/actor"
+	"WeNeedGameServer/game/legacy/actor"
 	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/packet"
 	"log"
@@ -13,16 +13,17 @@ type Receiver struct {
 	connTable        *map[uint32]*net.UDPAddr
 	packetActorTable map[uint32]*actor.PacketActor
 	nextSEQTable     map[uint32]uint32
-	nQueue           *internal_type.Queue[packet.PacketI]
+	nQueue           *internal_type.Queue[*packet.PacketI]
 	nQueueManager    *QueueManager
 	udpConn          *net.UDPConn
 }
 
-func NewReceiver(connTable *map[uint32]*net.UDPAddr, nQueue *internal_type.Queue[packet.PacketI], udpConn *net.UDPConn) *Receiver {
+func NewReceiver(connTable *map[uint32]*net.UDPAddr, nQueue *internal_type.Queue[*packet.PacketI], udpConn *net.UDPConn) *Receiver {
 	return &Receiver{make(map[uint32]chan packet.PacketI), connTable, make(map[uint32]*actor.PacketActor), make(map[uint32]uint32), nQueue, NewQueueManager(nQueue), udpConn}
 }
 
 func (r *Receiver) StartUDP() {
+	go r.nQueueManager.StartQueueManager()
 	readBuffer := make([]byte, 2048)
 	for {
 		readCount, addr, err := r.udpConn.ReadFromUDP(readBuffer)
@@ -42,10 +43,10 @@ func (r *Receiver) handlePacket(clientPacket []byte, endPoint int, userAddr *net
 	if QPort := (*r.connTable)[data.GetQPort()]; QPort == nil {
 		r.tempHandleNewConnection(data.GetQPort(), userAddr)
 	}
-	r.throwData(data, userAddr)
+	r.throwData(data)
 }
 
-func (r *Receiver) throwData(data packet.PacketI, userAddr *net.UDPAddr) {
+func (r *Receiver) throwData(data packet.PacketI) {
 	if (*r.connTable)[data.GetQPort()] != nil || r.nextSEQTable[data.GetQPort()] == data.GetSEQ() {
 		r.nextSEQTable[data.GetQPort()] += 1
 		r.chanTable[data.GetQPort()] <- data

@@ -2,7 +2,7 @@ package legacy
 
 import (
 	"WeNeedGameServer/game"
-	"WeNeedGameServer/game/actor"
+	"WeNeedGameServer/game/legacy/actor"
 	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/packet"
