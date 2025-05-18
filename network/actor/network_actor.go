@@ -45,7 +45,7 @@ func (na *NetworkActor) processEventPacket(packet *client.EventPacket) {
 }
 
 func (na *NetworkActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
-	playerPosition := player.NewPlayerPosition(0, 0, 0, 0, 0, false, false)
+	playerPosition := player.NewPlayerPositionD()
 	hitInformationMap := make(map[uint32]int16)
 	for i := 0; i < payLoadEndpoint; {
 		payloadCommand := command.Command(payload[i : i+2])
@@ -103,5 +103,5 @@ func (na *NetworkActor) processCommandPayload(payload []byte, payLoadEndpoint in
 		}
 	}
 
-	*na.qmChan <- server.NewDeltaPacket(na.qPort, &playerPosition, &hitInformationMap)
+	*na.qmChan <- server.NewDeltaPacket(na.qPort, playerPosition, &hitInformationMap)
 }

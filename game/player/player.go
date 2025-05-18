@@ -17,30 +17,8 @@ type Player struct {
 	ShootHitInformation map[uint32]int16
 }
 
-type PlayerPosition struct {
-	Hp        int16
-	PositionX float32
-	PositionZ float32
-	YawAngle  float32
-	PtAngle   float32
-	Jp        bool
-	IsShoot   bool
-}
-
 func NewPlayer() *Player {
 	return &Player{hp: 100, ShootHitInformation: make(map[uint32]int16)}
-}
-
-func NewPlayerPosition(hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool) PlayerPosition {
-	return PlayerPosition{
-		Hp:        hp,
-		PositionX: positionX,
-		PositionZ: positionZ,
-		YawAngle:  yawAngle,
-		PtAngle:   ptAngle,
-		Jp:        jp,
-		IsShoot:   isShoot,
-	}
 }
 
 func (p *Player) GetPlayerDeltaState() PlayerPosition {

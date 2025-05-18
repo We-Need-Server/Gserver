@@ -57,7 +57,7 @@ func (a *PacketActor) processEventPacket(packet *client.EventPacket) {
 
 func (a *PacketActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
 	for i := 0; i < payLoadEndpoint; {
-		payloadCommand := string(payload[i : i+2])
+		payloadCommand := command.Command(payload[i : i+2])
 		switch payloadCommand {
 		case command.FB:
 			zDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
