@@ -1,7 +1,7 @@
 package legacy
 
 import (
-	"WeNeedGameServer/game"
+	legacy2 "WeNeedGameServer/game/legacy"
 	"WeNeedGameServer/game/player"
 	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/mediator"
@@ -16,7 +16,7 @@ import (
 type GameTick struct {
 	TickTime        uint32
 	Ticker          *time.Ticker
-	Game            *game.Game
+	Game            *legacy2.Game
 	networkInstance *legacy.Network
 	stopChan        chan struct{}
 	Mediator        *mediator.Mediator
@@ -34,7 +34,7 @@ func newActorStatus() *ActorStatus {
 	return &ActorStatus{}
 }
 
-func NewGameTick(tickTime uint32, game *game.Game, networkInstance *legacy.Network) *GameTick {
+func NewGameTick(tickTime uint32, game *legacy2.Game, networkInstance *legacy.Network) *GameTick {
 	ticks := [60]map[uint32]player.PlayerPosition{}
 	for i := range ticks {
 		ticks[i] = make(map[uint32]player.PlayerPosition)

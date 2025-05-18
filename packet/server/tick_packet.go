@@ -9,14 +9,14 @@ import (
 )
 
 type TickPacket struct {
-	TickNumber         uint32                           `json:"tickNumber"`
-	Timestamp          int64                            `json:"timestamp"`
-	UserSequenceNumber uint32                           `json:"userSequenceNumber"`
-	Flags              uint8                            `json:"flags"`
-	UserPositions      map[uint32]player.PlayerPosition `json:"userPositions"` // 내부 처리용 맵
+	TickNumber         uint32                            `json:"tickNumber"`
+	Timestamp          int64                             `json:"timestamp"`
+	UserSequenceNumber uint32                            `json:"userSequenceNumber"`
+	Flags              uint8                             `json:"flags"`
+	UserPositions      map[uint32]*player.PlayerPosition `json:"userPositions"` // 내부 처리용 맵
 }
 
-func NewTickPacket(TickNumber uint32, Timestamp int64, UserSequenceNumber uint32, Flags uint8, UserPositions map[uint32]player.PlayerPosition) *TickPacket {
+func NewTickPacket(TickNumber uint32, Timestamp int64, UserSequenceNumber uint32, Flags uint8, UserPositions map[uint32]*player.PlayerPosition) *TickPacket {
 	return &TickPacket{TickNumber, Timestamp, UserSequenceNumber, Flags, UserPositions}
 }
 

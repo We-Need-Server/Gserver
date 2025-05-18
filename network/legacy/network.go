@@ -1,7 +1,7 @@
 package legacy
 
 import (
-	"WeNeedGameServer/game"
+	"WeNeedGameServer/game/legacy"
 	"WeNeedGameServer/game/legacy/actor"
 	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/mediator"
@@ -16,11 +16,11 @@ type Network struct {
 	nextSEQTable     map[uint32]uint32
 	packetActorTable map[uint32]*actor.PacketActor
 	ln               *net.UDPConn
-	game             *game.Game
+	game             *legacy.Game
 	Mediator         *mediator.Mediator
 }
 
-func NewNetwork(game *game.Game) *Network {
+func NewNetwork(game *legacy.Game) *Network {
 	return &Network{
 		chanTable:        make(map[uint32]chan packet.PacketI),
 		ConnTable:        make(map[uint32]*net.UDPAddr),

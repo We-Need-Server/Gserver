@@ -21,11 +21,10 @@ func NewPlayer() *Player {
 	return &Player{hp: 100, ShootHitInformation: make(map[uint32]int16)}
 }
 
-func (p *Player) GetPlayerDeltaState() PlayerPosition {
-	return NewPlayerPosition(p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
-}
-
-func (p *Player) GetPlayerState() PlayerPosition {
+//	func (p *Player) GetPlayerDeltaState() PlayerPosition {
+//		return NewPlayerPosition(p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
+//	}
+func (p *Player) GetPlayerState() *PlayerPosition {
 	return NewPlayerPosition(p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot)
 }
 
@@ -115,6 +114,17 @@ func (p *Player) ReflectHitInformation() {
 	for key, _ := range p.ShootHitInformation {
 		p.ShootHitInformation[key] = 0
 	}
+}
+
+func (p *Player) ReflectPlayerPosition(playerPosition *PlayerPosition) {
+	p.positionX += (*playerPosition).PositionX
+	p.positionZ += (*playerPosition).PositionZ
+	p.hp -= (*playerPosition).Hp
+	p.jp = (*playerPosition).Jp
+	p.isShoot = (*playerPosition).IsShoot
+	p.ptAngle += (*playerPosition).PtAngle
+	p.yawAngle += (*playerPosition).YawAngle
+
 }
 
 // 이게 그러면 tick 패킷이 만들어질 때 다 락킹이 걸린다.

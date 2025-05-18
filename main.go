@@ -2,28 +2,35 @@ package main
 
 import (
 	"WeNeedGameServer/game"
-	"WeNeedGameServer/mediator"
-	"WeNeedGameServer/network/legacy"
+	"WeNeedGameServer/network"
 	"WeNeedGameServer/register"
-	legacy2 "WeNeedGameServer/tick/legacy"
-	"log"
+	"WeNeedGameServer/tick"
 )
 
 var PacketRegisterInstance = make(register.PacketRegister)
 
+//func main() {
+//	mediatorInstance := mediator.NewMediator()
+//	gameInstance := legacy3.NewGame()
+//	networkInstance := legacy.NewNetwork(gameInstance)
+//	if _, err := mediatorInstance.Register("network", networkInstance); err != nil {
+//		log.Panicln("메디에이터 등록 실패")
+//	}
+//	go networkInstance.Start()
+//	gameTickInstance := legacy2.NewGameTick(0, gameInstance, networkInstance)
+//	if _, err := mediatorInstance.Register("tick", gameTickInstance); err != nil {
+//		log.Panicln("메디에이터 등록 실패")
+//	}
+//	gameTickInstance.StartGameLoop()
+//}
+
 func main() {
-	mediatorInstance := mediator.NewMediator()
+	networkInstance := network.NewNetwork(":20000")
+	ur, us := networkInstance.ReadyUDP()
+	go ur.StartUDP()
 	gameInstance := game.NewGame()
-	networkInstance := legacy.NewNetwork(gameInstance)
-	if _, err := mediatorInstance.Register("network", networkInstance); err != nil {
-		log.Panicln("메디에이터 등록 실패")
-	}
-	go networkInstance.Start()
-	gameTickInstance := legacy2.NewGameTick(0, gameInstance, networkInstance)
-	if _, err := mediatorInstance.Register("tick", gameTickInstance); err != nil {
-		log.Panicln("메디에이터 등록 실패")
-	}
-	gameTickInstance.StartGameLoop()
+	tickInstance := tick.NewGameTick(60, gameInstance, us)
+	tickInstance.StartGameLoop()
 }
 
 //

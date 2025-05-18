@@ -32,14 +32,14 @@ func (p *PlayerPosition) CalculatePlayerPosition(calP *PlayerPosition) {
 	p.IsShoot = p.IsShoot || calP.IsShoot
 }
 
-//func NewPlayerPosition(hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool) PlayerPosition {
-//	return PlayerPosition{
-//		Hp:        hp,
-//		PositionX: positionX,
-//		PositionZ: positionZ,
-//		YawAngle:  yawAngle,
-//		PtAngle:   ptAngle,
-//		Jp:        jp,
-//		IsShoot:   isShoot,
-//	}
-//}
+func NewPlayerPosition(hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool) *PlayerPosition {
+	return &PlayerPosition{
+		Hp:        hp,
+		PositionX: positionX,
+		PositionZ: positionZ,
+		YawAngle:  yawAngle,
+		PtAngle:   ptAngle,
+		Jp:        jp,
+		IsShoot:   isShoot,
+	}
+}
