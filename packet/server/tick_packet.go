@@ -2,7 +2,6 @@ package server
 
 import (
 	"WeNeedGameServer/game/player"
-	"WeNeedGameServer/util"
 	"bytes"
 	"encoding/binary"
 	"fmt"
@@ -58,9 +57,12 @@ func (p *TickPacket) Serialize() []byte {
 			buf.WriteByte('W')
 			binary.Write(buf, binary.LittleEndian, (*playerPosition).YawAngle)
 		}
-		buf.WriteByte('J')
-		buf.WriteByte('P')
-		buf.WriteByte(util.BoolToByte((*playerPosition).Jp))
+
+		if (*playerPosition).Jp {
+			buf.WriteByte('J')
+			buf.WriteByte('P')
+			fmt.Println("JP-Tick")
+		}
 
 		if (*playerPosition).IsShoot {
 			buf.WriteByte('S')

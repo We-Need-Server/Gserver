@@ -84,7 +84,7 @@ func (na *NetworkActor) processCommandPayload(payload []byte, payLoadEndpoint in
 			//a.actorPlayer.TurnJP(jp)
 			fmt.Println("JP", jp)
 			playerPosition.Jp = true
-			i += 3
+			i += 2
 			break
 		case command.SH:
 			//a.actorPlayer.TurnIsShoot()
