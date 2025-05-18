@@ -11,22 +11,22 @@ import (
 )
 
 type Network struct {
-	ChanTable        map[uint32]chan packet.PacketI
+	chanTable        map[uint32]chan packet.PacketI
 	ConnTable        map[uint32]*net.UDPAddr
-	NextSEQTable     map[uint32]uint32
-	PacketActorTable map[uint32]*actor.PacketActor
-	Ln               *net.UDPConn
-	Game             *game.Game
+	nextSEQTable     map[uint32]uint32
+	packetActorTable map[uint32]*actor.PacketActor
+	ln               *net.UDPConn
+	game             *game.Game
 	Mediator         *mediator.Mediator
 }
 
-func NewNetwork(Game *game.Game) *Network {
+func NewNetwork(game *game.Game) *Network {
 	return &Network{
-		ChanTable:        make(map[uint32]chan packet.PacketI),
+		chanTable:        make(map[uint32]chan packet.PacketI),
 		ConnTable:        make(map[uint32]*net.UDPAddr),
-		NextSEQTable:     make(map[uint32]uint32),
-		PacketActorTable: make(map[uint32]*actor.PacketActor),
-		Game:             Game,
+		nextSEQTable:     make(map[uint32]uint32),
+		packetActorTable: make(map[uint32]*actor.PacketActor),
+		game:             game,
 		Mediator:         nil,
 	}
 }
@@ -40,7 +40,7 @@ func (n *Network) Start() {
 	if listenErr != nil {
 		log.Panicln("리슨 오류")
 	}
-	n.Ln = ln
+	n.ln = ln
 	readBuffer := make([]byte, 2048)
 	for {
 		readCount, addr, err := ln.ReadFromUDP(readBuffer)
@@ -88,24 +88,36 @@ func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.
 //}
 
 func (n *Network) throwData(data packet.PacketI, userAddr *net.UDPAddr) {
-	if n.ConnTable[data.GetQPort()] != nil || n.NextSEQTable[data.GetQPort()] == data.GetSEQ() {
-		n.NextSEQTable[data.GetQPort()] += 1
+	if n.ConnTable[data.GetQPort()] != nil || n.nextSEQTable[data.GetQPort()] == data.GetSEQ() {
+		n.nextSEQTable[data.GetQPort()] += 1
 		n.Send("tick", internal_type.NewSEQData(data.GetQPort(), data.GetSEQ()))
-		n.ChanTable[data.GetQPort()] <- data
+		n.chanTable[data.GetQPort()] <- data
 	}
 }
 
 // handleConnection을 실행하도록 한다
 
-func (n *Network) tempHandleNewConnection(QPort uint32, userAddr *net.UDPAddr) {
-	n.ChanTable[QPort] = make(chan packet.PacketI)
-	n.ConnTable[QPort] = userAddr
-	n.NextSEQTable[QPort] = 1
-	packetActor := actor.NewPacketActor(QPort, userAddr, n.ChanTable[QPort], n.Game.AddPlayer(QPort))
+func (n *Network) tempHandleNewConnection(qPort uint32, userAddr *net.UDPAddr) {
+	n.chanTable[qPort] = make(chan packet.PacketI)
+	n.ConnTable[qPort] = userAddr
+	n.nextSEQTable[qPort] = 1
+	// 이 부분에 대해서 mediator로 게임 객체에 전달하게 하여 게임 객체를 네트워크 객체가 안 가지도록 할 수 있음
+	//packetActor := actor.NewPacketActor(qPort, userAddr, n.chanTable[qPort], n.game.AddPlayer(qPort))
+	packetActor := actor.NewPacketActor(qPort, userAddr, n.chanTable[qPort])
+	n.Send("game", qPort)
 	if _, err := n.Mediator.Register("actor", packetActor); err != nil {
 		log.Panicln("메디에이터 등록 실패")
 	}
-	n.PacketActorTable[QPort] = packetActor
+	n.packetActorTable[qPort] = packetActor
 	packetActor.Send("tick", packetActor.QPort)
-	go n.PacketActorTable[QPort].ProcessLoopPacket()
+	go n.packetActorTable[qPort].ProcessLoopPacket()
+}
+
+func (n *Network) SendUDPPacket(b []byte, udpAddr *net.UDPAddr) (int, error) {
+	status, err := n.ln.WriteToUDP(b, udpAddr)
+	if err != nil {
+		log.Println("Failed to send message:", err)
+		return status, err
+	}
+	return status, nil
 }
