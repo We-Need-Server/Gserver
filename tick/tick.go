@@ -33,7 +33,7 @@ func newActorStatus() *ActorStatus {
 	return &ActorStatus{}
 }
 
-func NewGameTick(tickTime uint32, game *game.Game, us *sender.Sender) *GameTick {
+func NewGameTick(tickTime int64, game *game.Game, us *sender.Sender) *GameTick {
 	ticks := [60]map[uint32]*player.PlayerPosition{}
 	for i := range ticks {
 		ticks[i] = make(map[uint32]*player.PlayerPosition)
@@ -85,13 +85,15 @@ func (gt *GameTick) StartGameLoop() {
 }
 
 func (gt *GameTick) dequeuePacket() {
+	fmt.Println()
 	playerPositionMap := make(map[uint32]*player.PlayerPosition)
 	for {
 		p := <-*gt.us.NChan
 		switch p.GetPacketKind() {
 		case 'S':
-			gt.playerPositionMap = &playerPositionMap
+			tempMap := playerPositionMap
 			playerPositionMap = make(map[uint32]*player.PlayerPosition)
+			gt.playerPositionMap = &tempMap
 			break
 		case 'I':
 			if p, ok := p.(*client.TickIPacket); ok {
@@ -104,17 +106,20 @@ func (gt *GameTick) dequeuePacket() {
 			}
 			break
 		case 'D':
+			fmt.Println("delta")
 			if _, exists := playerPositionMap[p.GetQPort()]; !exists {
 				playerPositionMap[p.GetQPort()] = player.NewPlayerPositionD()
 			}
 			if p, ok := p.(*server.DeltaPacket); ok {
 				playerPositionMap[p.GetQPort()].CalculatePlayerPosition(p.PlayerPosition)
+				fmt.Println(*playerPositionMap[p.GetQPort()])
 				for key, val := range *p.HitInformationMap {
 					if _, exists := playerPositionMap[p.GetQPort()]; !exists {
 						playerPositionMap[key] = player.NewPlayerPositionD()
 					}
 					playerPositionMap[key].Hp += val
 				}
+
 			}
 			break
 		}
@@ -124,9 +129,12 @@ func (gt *GameTick) dequeuePacket() {
 func (gt *GameTick) processTick() {
 	*gt.us.NChan <- server.NewStopPacket()
 	for gt.playerPositionMap == nil {
+		fmt.Println("while", gt.playerPositionMap)
 	}
+	fmt.Println("out", *gt.playerPositionMap)
 	gt.ticks[gt.tickTime%60] = *gt.playerPositionMap
 	gt.game.ReflectPlayers(gt.playerPositionMap)
+	fmt.Println("out2", *gt.playerPositionMap)
 	gameState := gt.game.GetGameState()
 
 	for qPort, userAddr := range *gt.us.ConnTable {
@@ -162,7 +170,7 @@ func (gt *GameTick) processTick() {
 				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
 			}
 		} else {
-			fmt.Println("tick packet", *gt.playerPositionMap)
+			fmt.Println("tick packet", *((*gt).playerPositionMap))
 			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, *gt.playerPositionMap)
 		}
 

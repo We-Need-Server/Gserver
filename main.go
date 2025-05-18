@@ -29,7 +29,7 @@ func main() {
 	ur, us := networkInstance.ReadyUDP()
 	go ur.StartUDP()
 	gameInstance := game.NewGame()
-	tickInstance := tick.NewGameTick(60, gameInstance, us)
+	tickInstance := tick.NewGameTick(10, gameInstance, us)
 	tickInstance.StartGameLoop()
 }
 

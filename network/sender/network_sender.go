@@ -2,6 +2,7 @@ package sender
 
 import (
 	"WeNeedGameServer/packet"
+	"fmt"
 	"log"
 	"net"
 )
@@ -23,6 +24,7 @@ func NewSender(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint
 }
 
 func (s *Sender) SendUDPPacket(b []byte, udpAddr *net.UDPAddr) (int, error) {
+	fmt.Println(b)
 	status, err := s.udpConn.WriteToUDP(b, udpAddr)
 	if err != nil {
 		log.Println("Failed to send message:", err)
