@@ -144,9 +144,9 @@ func (gt *GameTick) processTick() {
 		gt.registerActorStatus(qPort)
 		actorStatus := gt.actorStatusMap[qPort]
 		var tickPacket *server.TickPacket
-		if (actorStatus.Flags & 1 << 7) != 0 {
+		if (actorStatus.Flags & (1 << 7)) != 0 {
 			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
-		} else if (actorStatus.Flags & 1 << 6) != 0 {
+		} else if (actorStatus.Flags & (1 << 6)) != 0 {
 			restoreTickCount := gt.tickTime - actorStatus.RTickNumber
 			if restoreTickCount >= 60 {
 				fmt.Println("좌표값 패킷 발사")
