@@ -180,7 +180,7 @@ func (gt *GameTick) processTick() {
 			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, *gt.playerPositionMap)
 		}
 
-		_, err := gt.udpSender.SendUDPPacket(tickPacket.Serialize(), userAddr)
+		_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userAddr)
 		if err != nil {
 			log.Println("Failed to send message:", err)
 		}
@@ -233,7 +233,7 @@ func (gt *GameTick) processTick() {
 //			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
 //		}
 //
-//		_, err := gt.udpSender.SendUDPPacket(tickPacket.Serialize(), userAddr)
+//		_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userAddr)
 //		if err != nil {
 //			log.Println("Failed to send message:", err)
 //		}

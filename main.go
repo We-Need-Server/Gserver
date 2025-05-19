@@ -25,9 +25,9 @@ var PacketRegisterInstance = make(register.PacketRegister)
 //}
 
 func main() {
-	networkInstance := network.NewNetwork(":20000")
-	udpReceiver, udpSender := networkInstance.ReadyUDP()
-	go udpReceiver.StartUDP()
+	networkInstance := network.NewNetwork(":20000", ":20001")
+	udpReceiver, udpSender := networkInstance.ReadyUdp()
+	go udpReceiver.StartUdp()
 	gameInstance := game.NewGame()
 	tickInstance := tick.NewGameTick(60, gameInstance, udpSender)
 	tickInstance.StartGameLoop()

@@ -36,7 +36,7 @@ func NewNetwork(listenUdpAddr string, listenTcpAddr string) *Network {
 	}
 }
 
-func (n *Network) ReadyUDP() (*receiver.UdpReceiver, *sender.UdpSender) {
+func (n *Network) ReadyUdp() (*receiver.UdpReceiver, *sender.UdpSender) {
 	udpServerPoint, udpResolveErr := net.ResolveUDPAddr("udp", n.listenUdpAddr)
 	if udpResolveErr != nil {
 		log.Panicln("네트워크 리졸버 오류")

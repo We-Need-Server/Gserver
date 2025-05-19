@@ -30,7 +30,7 @@ func NewUdpReceiver(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32
 	}
 }
 
-func (r *UdpReceiver) StartUDP() {
+func (r *UdpReceiver) StartUdp() {
 	go r.nChanManager.StartChanManager()
 	readBuffer := make([]byte, 2048)
 	for {

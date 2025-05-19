@@ -9,3 +9,7 @@ type TcpReceiver struct {
 func NewTcpReceiver(tcpReceiver *net.TCPListener) *TcpReceiver {
 	return &TcpReceiver{tcpListener: tcpReceiver}
 }
+
+func (r *TcpReceiver) StartTCP() {
+
+}
