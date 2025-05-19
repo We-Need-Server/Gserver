@@ -12,18 +12,18 @@ import (
 	"net"
 )
 
-type NetworkActor struct {
+type UdpActor struct {
 	qPort      uint32
 	userAddr   *net.UDPAddr
 	packetChan chan packet.PacketI
 	qmChan     *chan packet.PacketI
 }
 
-func NewNetworkActor(qPort uint32, userAddr *net.UDPAddr, packetChan chan packet.PacketI, qmChan *chan packet.PacketI) *NetworkActor {
-	return &NetworkActor{qPort, userAddr, packetChan, qmChan}
+func NewUdpActor(qPort uint32, userAddr *net.UDPAddr, packetChan chan packet.PacketI, qmChan *chan packet.PacketI) *UdpActor {
+	return &UdpActor{qPort, userAddr, packetChan, qmChan}
 }
 
-func (na *NetworkActor) ProcessLoopPacket() {
+func (na *UdpActor) ProcessLoopPacket() {
 	for {
 		pkt := <-na.packetChan
 
@@ -35,7 +35,7 @@ func (na *NetworkActor) ProcessLoopPacket() {
 	}
 }
 
-func (na *NetworkActor) processEventPacket(packet *client.EventPacket) {
+func (na *UdpActor) processEventPacket(packet *client.EventPacket) {
 	if packet.GetPacketKind() == 'N' {
 		na.processCommandPayload(packet.Payload, packet.PayloadEndpoint)
 	}
@@ -44,7 +44,7 @@ func (na *NetworkActor) processEventPacket(packet *client.EventPacket) {
 	fmt.Printf("패킷 내용: %+v\n", packet)
 }
 
-func (na *NetworkActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
+func (na *UdpActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
 	playerPosition := player.NewPlayerPositionD()
 	hitInformationMap := make(map[uint32]int16)
 	for i := 0; i < payLoadEndpoint; {

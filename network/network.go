@@ -9,29 +9,30 @@ import (
 )
 
 type Network struct {
-	connTable    map[uint32]*net.UDPAddr
-	nextSeqTable map[uint32]uint32
-	nChan        chan packet.PacketI
-	udpReceiver  *receiver.Receiver
-	udpSender    *sender.Sender
-	udpConn      *net.UDPConn
-	listenAddr   string
+	connTable     map[uint32]*net.UDPAddr
+	nextSeqTable  map[uint32]uint32
+	nChan         chan packet.PacketI
+	udpReceiver   *receiver.UdpReceiver
+	udpSender     *sender.UdpSender
+	udpConn       *net.UDPConn
+	listenUdpAddr string
+	listenTcpAddr string
 }
 
-func NewNetwork(listenAddr string) *Network {
+func NewNetwork(listenUdpAddr string) *Network {
 	return &Network{
-		connTable:    make(map[uint32]*net.UDPAddr),
-		nextSeqTable: make(map[uint32]uint32),
-		nChan:        make(chan packet.PacketI),
-		udpReceiver:  nil,
-		udpSender:    nil,
-		udpConn:      nil,
-		listenAddr:   listenAddr,
+		connTable:     make(map[uint32]*net.UDPAddr),
+		nextSeqTable:  make(map[uint32]uint32),
+		nChan:         make(chan packet.PacketI),
+		udpReceiver:   nil,
+		udpSender:     nil,
+		udpConn:       nil,
+		listenUdpAddr: listenUdpAddr,
 	}
 }
 
-func (n *Network) ReadyUDP() (*receiver.Receiver, *sender.Sender) {
-	UDPServerPoint, resolveErr := net.ResolveUDPAddr("udp", n.listenAddr)
+func (n *Network) ReadyUDP() (*receiver.UdpReceiver, *sender.UdpSender) {
+	UDPServerPoint, resolveErr := net.ResolveUDPAddr("udp", n.listenUdpAddr)
 	if resolveErr != nil {
 		log.Panicln("네트워크 리졸버 오류")
 	}
@@ -40,7 +41,7 @@ func (n *Network) ReadyUDP() (*receiver.Receiver, *sender.Sender) {
 		log.Panicln("리슨 오류")
 	}
 	n.udpConn = ln
-	n.udpReceiver = receiver.NewReceiver(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
-	n.udpSender = sender.NewSender(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
+	n.udpReceiver = receiver.NewUdpReceiver(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
+	n.udpSender = sender.NewUdpSender(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
 	return n.udpReceiver, n.udpSender
 }

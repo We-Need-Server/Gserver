@@ -8,29 +8,29 @@ import (
 	"net"
 )
 
-type Receiver struct {
+type UdpReceiver struct {
 	chanTable         map[uint32]chan packet.PacketI
 	connTable         *map[uint32]*net.UDPAddr
-	networkActorTable map[uint32]*actor.NetworkActor
+	networkActorTable map[uint32]*actor.UdpActor
 	nextSeqTable      *map[uint32]uint32
 	nChan             *chan packet.PacketI
-	nChanManager      *ChanManager
+	nChanManager      *UdpChanManager
 	udpConn           *net.UDPConn
 }
 
-func NewReceiver(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nChan *chan packet.PacketI, udpConn *net.UDPConn) *Receiver {
-	return &Receiver{
+func NewUdpReceiver(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nChan *chan packet.PacketI, udpConn *net.UDPConn) *UdpReceiver {
+	return &UdpReceiver{
 		chanTable:         make(map[uint32]chan packet.PacketI),
 		connTable:         connTable,
-		networkActorTable: make(map[uint32]*actor.NetworkActor),
+		networkActorTable: make(map[uint32]*actor.UdpActor),
 		nextSeqTable:      nextSeqTable,
 		nChan:             nChan,
-		nChanManager:      NewChanManager(nChan),
+		nChanManager:      NewUdpChanManager(nChan),
 		udpConn:           udpConn,
 	}
 }
 
-func (r *Receiver) StartUDP() {
+func (r *UdpReceiver) StartUDP() {
 	go r.nChanManager.StartChanManager()
 	readBuffer := make([]byte, 2048)
 	for {
@@ -42,7 +42,7 @@ func (r *Receiver) StartUDP() {
 	}
 }
 
-func (r *Receiver) handlePacket(clientPacket []byte, endPoint int, userAddr *net.UDPAddr) {
+func (r *UdpReceiver) handlePacket(clientPacket []byte, endPoint int, userAddr *net.UDPAddr) {
 	data, err := packet.ParsePacketByKind(clientPacket, endPoint)
 	if err != nil {
 		log.Panicln("잘못된 요청")
@@ -54,7 +54,7 @@ func (r *Receiver) handlePacket(clientPacket []byte, endPoint int, userAddr *net
 	r.throwData(data)
 }
 
-func (r *Receiver) throwData(data packet.ClientPacketI) {
+func (r *UdpReceiver) throwData(data packet.ClientPacketI) {
 	if (*r.connTable)[data.GetQPort()] != nil || (*r.nextSeqTable)[data.GetQPort()] == data.GetSEQ() {
 		(*r.nextSeqTable)[data.GetQPort()] += 1
 		fmt.Println("R 패킷 왔니")
@@ -67,11 +67,11 @@ func (r *Receiver) throwData(data packet.ClientPacketI) {
 	}
 }
 
-func (r *Receiver) tempHandleNewConnection(qPort uint32, userAddr *net.UDPAddr) {
+func (r *UdpReceiver) tempHandleNewConnection(qPort uint32, userAddr *net.UDPAddr) {
 	r.chanTable[qPort] = make(chan packet.PacketI)
 	(*r.connTable)[qPort] = userAddr
 	(*r.nextSeqTable)[qPort] = 1
-	networkActor := actor.NewNetworkActor(qPort, userAddr, r.chanTable[qPort], &r.nChanManager.CmChan)
+	networkActor := actor.NewUdpActor(qPort, userAddr, r.chanTable[qPort], &r.nChanManager.CmChan)
 	r.networkActorTable[qPort] = networkActor
 	go r.networkActorTable[qPort].ProcessLoopPacket()
 }
