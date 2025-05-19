@@ -16,7 +16,7 @@ type GameTick struct {
 	tickTime          uint32
 	ticker            *time.Ticker
 	game              *game.Game
-	us                *sender.Sender
+	udpSender         *sender.Sender
 	ticks             [60]map[uint32]*player.PlayerPosition
 	actorStatusMap    map[uint32]*ActorStatus
 	stopPacket        *server.StopPacket
@@ -33,7 +33,7 @@ func newActorStatus() *ActorStatus {
 	return &ActorStatus{}
 }
 
-func NewGameTick(tickTime int64, game *game.Game, us *sender.Sender) *GameTick {
+func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.Sender) *GameTick {
 	ticks := [60]map[uint32]*player.PlayerPosition{}
 	for i := range ticks {
 		ticks[i] = make(map[uint32]*player.PlayerPosition)
@@ -42,7 +42,7 @@ func NewGameTick(tickTime int64, game *game.Game, us *sender.Sender) *GameTick {
 		tickTime:          0,
 		ticker:            time.NewTicker(time.Second / time.Duration(tickTime)),
 		game:              game,
-		us:                us,
+		udpSender:         udpSender,
 		ticks:             ticks,
 		actorStatusMap:    make(map[uint32]*ActorStatus),
 		stopPacket:        server.NewStopPacket(),
@@ -90,7 +90,7 @@ func (gt *GameTick) dequeuePacket() {
 	fmt.Println()
 	playerPositionMap := make(map[uint32]*player.PlayerPosition)
 	for {
-		p := <-*gt.us.NChan
+		p := <-*gt.udpSender.NChan
 		switch p.GetPacketKind() {
 		case 'S':
 			tempMap := playerPositionMap
@@ -130,7 +130,7 @@ func (gt *GameTick) dequeuePacket() {
 }
 
 func (gt *GameTick) processTick() {
-	*gt.us.NChan <- server.NewStopPacket()
+	*gt.udpSender.NChan <- server.NewStopPacket()
 	for gt.playerPositionMap == nil {
 		//fmt.Println("while", gt.playerPositionMap)
 	}
@@ -140,18 +140,18 @@ func (gt *GameTick) processTick() {
 	//fmt.Println("out2", *gt.playerPositionMap)
 	gameState := gt.game.GetGameState()
 
-	for qPort, userAddr := range *gt.us.ConnTable {
+	for qPort, userAddr := range *gt.udpSender.ConnTable {
 		gt.registerActorStatus(qPort)
 		actorStatus := gt.actorStatusMap[qPort]
 		var tickPacket *server.TickPacket
 		if (actorStatus.Flags & (1 << 7)) != 0 {
-			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
+			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
 		} else if (actorStatus.Flags & (1 << 6)) != 0 {
 			restoreTickCount := gt.tickTime - actorStatus.RTickNumber
 			if restoreTickCount >= 60 {
 				fmt.Println("좌표값 패킷 발사")
 				actorStatus.Flags = (actorStatus.Flags &^ (1 << 6)) | (1 << 7)
-				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
+				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
 			} else {
 				fmt.Println("재전송 패킷 발사")
 				cloneGameDeltaState := make(map[uint32]*player.PlayerPosition)
@@ -173,14 +173,14 @@ func (gt *GameTick) processTick() {
 						}
 					}
 				}
-				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
+				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
 			}
 		} else {
 			fmt.Println("tick packet", *((*gt).playerPositionMap))
-			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.us.NextSeqTable)[qPort]-1, actorStatus.Flags, *gt.playerPositionMap)
+			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, *gt.playerPositionMap)
 		}
 
-		_, err := gt.us.SendUDPPacket(tickPacket.Serialize(), userAddr)
+		_, err := gt.udpSender.SendUDPPacket(tickPacket.Serialize(), userAddr)
 		if err != nil {
 			log.Println("Failed to send message:", err)
 		}
@@ -188,7 +188,7 @@ func (gt *GameTick) processTick() {
 		actorStatus.Flags = 0
 		actorStatus.RTickNumber = 0
 	}
-	//fmt.Println("Game state sent to", len(*gt.us.ConnTable), "clients")
+	//fmt.Println("Game state sent to", len(*gt.udpSender.ConnTable), "clients")
 	gt.playerPositionMap = nil
 	gt.tickTime += 1
 }
@@ -198,7 +198,7 @@ func (gt *GameTick) processTick() {
 //
 //	gt.ticks[gt.tickTime%60] = gameDeltaState
 //	gameState := gt.game.GetGameState()
-//	for qPort, userAddr := range *gt.us.ConnTable {
+//	for qPort, userAddr := range *gt.udpSender.ConnTable {
 //		actorStatus := gt.actorStatusMap[qPort]
 //		var tickPacket *server.TickPacket
 //		if (actorStatus.Flags & 1 << 7) != 0 {
@@ -233,7 +233,7 @@ func (gt *GameTick) processTick() {
 //			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
 //		}
 //
-//		_, err := gt.us.SendUDPPacket(tickPacket.Serialize(), userAddr)
+//		_, err := gt.udpSender.SendUDPPacket(tickPacket.Serialize(), userAddr)
 //		if err != nil {
 //			log.Println("Failed to send message:", err)
 //		}

@@ -12,8 +12,8 @@ type Network struct {
 	connTable    map[uint32]*net.UDPAddr
 	nextSeqTable map[uint32]uint32
 	nChan        chan packet.PacketI
-	ur           *receiver.Receiver
-	us           *sender.Sender
+	udpReceiver  *receiver.Receiver
+	udpSender    *sender.Sender
 	udpConn      *net.UDPConn
 	listenAddr   string
 }
@@ -23,8 +23,8 @@ func NewNetwork(listenAddr string) *Network {
 		connTable:    make(map[uint32]*net.UDPAddr),
 		nextSeqTable: make(map[uint32]uint32),
 		nChan:        make(chan packet.PacketI),
-		ur:           nil,
-		us:           nil,
+		udpReceiver:  nil,
+		udpSender:    nil,
 		udpConn:      nil,
 		listenAddr:   listenAddr,
 	}
@@ -40,7 +40,7 @@ func (n *Network) ReadyUDP() (*receiver.Receiver, *sender.Sender) {
 		log.Panicln("리슨 오류")
 	}
 	n.udpConn = ln
-	n.ur = receiver.NewReceiver(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
-	n.us = sender.NewSender(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
-	return n.ur, n.us
+	n.udpReceiver = receiver.NewReceiver(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
+	n.udpSender = sender.NewSender(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
+	return n.udpReceiver, n.udpSender
 }
