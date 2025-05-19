@@ -15,11 +15,13 @@ type Network struct {
 	udpReceiver   *receiver.UdpReceiver
 	udpSender     *sender.UdpSender
 	udpConn       *net.UDPConn
+	tcpListener   *net.TCPListener
+	tcpReceiver   *receiver.TcpReceiver
 	listenUdpAddr string
 	listenTcpAddr string
 }
 
-func NewNetwork(listenUdpAddr string) *Network {
+func NewNetwork(listenUdpAddr string, listenTcpAddr string) *Network {
 	return &Network{
 		connTable:     make(map[uint32]*net.UDPAddr),
 		nextSeqTable:  make(map[uint32]uint32),
@@ -27,21 +29,40 @@ func NewNetwork(listenUdpAddr string) *Network {
 		udpReceiver:   nil,
 		udpSender:     nil,
 		udpConn:       nil,
+		tcpListener:   nil,
+		tcpReceiver:   nil,
 		listenUdpAddr: listenUdpAddr,
+		listenTcpAddr: listenTcpAddr,
 	}
 }
 
 func (n *Network) ReadyUDP() (*receiver.UdpReceiver, *sender.UdpSender) {
-	UDPServerPoint, resolveErr := net.ResolveUDPAddr("udp", n.listenUdpAddr)
-	if resolveErr != nil {
+	udpServerPoint, udpResolveErr := net.ResolveUDPAddr("udp", n.listenUdpAddr)
+	if udpResolveErr != nil {
 		log.Panicln("네트워크 리졸버 오류")
 	}
-	ln, listenErr := net.ListenUDP("udp", UDPServerPoint)
-	if listenErr != nil {
+	udpLn, udpListenErr := net.ListenUDP("udp", udpServerPoint)
+	if udpListenErr != nil {
 		log.Panicln("리슨 오류")
 	}
-	n.udpConn = ln
+	n.udpConn = udpLn
 	n.udpReceiver = receiver.NewUdpReceiver(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
 	n.udpSender = sender.NewUdpSender(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
+
 	return n.udpReceiver, n.udpSender
+}
+
+func (n *Network) ReadyTcp() *receiver.TcpReceiver {
+	tcpServerPoint, tcpResolveErr := net.ResolveTCPAddr("tcp", n.listenTcpAddr)
+	if tcpResolveErr != nil {
+		log.Panicln("네트워크 리졸버 오류")
+	}
+	tcpLn, tcpListenErr := net.ListenTCP("tcp", tcpServerPoint)
+	if tcpListenErr != nil {
+		log.Panicln("리슨 오류")
+	}
+	n.tcpListener = tcpLn
+	n.tcpReceiver = receiver.NewTcpReceiver(tcpLn)
+
+	return n.tcpReceiver
 }
