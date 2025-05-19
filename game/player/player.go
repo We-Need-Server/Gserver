@@ -14,46 +14,19 @@ type Player struct {
 	jp                  bool
 	isAlive             bool
 	isShoot             bool
+	isReload            bool
 	ShootHitInformation map[uint32]int16
-}
-
-type HitInformationField struct {
-	hp      int16
-	hpDelta int16
-}
-
-type PlayerPosition struct {
-	Hp        *int16
-	PositionX float32
-	PositionZ float32
-	YawAngle  float32
-	PtAngle   float32
-	Jp        bool
-	IsShoot   bool
 }
 
 func NewPlayer() *Player {
 	return &Player{hp: 100, ShootHitInformation: make(map[uint32]int16)}
 }
 
-func NewPlayerPosition(hp *int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool) PlayerPosition {
-	return PlayerPosition{
-		Hp:        hp,
-		PositionX: positionX,
-		PositionZ: positionZ,
-		YawAngle:  yawAngle,
-		PtAngle:   ptAngle,
-		Jp:        jp,
-		IsShoot:   isShoot,
-	}
-}
-
-func (p *Player) GetPlayerDeltaState() PlayerPosition {
-	return NewPlayerPosition(&p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
-}
-
-func (p *Player) GetPlayerState() PlayerPosition {
-	return NewPlayerPosition(&p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot)
+//	func (p *Player) GetPlayerDeltaState() PlayerPosition {
+//		return NewPlayerPosition(p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
+//	}
+func (p *Player) GetPlayerState() *PlayerPosition {
+	return NewPlayerPosition(p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
 }
 
 func (p *Player) ReflectDeltaValues() {
@@ -142,6 +115,17 @@ func (p *Player) ReflectHitInformation() {
 	for key, _ := range p.ShootHitInformation {
 		p.ShootHitInformation[key] = 0
 	}
+}
+
+func (p *Player) ReflectPlayerPosition(playerPosition *PlayerPosition) {
+	p.positionX += (*playerPosition).PositionX
+	p.positionZ += (*playerPosition).PositionZ
+	p.hp -= (*playerPosition).Hp
+	p.jp = (*playerPosition).Jp
+	p.isShoot = (*playerPosition).IsShoot
+	p.isReload = playerPosition.IsReload
+	p.ptAngle += (*playerPosition).PtAngle
+	p.yawAngle += (*playerPosition).YawAngle
 }
 
 // 이게 그러면 tick 패킷이 만들어질 때 다 락킹이 걸린다.
