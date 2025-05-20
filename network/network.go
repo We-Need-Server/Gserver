@@ -9,6 +9,7 @@ import (
 )
 
 type Network struct {
+	idTable       map[uint32]uint8
 	connTable     map[uint32]*net.UDPAddr
 	nextSeqTable  map[uint32]uint32
 	nChan         chan udp.PacketI
@@ -22,6 +23,15 @@ type Network struct {
 }
 
 func NewNetwork(listenUdpAddr string, listenTcpAddr string) *Network {
+	idTable := make(map[uint32]uint8)
+	idTable[16] = 'B'
+	idTable[32] = 'B'
+	idTable[64] = 'B'
+	idTable[128] = 'B'
+	idTable[8] = 'R'
+	idTable[24] = 'R'
+	idTable[48] = 'R'
+	idTable[96] = 'R'
 	return &Network{
 		connTable:     make(map[uint32]*net.UDPAddr),
 		nextSeqTable:  make(map[uint32]uint32),
