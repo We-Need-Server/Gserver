@@ -6,8 +6,8 @@ import (
 	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/network/legacy"
-	client2 "WeNeedGameServer/packet/udp/client"
-	"WeNeedGameServer/packet/udp/server"
+	client2 "WeNeedGameServer/packet/udp/udp_client"
+	"WeNeedGameServer/packet/udp/udp_server"
 	"fmt"
 	"log"
 	"time"
@@ -126,13 +126,13 @@ func (gt *GameTick) processTick() {
 	gameState := gt.Game.GetGameState()
 	for qPort, userAddr := range gt.networkInstance.ConnTable {
 		actorStatus := gt.ActorStatusMap[qPort]
-		var tickPacket *server.TickPacket
+		var tickPacket *udp_server.TickPacket
 		if (actorStatus.Flags & 1 << 7) != 0 {
-			tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+			tickPacket = udp_server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
 		} else if (actorStatus.Flags & 1 << 6) != 0 {
 			restoreTickCount := gt.TickTime - actorStatus.RTickNumber
 			if restoreTickCount >= 60 {
-				tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags&^(1<<6), gameState)
+				tickPacket = udp_server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags&^(1<<6), gameState)
 			} else {
 				cloneGameDeltaState := make(map[uint32]player.PlayerPosition)
 				for k, v := range gameDeltaState {
@@ -153,10 +153,10 @@ func (gt *GameTick) processTick() {
 						}
 					}
 				}
-				tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+				tickPacket = udp_server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
 			}
 		} else {
-			tickPacket = server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
+			tickPacket = udp_server.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
 		}
 
 		_, err := gt.networkInstance.SendUDPPacket(tickPacket.Serialize(), userAddr)

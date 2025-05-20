@@ -1,7 +1,7 @@
 package udp
 
 import (
-	client2 "WeNeedGameServer/packet/udp/client"
+	client2 "WeNeedGameServer/packet/udp/udp_client"
 	"fmt"
 )
 

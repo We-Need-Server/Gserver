@@ -1,4 +1,4 @@
-package server
+package udp_server
 
 type StopPacket struct {
 	pKind uint8

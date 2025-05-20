@@ -5,8 +5,8 @@ import (
 	"WeNeedGameServer/game/player"
 	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/network/sender"
-	client2 "WeNeedGameServer/packet/udp/client"
-	server2 "WeNeedGameServer/packet/udp/server"
+	client2 "WeNeedGameServer/packet/udp/udp_client"
+	server2 "WeNeedGameServer/packet/udp/udp_server"
 	"fmt"
 	"log"
 	"time"
@@ -200,13 +200,13 @@ func (gt *GameTick) processTick() {
 //	gameState := gt.game.GetGameState()
 //	for qPort, userAddr := range *gt.udpSender.ConnTable {
 //		actorStatus := gt.actorStatusMap[qPort]
-//		var tickPacket *server.TickPacket
+//		var tickPacket *udp_server.TickPacket
 //		if (actorStatus.Flags & 1 << 7) != 0 {
-//			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+//			tickPacket = udp_server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
 //		} else if (actorStatus.Flags & 1 << 6) != 0 {
 //			restoreTickCount := gt.tickTime - actorStatus.RTickNumber
 //			if restoreTickCount >= 60 {
-//				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags&^(1<<6), gameState)
+//				tickPacket = udp_server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags&^(1<<6), gameState)
 //			} else {
 //				cloneGameDeltaState := make(map[uint32]player.PlayerPosition)
 //				for k, v := range gameDeltaState {
@@ -227,10 +227,10 @@ func (gt *GameTick) processTick() {
 //						}
 //					}
 //				}
-//				tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+//				tickPacket = udp_server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
 //			}
 //		} else {
-//			tickPacket = server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
+//			tickPacket = udp_server.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
 //		}
 //
 //		_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userAddr)
