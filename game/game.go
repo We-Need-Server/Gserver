@@ -2,18 +2,21 @@ package game
 
 import (
 	"WeNeedGameServer/game/player"
-	"WeNeedGameServer/game/round"
 )
 
 type Game struct {
-	round   *round.Round
-	players map[uint32]*player.Player
+	redAlivePlayerCount  uint16
+	blueAlivePlayerCount uint16
+	increaseScore        func(uint8)
+	players              map[uint32]*player.Player
 }
 
-func NewGame(round *round.Round) *Game {
+func NewGame(blueAlivePlayerCount uint16, redAlivePlayerCount uint16, increaseScore func(uint8)) *Game {
 	return &Game{
-		round:   round,
-		players: make(map[uint32]*player.Player),
+		blueAlivePlayerCount: blueAlivePlayerCount,
+		redAlivePlayerCount:  redAlivePlayerCount,
+		increaseScore:        increaseScore,
+		players:              make(map[uint32]*player.Player),
 	}
 }
 
@@ -36,4 +39,16 @@ func (g *Game) ReflectPlayers(playerPositionMap *map[uint32]*player.PlayerPositi
 		}
 		g.players[key].ReflectPlayerPosition(val)
 	}
+}
+
+func (g *Game) decreasePlayer(deadPlayerTeam uint8) {
+	if deadPlayerTeam == 'B' {
+		g.blueAlivePlayerCount -= 1
+		if g.blueAlivePlayerCount == 0 {
+			g.increaseScore('A')
+		}
+	} else {
+		g.redAlivePlayerCount -= 1
+	}
+
 }
