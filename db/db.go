@@ -45,9 +45,9 @@ func (db *UserDb) AddUser(userId uint32, team uint8) {
 	db.userList[userId] = user.NewUser(team)
 }
 
-func (db *UserDb) Login(userId uint32, userConn *net.Conn) error {
+func (db *UserDb) Login(userId uint32, userConn net.Conn) error {
 	if u, exists := db.userList[userId]; exists {
-		u.TcpAddr = userConn
+		u.TcpConn = userConn
 		u.QPort = db.qPortArr[len(db.qPortArr)-1]
 		db.qPortArr = db.qPortArr[:len(db.qPortArr)-1]
 		if u.Team == 'B' {

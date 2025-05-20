@@ -11,3 +11,11 @@ func NewUserConnectionUpdatePacket(userList []uint32) *UserConnectionUpdatePacke
 		UserList: userList,
 	}
 }
+
+func (p *UserConnectionUpdatePacket) Serialize() []byte {
+	return []byte{}
+}
+
+func (p *UserConnectionUpdatePacket) DeSerialize() {
+
+}
