@@ -6,15 +6,13 @@ import (
 )
 
 type Game struct {
-	round *round.Round
-
+	round   *round.Round
 	players map[uint32]*player.Player
 }
 
 func NewGame(round *round.Round) *Game {
 	return &Game{
-		round: round,
-
+		round:   round,
 		players: make(map[uint32]*player.Player),
 	}
 }
