@@ -5,8 +5,8 @@ import (
 	"WeNeedGameServer/game/player"
 	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/network/sender"
-	client2 "WeNeedGameServer/packet/udp/udp_client"
-	server2 "WeNeedGameServer/packet/udp/udp_server"
+	uclient "WeNeedGameServer/packet/udp/udp_client"
+	userver "WeNeedGameServer/packet/udp/udp_server"
 	"fmt"
 	"log"
 	"time"
@@ -19,7 +19,7 @@ type GameTick struct {
 	udpSender         *sender.UdpSender
 	ticks             [60]map[uint32]*player.PlayerPosition
 	actorStatusMap    map[uint32]*ActorStatus
-	stopPacket        *server2.StopPacket
+	stopPacket        *userver.StopPacket
 	playerPositionMap *map[uint32]*player.PlayerPosition
 }
 
@@ -45,7 +45,7 @@ func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender) *
 		udpSender:         udpSender,
 		ticks:             ticks,
 		actorStatusMap:    make(map[uint32]*ActorStatus),
-		stopPacket:        server2.NewStopPacket(),
+		stopPacket:        userver.NewStopPacket(),
 		playerPositionMap: nil,
 	}
 }
@@ -56,12 +56,12 @@ func (gt *GameTick) registerActorStatus(qPort uint32) {
 	}
 }
 
-func (gt *GameTick) iActorStatus(packet *client2.TickIPacket) {
+func (gt *GameTick) iActorStatus(packet *uclient.TickIPacket) {
 	gt.registerActorStatus(packet.GetQPort())
 	gt.actorStatusMap[packet.GetQPort()].Flags = 1 << 7
 }
 
-func (gt *GameTick) rActorStatus(packet *client2.TickRPacket) {
+func (gt *GameTick) rActorStatus(packet *uclient.TickRPacket) {
 	gt.registerActorStatus(packet.GetQPort())
 	gt.actorStatusMap[packet.GetQPort()].Flags = 1 << 6
 	gt.actorStatusMap[packet.GetQPort()].RTickNumber = packet.RTickNumber
@@ -98,13 +98,13 @@ func (gt *GameTick) dequeuePacket() {
 			gt.playerPositionMap = &tempMap
 			break
 		case 'I':
-			if p, ok := p.(*client2.TickIPacket); ok {
+			if p, ok := p.(*uclient.TickIPacket); ok {
 				gt.iActorStatus(p)
 			}
 			break
 		case 'R':
 			fmt.Println("왔다잉 재전송 패킷")
-			if p, ok := p.(*client2.TickRPacket); ok {
+			if p, ok := p.(*uclient.TickRPacket); ok {
 				gt.rActorStatus(p)
 			}
 			break
@@ -113,7 +113,7 @@ func (gt *GameTick) dequeuePacket() {
 			if _, exists := playerPositionMap[p.GetQPort()]; !exists {
 				playerPositionMap[p.GetQPort()] = player.NewPlayerPositionD()
 			}
-			if p, ok := p.(*server2.DeltaPacket); ok {
+			if p, ok := p.(*userver.DeltaPacket); ok {
 				playerPositionMap[p.GetQPort()].CalculatePlayerPosition(p.PlayerPosition)
 				fmt.Println(*playerPositionMap[p.GetQPort()])
 				for key, val := range *p.HitInformationMap {
@@ -130,7 +130,7 @@ func (gt *GameTick) dequeuePacket() {
 }
 
 func (gt *GameTick) processTick() {
-	*gt.udpSender.NChan <- server2.NewStopPacket()
+	*gt.udpSender.NChan <- userver.NewStopPacket()
 	for gt.playerPositionMap == nil {
 		//fmt.Println("while", gt.playerPositionMap)
 	}
@@ -143,15 +143,15 @@ func (gt *GameTick) processTick() {
 	for qPort, userAddr := range *gt.udpSender.ConnTable {
 		gt.registerActorStatus(qPort)
 		actorStatus := gt.actorStatusMap[qPort]
-		var tickPacket *server2.TickPacket
+		var tickPacket *userver.TickPacket
 		if (actorStatus.Flags & (1 << 7)) != 0 {
-			tickPacket = server2.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
+			tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
 		} else if (actorStatus.Flags & (1 << 6)) != 0 {
 			restoreTickCount := gt.tickTime - actorStatus.RTickNumber
 			if restoreTickCount >= 60 {
 				fmt.Println("좌표값 패킷 발사")
 				actorStatus.Flags = (actorStatus.Flags &^ (1 << 6)) | (1 << 7)
-				tickPacket = server2.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
+				tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, gameState)
 			} else {
 				fmt.Println("재전송 패킷 발사")
 				cloneGameDeltaState := make(map[uint32]*player.PlayerPosition)
@@ -173,11 +173,11 @@ func (gt *GameTick) processTick() {
 						}
 					}
 				}
-				tickPacket = server2.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
+				tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
 			}
 		} else {
 			fmt.Println("tick packet", *((*gt).playerPositionMap))
-			tickPacket = server2.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, *gt.playerPositionMap)
+			tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), (*gt.udpSender.NextSeqTable)[qPort]-1, actorStatus.Flags, *gt.playerPositionMap)
 		}
 
 		_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userAddr)

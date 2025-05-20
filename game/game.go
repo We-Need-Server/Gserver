@@ -1,13 +1,22 @@
 package game
 
-import "WeNeedGameServer/game/player"
+import (
+	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/game/round"
+)
 
 type Game struct {
+	round *round.Round
+
 	players map[uint32]*player.Player
 }
 
-func NewGame() *Game {
-	return &Game{players: make(map[uint32]*player.Player)}
+func NewGame(round *round.Round) *Game {
+	return &Game{
+		round: round,
+
+		players: make(map[uint32]*player.Player),
+	}
 }
 
 func (g *Game) GetGameState() map[uint32]*player.PlayerPosition {
