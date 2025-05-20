@@ -1,6 +1,7 @@
 package network
 
 import (
+	"WeNeedGameServer/db/user"
 	"WeNeedGameServer/network/receiver"
 	"WeNeedGameServer/network/sender"
 	"WeNeedGameServer/packet/udp"
@@ -9,8 +10,8 @@ import (
 )
 
 type Network struct {
-	idTable       map[uint32]uint8
-	connTable     map[uint32]*net.UDPAddr
+	tcpConnTable  map[uint32]*net.Conn
+	udpConnTable  map[uint32]*net.UDPAddr
 	nextSeqTable  map[uint32]uint32
 	nChan         chan udp.PacketI
 	udpReceiver   *receiver.UdpReceiver
@@ -18,22 +19,15 @@ type Network struct {
 	udpConn       *net.UDPConn
 	tcpListener   *net.TCPListener
 	tcpReceiver   *receiver.TcpReceiver
+	tcpSender     *sender.TcpSender
 	listenUdpAddr string
 	listenTcpAddr string
 }
 
 func NewNetwork(listenUdpAddr string, listenTcpAddr string) *Network {
-	idTable := make(map[uint32]uint8)
-	idTable[16] = 'B'
-	idTable[32] = 'B'
-	idTable[64] = 'B'
-	idTable[128] = 'B'
-	idTable[8] = 'R'
-	idTable[24] = 'R'
-	idTable[48] = 'R'
-	idTable[96] = 'R'
 	return &Network{
-		connTable:     make(map[uint32]*net.UDPAddr),
+		tcpConnTable:  make(map[uint32]*net.Conn),
+		udpConnTable:  make(map[uint32]*net.UDPAddr),
 		nextSeqTable:  make(map[uint32]uint32),
 		nChan:         make(chan udp.PacketI),
 		udpReceiver:   nil,
@@ -41,6 +35,7 @@ func NewNetwork(listenUdpAddr string, listenTcpAddr string) *Network {
 		udpConn:       nil,
 		tcpListener:   nil,
 		tcpReceiver:   nil,
+		tcpSender:     nil,
 		listenUdpAddr: listenUdpAddr,
 		listenTcpAddr: listenTcpAddr,
 	}
@@ -56,13 +51,17 @@ func (n *Network) ReadyUdp() (*receiver.UdpReceiver, *sender.UdpSender) {
 		log.Panicln("리슨 오류")
 	}
 	n.udpConn = udpLn
-	n.udpReceiver = receiver.NewUdpReceiver(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
-	n.udpSender = sender.NewUdpSender(&n.connTable, &n.nextSeqTable, &n.nChan, n.udpConn)
+	n.udpReceiver = receiver.NewUdpReceiver(&n.udpConnTable, &n.nextSeqTable, &n.nChan, n.udpConn)
+	n.udpSender = sender.NewUdpSender(&n.udpConnTable, &n.nextSeqTable, &n.nChan, n.udpConn)
 
 	return n.udpReceiver, n.udpSender
 }
 
-func (n *Network) ReadyTcp() *receiver.TcpReceiver {
+func (n *Network) communicateTcpSender(message receiver.TcpReceiverMessage) {
+	n.tcpSender.ProcessMessage(message)
+}
+
+func (n *Network) ReadyTcp(redTeamDb map[uint32]*user.User, blueTeamDb map[uint32]*user.User, loginFunc func(uint32, *net.TCPAddr) (uint32, error)) *receiver.TcpReceiver {
 	tcpServerPoint, tcpResolveErr := net.ResolveTCPAddr("tcp", n.listenTcpAddr)
 	if tcpResolveErr != nil {
 		log.Panicln("네트워크 리졸버 오류")
@@ -72,7 +71,8 @@ func (n *Network) ReadyTcp() *receiver.TcpReceiver {
 		log.Panicln("리슨 오류")
 	}
 	n.tcpListener = tcpLn
-	n.tcpReceiver = receiver.NewTcpReceiver(tcpLn)
+	n.tcpSender = sender.NewTcpSender(n.listenUdpAddr, n.tcpConnTable)
+	n.tcpReceiver = receiver.NewTcpReceiver(tcpLn, n.tcpConnTable, loginFunc, n.communicateTcpSender)
 
 	return n.tcpReceiver
 }

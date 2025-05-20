@@ -50,6 +50,11 @@ func (db *UserDb) Login(userId uint32, userAddr *net.TCPAddr) (uint32, error) {
 		u.TcpAddr = userAddr
 		u.QPort = db.qPortArr[len(db.qPortArr)-1]
 		db.qPortArr = db.qPortArr[:len(db.qPortArr)-1]
+		if u.Team == 'B' {
+			db.BlueTeamDb[userId] = u
+		} else {
+			db.RedTeamDb[userId] = u
+		}
 		return u.QPort, nil
 	} else {
 		return 0, fmt.Errorf("login failed")
