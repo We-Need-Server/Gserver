@@ -1,19 +1,21 @@
 package sender
 
 import (
+	"WeNeedGameServer/db/user"
 	"WeNeedGameServer/network/receiver"
-	"net"
 )
 
 type TcpSender struct {
 	listenUdpAddr string
-	tcpConnTable  map[uint32]*net.Conn
+	blueTeamDb    map[uint32]*user.User
+	redTeamDb     map[uint32]*user.User
 }
 
-func NewTcpSender(listenUdpAddr string, tcpConnTable map[uint32]*net.Conn) *TcpSender {
+func NewTcpSender(listenUdpAddr string, blueTeamDb map[uint32]*user.User, redTeamDb map[uint32]*user.User) *TcpSender {
 	return &TcpSender{
 		listenUdpAddr: listenUdpAddr,
-		tcpConnTable:  tcpConnTable,
+		blueTeamDb:    blueTeamDb,
+		redTeamDb:     redTeamDb,
 	}
 }
 

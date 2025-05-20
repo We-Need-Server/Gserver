@@ -4,7 +4,7 @@ import "net"
 
 type User struct {
 	QPort   uint32
-	TcpAddr *net.TCPAddr
+	TcpAddr *net.Conn
 	Team    uint8
 }
 

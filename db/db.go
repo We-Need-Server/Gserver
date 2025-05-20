@@ -45,9 +45,9 @@ func (db *UserDb) AddUser(userId uint32, team uint8) {
 	db.userList[userId] = user.NewUser(team)
 }
 
-func (db *UserDb) Login(userId uint32, userAddr *net.TCPAddr) (uint32, error) {
+func (db *UserDb) Login(userId uint32, userConn *net.Conn) error {
 	if u, exists := db.userList[userId]; exists {
-		u.TcpAddr = userAddr
+		u.TcpAddr = userConn
 		u.QPort = db.qPortArr[len(db.qPortArr)-1]
 		db.qPortArr = db.qPortArr[:len(db.qPortArr)-1]
 		if u.Team == 'B' {
@@ -55,8 +55,8 @@ func (db *UserDb) Login(userId uint32, userAddr *net.TCPAddr) (uint32, error) {
 		} else {
 			db.RedTeamDb[userId] = u
 		}
-		return u.QPort, nil
+		return nil
 	} else {
-		return 0, fmt.Errorf("login failed")
+		return fmt.Errorf("login failed")
 	}
 }
