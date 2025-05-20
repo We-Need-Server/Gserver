@@ -1,13 +1,13 @@
 package internal_type
 
 type UserSpawnStatus struct {
-	userId       uint32
-	respawnPoint int16
+	UserId       uint32 `json:"userId"`
+	RespawnPoint int16  `json:"respawnPoint"`
 }
 
 func NewUserSpawnStatus(userId uint32, respawnPoint int16) *UserSpawnStatus {
 	return &UserSpawnStatus{
-		userId:       userId,
-		respawnPoint: respawnPoint,
+		UserId:       userId,
+		RespawnPoint: respawnPoint,
 	}
 }
