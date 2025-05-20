@@ -46,11 +46,11 @@ func (db *UserDb) AddUser(userId uint32, team uint8) {
 }
 
 func (db *UserDb) Login(userId uint32, userAddr *net.TCPAddr) (uint32, error) {
-	if user, exists := db.userList[userId]; exists {
-		user.TcpAddr = userAddr
-		user.QPort = db.qPortArr[len(db.qPortArr)-1]
+	if u, exists := db.userList[userId]; exists {
+		u.TcpAddr = userAddr
+		u.QPort = db.qPortArr[len(db.qPortArr)-1]
 		db.qPortArr = db.qPortArr[:len(db.qPortArr)-1]
-		return user.QPort, nil
+		return u.QPort, nil
 	} else {
 		return 0, fmt.Errorf("login failed")
 	}
