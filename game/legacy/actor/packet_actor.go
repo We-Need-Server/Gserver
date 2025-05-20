@@ -3,8 +3,8 @@ package actor
 import (
 	"WeNeedGameServer/command"
 	"WeNeedGameServer/mediator"
-	"WeNeedGameServer/packet"
-	"WeNeedGameServer/packet/client"
+	"WeNeedGameServer/packet/udp"
+	"WeNeedGameServer/packet/udp/client"
 	"WeNeedGameServer/util"
 	"fmt"
 	"math"
@@ -14,12 +14,12 @@ import (
 type PacketActor struct {
 	QPort      uint32
 	UserAddr   *net.UDPAddr
-	packetChan chan packet.PacketI
+	packetChan chan udp.PacketI
 	//actorPlayer *player.Player
 	Mediator *mediator.Mediator
 }
 
-func NewPacketActor(QPort uint32, UserAddr *net.UDPAddr, packetChan chan packet.PacketI) *PacketActor {
+func NewPacketActor(QPort uint32, UserAddr *net.UDPAddr, packetChan chan udp.PacketI) *PacketActor {
 	return &PacketActor{QPort, UserAddr, packetChan, nil}
 }
 

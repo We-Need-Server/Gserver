@@ -2,25 +2,25 @@ package receiver
 
 import (
 	"WeNeedGameServer/network/actor"
-	"WeNeedGameServer/packet"
+	"WeNeedGameServer/packet/udp"
 	"fmt"
 	"log"
 	"net"
 )
 
 type UdpReceiver struct {
-	chanTable         map[uint32]chan packet.PacketI
+	chanTable         map[uint32]chan udp.PacketI
 	connTable         *map[uint32]*net.UDPAddr
 	networkActorTable map[uint32]*actor.UdpActor
 	nextSeqTable      *map[uint32]uint32
-	nChan             *chan packet.PacketI
+	nChan             *chan udp.PacketI
 	nChanManager      *UdpChanManager
 	udpConn           *net.UDPConn
 }
 
-func NewUdpReceiver(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nChan *chan packet.PacketI, udpConn *net.UDPConn) *UdpReceiver {
+func NewUdpReceiver(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nChan *chan udp.PacketI, udpConn *net.UDPConn) *UdpReceiver {
 	return &UdpReceiver{
-		chanTable:         make(map[uint32]chan packet.PacketI),
+		chanTable:         make(map[uint32]chan udp.PacketI),
 		connTable:         connTable,
 		networkActorTable: make(map[uint32]*actor.UdpActor),
 		nextSeqTable:      nextSeqTable,
@@ -43,7 +43,7 @@ func (r *UdpReceiver) StartUdp() {
 }
 
 func (r *UdpReceiver) handlePacket(clientPacket []byte, endPoint int, userAddr *net.UDPAddr) {
-	data, err := packet.ParsePacketByKind(clientPacket, endPoint)
+	data, err := udp.ParsePacketByKind(clientPacket, endPoint)
 	if err != nil {
 		log.Panicln("잘못된 요청")
 	}
@@ -54,7 +54,7 @@ func (r *UdpReceiver) handlePacket(clientPacket []byte, endPoint int, userAddr *
 	r.throwData(data)
 }
 
-func (r *UdpReceiver) throwData(data packet.ClientPacketI) {
+func (r *UdpReceiver) throwData(data udp.ClientPacketI) {
 	if (*r.connTable)[data.GetQPort()] != nil || (*r.nextSeqTable)[data.GetQPort()] == data.GetSEQ() {
 		(*r.nextSeqTable)[data.GetQPort()] += 1
 		fmt.Println("R 패킷 왔니")
@@ -68,7 +68,7 @@ func (r *UdpReceiver) throwData(data packet.ClientPacketI) {
 }
 
 func (r *UdpReceiver) tempHandleNewConnection(qPort uint32, userAddr *net.UDPAddr) {
-	r.chanTable[qPort] = make(chan packet.PacketI)
+	r.chanTable[qPort] = make(chan udp.PacketI)
 	(*r.connTable)[qPort] = userAddr
 	(*r.nextSeqTable)[qPort] = 1
 	networkActor := actor.NewUdpActor(qPort, userAddr, r.chanTable[qPort], &r.nChanManager.CmChan)

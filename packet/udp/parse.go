@@ -1,4 +1,4 @@
-package packet
+package udp
 
 // 하나의 공통된 함수를 통해서 패킷을 파싱하는 것을 해보자.
 //

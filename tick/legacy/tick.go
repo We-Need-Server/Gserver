@@ -6,8 +6,8 @@ import (
 	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/mediator"
 	"WeNeedGameServer/network/legacy"
-	"WeNeedGameServer/packet/client"
-	"WeNeedGameServer/packet/server"
+	client2 "WeNeedGameServer/packet/udp/client"
+	"WeNeedGameServer/packet/udp/server"
 	"fmt"
 	"log"
 	"time"
@@ -62,9 +62,9 @@ func (gt *GameTick) Send(receiverName string, message interface{}) {
 func (gt *GameTick) Receive(senderName string, message interface{}) {
 	if senderName == "network" {
 		switch pkt := message.(type) {
-		case *client.TickIPacket:
+		case *client2.TickIPacket:
 			gt.iActorStatus(pkt)
-		case *client.TickRPacket:
+		case *client2.TickRPacket:
 			gt.rActorStatus(pkt)
 		case *internal_type.SEQData:
 			gt.updateUserSEQ(pkt)
@@ -82,13 +82,13 @@ func (gt *GameTick) registerActorStatus(qPort uint32) {
 	}
 }
 
-func (gt *GameTick) iActorStatus(packet *client.TickIPacket) {
+func (gt *GameTick) iActorStatus(packet *client2.TickIPacket) {
 	if _, exists := gt.ActorStatusMap[packet.GetQPort()]; exists {
 		gt.ActorStatusMap[packet.GetQPort()].Flags |= 1 << 7
 	}
 }
 
-func (gt *GameTick) rActorStatus(packet *client.TickRPacket) {
+func (gt *GameTick) rActorStatus(packet *client2.TickRPacket) {
 	if _, exists := gt.ActorStatusMap[packet.GetQPort()]; exists {
 		gt.ActorStatusMap[packet.GetQPort()].Flags |= 1 << 6
 		gt.ActorStatusMap[packet.GetQPort()].RTickNumber = packet.RTickNumber

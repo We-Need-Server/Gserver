@@ -5,13 +5,13 @@ import (
 	"WeNeedGameServer/game/legacy/actor"
 	"WeNeedGameServer/internal_type"
 	"WeNeedGameServer/mediator"
-	"WeNeedGameServer/packet"
+	"WeNeedGameServer/packet/udp"
 	"log"
 	"net"
 )
 
 type Network struct {
-	chanTable        map[uint32]chan packet.PacketI
+	chanTable        map[uint32]chan udp.PacketI
 	ConnTable        map[uint32]*net.UDPAddr
 	nextSEQTable     map[uint32]uint32
 	packetActorTable map[uint32]*actor.PacketActor
@@ -22,7 +22,7 @@ type Network struct {
 
 func NewNetwork(game *legacy.Game) *Network {
 	return &Network{
-		chanTable:        make(map[uint32]chan packet.PacketI),
+		chanTable:        make(map[uint32]chan udp.PacketI),
 		ConnTable:        make(map[uint32]*net.UDPAddr),
 		nextSEQTable:     make(map[uint32]uint32),
 		packetActorTable: make(map[uint32]*actor.PacketActor),
@@ -63,7 +63,7 @@ func (n *Network) Receive(senderName string, message interface{}) {
 }
 
 func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.UDPAddr) {
-	data, err := packet.ParsePacketByKind(clientPacket, endPoint)
+	data, err := udp.ParsePacketByKind(clientPacket, endPoint)
 	if err != nil {
 		log.Panicln("잘못된 요청")
 	}
@@ -87,7 +87,7 @@ func (n *Network) handlePacket(clientPacket []byte, endPoint int, userAddr *net.
 //	return checkUser
 //}
 
-func (n *Network) throwData(data packet.ClientPacketI, userAddr *net.UDPAddr) {
+func (n *Network) throwData(data udp.ClientPacketI, userAddr *net.UDPAddr) {
 	if n.ConnTable[data.GetQPort()] != nil || n.nextSEQTable[data.GetQPort()] == data.GetSEQ() {
 		n.nextSEQTable[data.GetQPort()] += 1
 		n.Send("tick", internal_type.NewSEQData(data.GetQPort(), data.GetSEQ()))
@@ -98,7 +98,7 @@ func (n *Network) throwData(data packet.ClientPacketI, userAddr *net.UDPAddr) {
 // handleConnection을 실행하도록 한다
 
 func (n *Network) tempHandleNewConnection(qPort uint32, userAddr *net.UDPAddr) {
-	n.chanTable[qPort] = make(chan packet.PacketI)
+	n.chanTable[qPort] = make(chan udp.PacketI)
 	n.ConnTable[qPort] = userAddr
 	n.nextSEQTable[qPort] = 1
 	// 이 부분에 대해서 mediator로 게임 객체에 전달하게 하여 게임 객체를 네트워크 객체가 안 가지도록 할 수 있음

@@ -1,13 +1,13 @@
 package register
 
 import (
-	"WeNeedGameServer/packet"
+	"WeNeedGameServer/packet/udp"
 	"fmt"
 )
 
-type PacketRegister map[string]packet.PropertyMap
+type PacketRegister map[string]udp.PropertyMap
 
-func (p PacketRegister) Add(s string, packetMap packet.PropertyMap) (string, error) {
+func (p PacketRegister) Add(s string, packetMap udp.PropertyMap) (string, error) {
 	if s == "" {
 		return "", fmt.Errorf("packet name cannot be empty")
 	}

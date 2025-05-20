@@ -1,7 +1,7 @@
-package packet
+package udp
 
 import (
-	"WeNeedGameServer/packet/client"
+	client2 "WeNeedGameServer/packet/udp/client"
 	"fmt"
 )
 
@@ -47,11 +47,11 @@ func ParsePacketByKind(np []byte, endPoint int) (ClientPacketI, error) {
 
 	switch pKind {
 	case 'N':
-		return client.ParseEventPacket(np, endPoint), nil
+		return client2.ParseEventPacket(np, endPoint), nil
 	case 'I':
-		return client.ParseTickIPacket(np, endPoint), nil
+		return client2.ParseTickIPacket(np, endPoint), nil
 	case 'R':
-		return client.ParseTickRPacket(np, endPoint), nil
+		return client2.ParseTickRPacket(np, endPoint), nil
 	default:
 		return nil, fmt.Errorf("unknown packet kind: %d", pKind)
 	}

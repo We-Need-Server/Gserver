@@ -1,7 +1,7 @@
 package sender
 
 import (
-	"WeNeedGameServer/packet"
+	"WeNeedGameServer/packet/udp"
 	"fmt"
 	"log"
 	"net"
@@ -10,11 +10,11 @@ import (
 type UdpSender struct {
 	ConnTable    *map[uint32]*net.UDPAddr
 	NextSeqTable *map[uint32]uint32
-	NChan        *chan packet.PacketI
+	NChan        *chan udp.PacketI
 	udpConn      *net.UDPConn
 }
 
-func NewUdpSender(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nChan *chan packet.PacketI, udpConn *net.UDPConn) *UdpSender {
+func NewUdpSender(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nChan *chan udp.PacketI, udpConn *net.UDPConn) *UdpSender {
 	return &UdpSender{
 		ConnTable:    connTable,
 		NextSeqTable: nextSeqTable,
