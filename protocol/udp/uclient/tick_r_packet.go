@@ -1,4 +1,4 @@
-package udp_client
+package uclient
 
 import (
 	"WeNeedGameServer/util"

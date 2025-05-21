@@ -4,8 +4,8 @@ import (
 	"WeNeedGameServer/command"
 	"WeNeedGameServer/game/player"
 	"WeNeedGameServer/protocol/udp"
-	"WeNeedGameServer/protocol/udp/udp_client"
-	"WeNeedGameServer/protocol/udp/udp_server"
+	"WeNeedGameServer/protocol/udp/uclient"
+	"WeNeedGameServer/protocol/udp/userver"
 	"WeNeedGameServer/util"
 	"fmt"
 	"math"
@@ -29,13 +29,13 @@ func (na *UdpActor) ProcessLoopPacket() {
 
 		switch pkt.GetPacketKind() {
 		case 'N':
-			na.processEventPacket(pkt.(*udp_client.EventPacket))
+			na.processEventPacket(pkt.(*uclient.EventPacket))
 		}
 
 	}
 }
 
-func (na *UdpActor) processEventPacket(packet *udp_client.EventPacket) {
+func (na *UdpActor) processEventPacket(packet *uclient.EventPacket) {
 	if packet.GetPacketKind() == 'N' {
 		na.processCommandPayload(packet.Payload, packet.PayloadEndpoint)
 	}
@@ -107,5 +107,5 @@ func (na *UdpActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
 		}
 	}
 
-	*na.qmChan <- udp_server.NewDeltaPacket(na.qPort, playerPosition, &hitInformationMap)
+	*na.qmChan <- userver.NewDeltaPacket(na.qPort, playerPosition, &hitInformationMap)
 }

@@ -4,7 +4,7 @@ import (
 	"WeNeedGameServer/game/internal/command"
 	"WeNeedGameServer/legacy/mediator"
 	"WeNeedGameServer/protocol/udp"
-	"WeNeedGameServer/protocol/udp/udp_client"
+	"WeNeedGameServer/protocol/udp/uclient"
 	"WeNeedGameServer/util"
 	"fmt"
 	"math"
@@ -40,13 +40,13 @@ func (a *PacketActor) ProcessLoopPacket() {
 
 		switch pkt.GetPacketKind() {
 		case 'N':
-			a.processEventPacket(pkt.(*udp_client.EventPacket))
+			a.processEventPacket(pkt.(*uclient.EventPacket))
 		}
 
 	}
 }
 
-func (a *PacketActor) processEventPacket(packet *udp_client.EventPacket) {
+func (a *PacketActor) processEventPacket(packet *uclient.EventPacket) {
 	if packet.GetPacketKind() == 'N' {
 		a.processCommandPayload(packet.Payload, packet.PayloadEndpoint)
 	}

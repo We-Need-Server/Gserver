@@ -1,4 +1,4 @@
-package udp_server
+package userver
 
 import (
 	"WeNeedGameServer/game/player"
