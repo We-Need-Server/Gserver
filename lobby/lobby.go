@@ -3,6 +3,7 @@ package lobby
 import (
 	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/lobby/internal"
+	"WeNeedGameServer/protocol/tcp"
 	"log"
 	"net"
 )
@@ -26,7 +27,7 @@ func NewLobby(listenUdpAddr string, listenTcpAddr string) *Lobby {
 	}
 }
 
-func (l *Lobby) communicateTcpSender(message internal.TcpReceiverMessage) {
+func (l *Lobby) communicateTcpSender(message *tcp.ReceiverMessage) {
 	l.tcpSender.ProcessMessage(message)
 }
 

@@ -1,4 +1,4 @@
-package tcp_server
+package tserver
 
 type UserConnectionUpdatePacket struct {
 	PKind    uint8    `json:"packetKind"`

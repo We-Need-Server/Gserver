@@ -1,4 +1,4 @@
-package tcp_server
+package tserver
 
 type GameOverPacket struct {
 	PKind uint8 `json:"packetKind"`
@@ -6,4 +6,12 @@ type GameOverPacket struct {
 
 func NewGameOverPacket() *GameOverPacket {
 	return &GameOverPacket{PKind: 'O'}
+}
+
+func (p *GameOverPacket) DeSerialize() {
+
+}
+
+func (p *GameOverPacket) Serialize() []byte {
+	return []byte{}
 }

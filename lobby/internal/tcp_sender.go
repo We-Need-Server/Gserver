@@ -3,7 +3,7 @@ package internal
 import (
 	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/protocol/tcp"
-	"WeNeedGameServer/protocol/tcp/tcp_server"
+	"WeNeedGameServer/protocol/tcp/tserver"
 	"fmt"
 )
 
@@ -21,12 +21,12 @@ func NewTcpSender(listenUdpAddr string, blueTeamDb map[uint32]*db.User, redTeamD
 	}
 }
 
-func (s *TcpSender) ProcessMessage(message TcpReceiverMessage) {
+func (s *TcpSender) ProcessMessage(message *tcp.ReceiverMessage) {
 	switch message.SenderType {
-	case SendByBroadCast:
+	case tcp.SendByBroadCast:
 		s.sendByBroadCast(s.makePacket(message.PKind, message.UserId))
 		break
-	case SendByUniCast:
+	case tcp.SendByUniCast:
 		s.sendByUniCast(message.UserId, s.makePacket(message.PKind, message.UserId))
 		break
 	}
@@ -36,7 +36,7 @@ func (s *TcpSender) makePacket(pKind uint8, userId uint32) tcp.PacketI {
 	switch pKind {
 	case 'I':
 		if u := s.getUser(userId); u != nil {
-			return tcp_server.NewConnectionResponsePacket(u.QPort, s.listenUdpAddr)
+			return tserver.NewConnectionResponsePacket(u.QPort, s.listenUdpAddr)
 		}
 	case 'U':
 		var userList []uint32
@@ -46,7 +46,7 @@ func (s *TcpSender) makePacket(pKind uint8, userId uint32) tcp.PacketI {
 		for key, _ := range s.redTeamDb {
 			userList = append(userList, key)
 		}
-		return tcp_server.NewUserConnectionUpdatePacket(userList)
+		return tserver.NewUserConnectionUpdatePacket(userList)
 	case 'S':
 		break
 	}

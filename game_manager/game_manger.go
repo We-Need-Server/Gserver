@@ -2,6 +2,8 @@ package game_manager
 
 import (
 	"WeNeedGameServer/external/db"
+	"WeNeedGameServer/protocol/tcp"
+	"WeNeedGameServer/protocol/tcp/tserver"
 )
 
 type GameManager struct {
@@ -12,9 +14,10 @@ type GameManager struct {
 	blueAlivePlayerCount uint16
 	redAlivePlayerCount  uint16
 	finalWinnerTeam      uint8
+	sendTcpPacketFunc    func(message *tcp.ReceiverMessage)
 }
 
-func NewGameManager(userDb *db.Db, matchScore uint16) *GameManager {
+func NewGameManager(userDb *db.Db, matchScore uint16, sendTcpPacketFunc func(message *tcp.ReceiverMessage)) *GameManager {
 	return &GameManager{
 		userDb:               userDb,
 		matchScore:           matchScore,
@@ -23,6 +26,7 @@ func NewGameManager(userDb *db.Db, matchScore uint16) *GameManager {
 		blueAlivePlayerCount: 0,
 		redAlivePlayerCount:  0,
 		finalWinnerTeam:      0,
+		sendTcpPacketFunc:    sendTcpPacketFunc,
 	}
 }
 
@@ -31,20 +35,30 @@ func (gm *GameManager) InitAlivePlayer() {
 	gm.redAlivePlayerCount = gm.userDb.GetTeamAlivePlayerCount(db.RedTeam)
 }
 
-func (gm *GameManager) IncreaseScore(winnerTeam uint8) {
+func (gm *GameManager) IncreaseScore(winnerTeam db.Team) {
 	gm.matchScore -= 1
-	if winnerTeam == 'B' {
-		gm.blueScore += 1
-	} else {
+	if winnerTeam {
 		gm.redScore += 1
+	} else {
+		gm.blueScore += 1
+	}
+	if gm.matchScore == 0 {
+		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage('O', tserver.NewGameOverPacket()))
+	} else {
+
 	}
 }
 
-func (gm *GameManager) DecreasePlayer(deadPlayerTeam uint8) (uint16, uint16) {
-	if deadPlayerTeam == 'B' {
-		gm.blueAlivePlayerCount -= 1
-	} else {
+func (gm *GameManager) DecreasePlayer(deadPlayerTeam db.Team) {
+	if deadPlayerTeam {
 		gm.redAlivePlayerCount -= 1
+		if gm.redAlivePlayerCount == 0 {
+			gm.IncreaseScore(db.BlueTeam)
+		}
+	} else {
+		gm.blueAlivePlayerCount -= 1
+		if gm.blueAlivePlayerCount == 0 {
+			gm.IncreaseScore(db.RedTeam)
+		}
 	}
-	return gm.blueAlivePlayerCount, gm.redAlivePlayerCount
 }

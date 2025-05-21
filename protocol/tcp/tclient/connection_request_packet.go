@@ -1,4 +1,4 @@
-package tcp_client
+package tclient
 
 type ConnectionRequestPacket struct {
 	UserId uint32

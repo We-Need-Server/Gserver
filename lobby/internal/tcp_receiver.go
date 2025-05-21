@@ -1,16 +1,17 @@
 package internal
 
 import (
+	"WeNeedGameServer/protocol/tcp"
 	"net"
 )
 
 type TcpReceiver struct {
 	tcpListener           *net.TCPListener
 	loginFunc             func(uint32, net.Conn) error
-	communicateSenderFunc func(TcpReceiverMessage)
+	communicateSenderFunc func(*tcp.ReceiverMessage)
 }
 
-func NewTcpReceiver(tcpListener *net.TCPListener, loginFunc func(uint32, net.Conn) error, communicateSenderFunc func(TcpReceiverMessage)) *TcpReceiver {
+func NewTcpReceiver(tcpListener *net.TCPListener, loginFunc func(uint32, net.Conn) error, communicateSenderFunc func(*tcp.ReceiverMessage)) *TcpReceiver {
 	return &TcpReceiver{
 		tcpListener:           tcpListener,
 		loginFunc:             loginFunc,
