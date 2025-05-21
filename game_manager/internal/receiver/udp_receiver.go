@@ -1,8 +1,8 @@
 package receiver
 
 import (
+	"WeNeedGameServer/game_manager/internal/actor"
 	"WeNeedGameServer/protocol/udp"
-	"WeNeedGameServer/round/internal/actor"
 	"fmt"
 	"log"
 	"net"

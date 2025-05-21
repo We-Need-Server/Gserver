@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"WeNeedGameServer/external/db/user"
+	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/protocol/tcp"
 	"WeNeedGameServer/protocol/tcp/tcp_server"
 	"fmt"
@@ -9,11 +9,11 @@ import (
 
 type TcpSender struct {
 	listenUdpAddr string
-	blueTeamDb    map[uint32]*user.User
-	redTeamDb     map[uint32]*user.User
+	blueTeamDb    map[uint32]*db.User
+	redTeamDb     map[uint32]*db.User
 }
 
-func NewTcpSender(listenUdpAddr string, blueTeamDb map[uint32]*user.User, redTeamDb map[uint32]*user.User) *TcpSender {
+func NewTcpSender(listenUdpAddr string, blueTeamDb map[uint32]*db.User, redTeamDb map[uint32]*db.User) *TcpSender {
 	return &TcpSender{
 		listenUdpAddr: listenUdpAddr,
 		blueTeamDb:    blueTeamDb,
@@ -61,7 +61,7 @@ func (s *TcpSender) sendByBroadCast(packet tcp.PacketI) {
 					fmt.Println("send broadcast error", err)
 				}
 			} else {
-				u = user.NewUser(u.Team)
+				u = db.NewUser(u.Team)
 			}
 		}
 	}
@@ -77,7 +77,7 @@ func (s *TcpSender) sendByUniCast(userId uint32, packet tcp.PacketI) {
 	}
 }
 
-func (s *TcpSender) getUser(userId uint32) *user.User {
+func (s *TcpSender) getUser(userId uint32) *db.User {
 	if u, bExists := s.blueTeamDb[userId]; bExists {
 		return u
 	} else if u, rExists := s.redTeamDb[userId]; rExists {

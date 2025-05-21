@@ -1,9 +1,9 @@
 package internal
 
 import (
+	"WeNeedGameServer/game_manager/internal/receiver"
+	"WeNeedGameServer/game_manager/internal/sender"
 	"WeNeedGameServer/protocol/udp"
-	"WeNeedGameServer/round/internal/receiver"
-	"WeNeedGameServer/round/internal/sender"
 	"log"
 	"net"
 )

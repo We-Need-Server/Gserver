@@ -1,7 +1,7 @@
 package tcp_server
 
 import (
-	"WeNeedGameServer/round/internal/types"
+	"WeNeedGameServer/game_manager/internal/types"
 )
 
 type RoundStartPacket struct {

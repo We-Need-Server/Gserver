@@ -3,10 +3,10 @@ package tick
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/game_manager/internal/sender"
+	"WeNeedGameServer/game_manager/internal/types"
 	udp_client2 "WeNeedGameServer/protocol/udp/udp_client"
 	udp_server2 "WeNeedGameServer/protocol/udp/udp_server"
-	"WeNeedGameServer/round/internal/sender"
-	"WeNeedGameServer/round/internal/types"
 	"fmt"
 	"log"
 	"time"

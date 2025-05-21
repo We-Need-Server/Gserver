@@ -3,9 +3,9 @@ package main
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game/internal/tick"
+	"WeNeedGameServer/game_manager/internal"
 	"WeNeedGameServer/lobby/internal/db"
 	"WeNeedGameServer/protocol/register"
-	"WeNeedGameServer/round/internal"
 )
 
 var PacketRegisterInstance = make(register.PacketRegister)

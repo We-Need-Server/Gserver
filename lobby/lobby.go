@@ -8,7 +8,7 @@ import (
 )
 
 type Lobby struct {
-	userDb        *db.UserDb
+	userDb        *db.Db
 	tcpListener   *net.TCPListener
 	tcpReceiver   *internal.TcpReceiver
 	tcpSender     *internal.TcpSender

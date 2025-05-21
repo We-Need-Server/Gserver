@@ -1,14 +1,16 @@
-package user
+package db
 
-import "net"
+import (
+	"net"
+)
 
 type User struct {
 	QPort   uint32
 	TcpConn net.Conn
-	Team    uint8
+	Team    Team
 }
 
-func NewUser(team uint8) *User {
+func NewUser(team Team) *User {
 	return &User{
 		QPort:   0,
 		TcpConn: nil,
