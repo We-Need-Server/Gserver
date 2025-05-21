@@ -1,11 +1,11 @@
 package main
 
 import (
-	"WeNeedGameServer/db"
 	"WeNeedGameServer/game"
-	"WeNeedGameServer/network"
-	"WeNeedGameServer/register"
-	"WeNeedGameServer/tick"
+	"WeNeedGameServer/game/internal/tick"
+	"WeNeedGameServer/lobby/db"
+	"WeNeedGameServer/protocol/register"
+	"WeNeedGameServer/round/internal"
 )
 
 var PacketRegisterInstance = make(register.PacketRegister)
@@ -28,7 +28,7 @@ var PacketRegisterInstance = make(register.PacketRegister)
 func main() {
 	userDbInstance := db.NewUserDb()
 	userDbInstance.Init()
-	networkInstance := network.NewNetwork(":20000", ":20001")
+	networkInstance := internal.NewNetwork(":20000", ":20001")
 	udpReceiver, udpSender := networkInstance.ReadyUdp()
 	go udpReceiver.StartUdp()
 	gameInstance := game.NewGame()
