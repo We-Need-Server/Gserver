@@ -1,22 +1,23 @@
 package game
 
 import (
+	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/game/player"
 )
 
 type Game struct {
-	redAlivePlayerCount  uint16
-	blueAlivePlayerCount uint16
-	increaseScore        func(uint8)
-	players              map[uint32]*player.Player
+	blueTeam           map[uint32]*db.User
+	redTeam            map[uint32]*db.User
+	decreasePlayerFunc func(team db.Team)
+	players            map[uint32]*player.Player
 }
 
-func NewGame(blueAlivePlayerCount uint16, redAlivePlayerCount uint16, increaseScore func(uint8)) *Game {
+func NewGame(blueTeam map[uint32]*db.User, redTeam map[uint32]*db.User, decreasePlayerFunc func(team db.Team)) *Game {
 	return &Game{
-		blueAlivePlayerCount: blueAlivePlayerCount,
-		redAlivePlayerCount:  redAlivePlayerCount,
-		increaseScore:        increaseScore,
-		players:              make(map[uint32]*player.Player),
+		blueTeam:           blueTeam,
+		redTeam:            redTeam,
+		decreasePlayerFunc: decreasePlayerFunc,
+		players:            make(map[uint32]*player.Player),
 	}
 }
 
@@ -39,16 +40,4 @@ func (g *Game) ReflectPlayers(playerPositionMap *map[uint32]*player.PlayerPositi
 		}
 		g.players[key].ReflectPlayerPosition(val)
 	}
-}
-
-func (g *Game) decreasePlayer(deadPlayerTeam uint8) {
-	if deadPlayerTeam == 'B' {
-		g.blueAlivePlayerCount -= 1
-		if g.blueAlivePlayerCount == 0 {
-			g.increaseScore('A')
-		}
-	} else {
-		g.redAlivePlayerCount -= 1
-	}
-
 }

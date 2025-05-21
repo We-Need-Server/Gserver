@@ -7,11 +7,19 @@ type RoundEndPacket struct {
 	BlueScore  uint16 `json:"blueScore"`
 }
 
-func NewRoundEndPacket(winnerTeam uint8, redScore uint16, blueScore uint16) *RoundEndPacket {
+func NewRoundEndPacket(winnerTeam uint8, blueScore uint16, redScore uint16) *RoundEndPacket {
 	return &RoundEndPacket{
 		PKind:      'E',
 		WinnerTeam: winnerTeam,
-		RedScore:   redScore,
 		BlueScore:  blueScore,
+		RedScore:   redScore,
 	}
+}
+
+func (p *RoundEndPacket) DeSerialize() {
+
+}
+
+func (p *RoundEndPacket) Serialize() []byte {
+	return []byte{}
 }

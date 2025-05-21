@@ -27,10 +27,11 @@ func NewUserDb() *Db {
 	}
 	util.ShuffleUint32Arr(qPortArr)
 	return &Db{
+
 		qPortArr:   qPortArr,
-		userList:   make(map[uint32]*User),
-		RedTeamDb:  make(map[uint32]*User),
-		BlueTeamDb: make(map[uint32]*User),
+		userList:   make(map[uint32]*User), // 회원 가입 한 유저들
+		RedTeamDb:  make(map[uint32]*User), // 현재 레드팀에서 활성화된 유저들 => 2명
+		BlueTeamDb: make(map[uint32]*User), // 현재 블루팀에서 활성화된 유저들 => 1명
 	}
 }
 
