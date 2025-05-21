@@ -1,7 +1,7 @@
 package db
 
 import (
-	"WeNeedGameServer/lobby/db/user"
+	"WeNeedGameServer/external/db/user"
 	"WeNeedGameServer/util"
 	"fmt"
 	"net"

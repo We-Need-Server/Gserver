@@ -6,11 +6,11 @@ import (
 
 type TcpReceiver struct {
 	tcpListener           *net.TCPListener
-	loginFunc             func(uint32, *net.TCPAddr) (uint32, error)
+	loginFunc             func(uint32, net.Conn) error
 	communicateSenderFunc func(TcpReceiverMessage)
 }
 
-func NewTcpReceiver(tcpListener *net.TCPListener, loginFunc func(uint32, *net.TCPAddr) (uint32, error), communicateSenderFunc func(TcpReceiverMessage)) *TcpReceiver {
+func NewTcpReceiver(tcpListener *net.TCPListener, loginFunc func(uint32, net.Conn) error, communicateSenderFunc func(TcpReceiverMessage)) *TcpReceiver {
 	return &TcpReceiver{
 		tcpListener:           tcpListener,
 		loginFunc:             loginFunc,

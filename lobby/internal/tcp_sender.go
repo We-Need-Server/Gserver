@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"WeNeedGameServer/lobby/db/user"
+	"WeNeedGameServer/external/db/user"
 	"WeNeedGameServer/protocol/tcp"
 	"WeNeedGameServer/protocol/tcp/tcp_server"
 	"fmt"

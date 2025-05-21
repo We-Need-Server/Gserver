@@ -3,7 +3,7 @@ package main
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game/internal/tick"
-	"WeNeedGameServer/lobby/db"
+	"WeNeedGameServer/lobby/internal/db"
 	"WeNeedGameServer/protocol/register"
 	"WeNeedGameServer/round/internal"
 )
