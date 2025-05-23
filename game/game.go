@@ -12,6 +12,7 @@ type Game struct {
 	players            map[uint32]*player.Player
 }
 
+// 이제 게임 부분만 구축하면 끝!
 func NewGame(blueTeam map[uint32]*db.User, redTeam map[uint32]*db.User, decreasePlayerFunc func(team db.Team)) *Game {
 	return &Game{
 		blueTeam:           blueTeam,

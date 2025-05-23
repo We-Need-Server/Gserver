@@ -4,6 +4,7 @@ import (
 	"WeNeedGameServer/util"
 	"fmt"
 	"net"
+	"sync/atomic"
 )
 
 type Team bool
@@ -14,10 +15,12 @@ const (
 )
 
 type Db struct {
-	qPortArr   []uint32
-	userList   map[uint32]*User
-	RedTeamDb  map[uint32]*User
-	BlueTeamDb map[uint32]*User
+	qPortArr           []uint32
+	userList           map[uint32]*User
+	RedTeamDb          map[uint32]*User
+	BlueTeamDb         map[uint32]*User
+	redTeamAliveCount  int64
+	blueTeamAliveCount int64
 }
 
 func NewUserDb() *Db {
@@ -27,7 +30,6 @@ func NewUserDb() *Db {
 	}
 	util.ShuffleUint32Arr(qPortArr)
 	return &Db{
-
 		qPortArr:   qPortArr,
 		userList:   make(map[uint32]*User), // 회원 가입 한 유저들
 		RedTeamDb:  make(map[uint32]*User), // 현재 레드팀에서 활성화된 유저들 => 2명
@@ -50,6 +52,22 @@ func (db *Db) Init() {
 
 func (db *Db) AddUser(userId uint32, team Team) {
 	db.userList[userId] = NewUser(team)
+}
+
+func (db *Db) GetTeamAliveCount(team Team) int64 {
+	if team == RedTeam {
+		return db.redTeamAliveCount
+	} else {
+		return db.blueTeamAliveCount
+	}
+}
+
+func (db *Db) DecreaseTeamAliveCount(team Team) {
+	if team == RedTeam {
+		atomic.AddInt64(&db.redTeamAliveCount, -1)
+	} else {
+		atomic.AddInt64(&db.blueTeamAliveCount, -1)
+	}
 }
 
 func (db *Db) Login(userId uint32, userConn net.Conn) error {
