@@ -3,9 +3,11 @@ package game_manager
 import (
 	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/game"
+	"WeNeedGameServer/game_manager/internal"
 	"WeNeedGameServer/protocol/tcp"
 	"WeNeedGameServer/protocol/tcp/tserver"
 	"WeNeedGameServer/util"
+	"time"
 )
 
 // 스냅샷 방식으로 살아있는 플레이어 수를 정한다.
@@ -17,10 +19,12 @@ type GameManager struct {
 	redScore             uint16
 	finalWinnerTeam      uint8
 	sendTcpPacketFunc    func(message *tcp.ReceiverMessage)
+	gameNetwork          *internal.GameNetwork
+	gameTick             *internal.GameTick
 	game                 *game.Game
 }
 
-func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPacketFunc func(message *tcp.ReceiverMessage)) *GameManager {
+func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPacketFunc func(message *tcp.ReceiverMessage), listenUdpAddr string) *GameManager {
 	userSpawnPositionArr := make([]int, playerNum)
 	for i := 0; i < playerNum; i++ {
 		userSpawnPositionArr[i] = i + 1
@@ -31,8 +35,9 @@ func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPack
 		matchScore:           matchScore,
 		blueScore:            0,
 		redScore:             0,
-		finalWinnerTeam:      0,
 		sendTcpPacketFunc:    sendTcpPacketFunc,
+		gameNetwork:          internal.NewGameNetwork(listenUdpAddr),
+		gameTick:             nil,
 		game:                 nil,
 	}
 }
@@ -42,9 +47,18 @@ func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPack
 //	gm.redAlivePlayerCount = gm.userDb.GetTeamAlivePlayerCount(db.RedTeam)
 //}
 
+func (gm *GameManager) StartGameManager() {
+	gm.gameNetwork.ReadyUdp()
+	go gm.gameNetwork.UdpReceiver.StartUdp()
+	gm.InitGame()
+	gm.gameTick = internal.NewGameTick(60, gm.game, gm.gameNetwork.UdpSender)
+	go gm.gameTick.StartGameLoop()
+}
+
 func (gm *GameManager) InitGame() {
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
-	gm.game = game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.decreasePlayer)
+	gm.game = game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
+	gm.game.ReadyGame()
 }
 
 func (gm *GameManager) IncreaseTeamScore(winnerTeam db.Team) {
@@ -59,8 +73,12 @@ func (gm *GameManager) ReadyNextRound(winnerTeam db.Team) {
 	gm.matchScore -= 1
 	gm.IncreaseTeamScore(winnerTeam)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage('E', tserver.NewRoundEndPacket(winnerTeam, gm.blueScore, gm.redScore)))
+	time.Sleep(5 * time.Second)
 	if gm.matchScore == 0 {
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage('O', tserver.NewGameOverPacket()))
+		gm.game = nil
+	} else {
+		gm.InitGame()
 	}
 }
 

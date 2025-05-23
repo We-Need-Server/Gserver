@@ -10,15 +10,15 @@ import (
 
 type UdpReceiver struct {
 	chanTable         map[uint32]chan udp.PacketI
-	connTable         *map[uint32]*net.UDPAddr
+	connTable         map[uint32]*net.UDPAddr
 	networkActorTable map[uint32]*actor.UdpActor
-	nextSeqTable      *map[uint32]uint32
-	nChan             *chan udp.PacketI
+	nextSeqTable      map[uint32]uint32
+	nChan             chan udp.PacketI
 	nChanManager      *UdpChanManager
 	udpConn           *net.UDPConn
 }
 
-func NewUdpReceiver(connTable *map[uint32]*net.UDPAddr, nextSeqTable *map[uint32]uint32, nChan *chan udp.PacketI, udpConn *net.UDPConn) *UdpReceiver {
+func NewUdpReceiver(connTable map[uint32]*net.UDPAddr, nextSeqTable map[uint32]uint32, nChan chan udp.PacketI, udpConn *net.UDPConn) *UdpReceiver {
 	return &UdpReceiver{
 		chanTable:         make(map[uint32]chan udp.PacketI),
 		connTable:         connTable,
@@ -48,29 +48,29 @@ func (r *UdpReceiver) handlePacket(clientPacket []byte, endPoint int, userAddr *
 		log.Panicln("잘못된 요청")
 	}
 
-	if QPort := (*r.connTable)[data.GetQPort()]; QPort == nil {
+	if QPort := r.connTable[data.GetQPort()]; QPort == nil {
 		r.tempHandleNewConnection(data.GetQPort(), userAddr)
 	}
 	r.throwData(data)
 }
 
 func (r *UdpReceiver) throwData(data udp.ClientPacketI) {
-	if (*r.connTable)[data.GetQPort()] != nil || (*r.nextSeqTable)[data.GetQPort()] == data.GetSEQ() {
-		(*r.nextSeqTable)[data.GetQPort()] += 1
+	if r.connTable[data.GetQPort()] != nil || r.nextSeqTable[data.GetQPort()] == data.GetSEQ() {
+		r.nextSeqTable[data.GetQPort()] += 1
 		fmt.Println("R 패킷 왔니")
 		fmt.Println(data.GetPacketKind())
 		if data.GetPacketKind() == 'N' {
 			r.chanTable[data.GetQPort()] <- data
 		} else {
-			*r.nChan <- data
+			r.nChan <- data
 		}
 	}
 }
 
 func (r *UdpReceiver) tempHandleNewConnection(qPort uint32, userAddr *net.UDPAddr) {
 	r.chanTable[qPort] = make(chan udp.PacketI)
-	(*r.connTable)[qPort] = userAddr
-	(*r.nextSeqTable)[qPort] = 1
+	r.connTable[qPort] = userAddr
+	r.nextSeqTable[qPort] = 1
 	networkActor := actor.NewUdpActor(qPort, userAddr, r.chanTable[qPort], &r.nChanManager.CmChan)
 	r.networkActorTable[qPort] = networkActor
 	go r.networkActorTable[qPort].ProcessLoopPacket()

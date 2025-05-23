@@ -8,29 +8,29 @@ import (
 	"net"
 )
 
-type Network struct {
+type GameNetwork struct {
 	udpConnTable  map[uint32]*net.UDPAddr
 	nextSeqTable  map[uint32]uint32
 	nChan         chan udp.PacketI
-	udpReceiver   *receiver.UdpReceiver
-	udpSender     *sender.UdpSender
+	UdpReceiver   *receiver.UdpReceiver
+	UdpSender     *sender.UdpSender
 	udpConn       *net.UDPConn
 	listenUdpAddr string
 }
 
-func NewNetwork(listenUdpAddr string) *Network {
-	return &Network{
+func NewGameNetwork(listenUdpAddr string) *GameNetwork {
+	return &GameNetwork{
 		udpConnTable:  make(map[uint32]*net.UDPAddr),
 		nextSeqTable:  make(map[uint32]uint32),
 		nChan:         make(chan udp.PacketI),
-		udpReceiver:   nil,
-		udpSender:     nil,
+		UdpReceiver:   nil,
+		UdpSender:     nil,
 		udpConn:       nil,
 		listenUdpAddr: listenUdpAddr,
 	}
 }
 
-func (n *Network) ReadyUdp() (*receiver.UdpReceiver, *sender.UdpSender) {
+func (n *GameNetwork) ReadyUdp() {
 	udpServerPoint, udpResolveErr := net.ResolveUDPAddr("udp", n.listenUdpAddr)
 	if udpResolveErr != nil {
 		log.Panicln("네트워크 리졸버 오류")
@@ -40,8 +40,7 @@ func (n *Network) ReadyUdp() (*receiver.UdpReceiver, *sender.UdpSender) {
 		log.Panicln("리슨 오류")
 	}
 	n.udpConn = udpLn
-	n.udpReceiver = receiver.NewUdpReceiver(&n.udpConnTable, &n.nextSeqTable, &n.nChan, n.udpConn)
-	n.udpSender = sender.NewUdpSender(&n.udpConnTable, &n.nextSeqTable, &n.nChan, n.udpConn)
+	n.UdpReceiver = receiver.NewUdpReceiver(n.udpConnTable, n.nextSeqTable, n.nChan, n.udpConn)
+	n.UdpSender = sender.NewUdpSender(n.udpConnTable, n.nextSeqTable, n.nChan, n.udpConn)
 
-	return n.udpReceiver, n.udpSender
 }

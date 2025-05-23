@@ -19,7 +19,7 @@ var PacketRegisterInstance = make(register.PacketRegister)
 //	}
 //	go networkInstance.Start()
 //	gameTickInstance := legacy2.NewGameTick(0, gameInstance, networkInstance)
-//	if _, err := mediatorInstance.Register("tick", gameTickInstance); err != nil {
+//	if _, err := mediatorInstance.Register("game_tick", gameTickInstance); err != nil {
 //		log.Panicln("메디에이터 등록 실패")
 //	}
 //	gameTickInstance.StartGameLoop()

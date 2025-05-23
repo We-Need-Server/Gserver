@@ -16,10 +16,10 @@ type UdpActor struct {
 	qPort      uint32
 	userAddr   *net.UDPAddr
 	packetChan chan udp.PacketI
-	qmChan     *chan udp.PacketI
+	qmChan     chan udp.PacketI
 }
 
-func NewUdpActor(qPort uint32, userAddr *net.UDPAddr, packetChan chan udp.PacketI, qmChan *chan udp.PacketI) *UdpActor {
+func NewUdpActor(qPort uint32, userAddr *net.UDPAddr, packetChan chan udp.PacketI, qmChan chan udp.PacketI) *UdpActor {
 	return &UdpActor{qPort, userAddr, packetChan, qmChan}
 }
 
@@ -107,5 +107,5 @@ func (na *UdpActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
 		}
 	}
 
-	*na.qmChan <- userver.NewDeltaPacket(na.qPort, playerPosition, &hitInformationMap)
+	na.qmChan <- userver.NewDeltaPacket(na.qPort, playerPosition, &hitInformationMap)
 }

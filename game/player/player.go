@@ -1,6 +1,7 @@
 package player
 
 type Player struct {
+	respawnPoint        int
 	hp                  int16
 	hpDelta             int16
 	positionX           float32
@@ -18,8 +19,12 @@ type Player struct {
 	ShootHitInformation map[uint32]int16
 }
 
-func NewPlayer() *Player {
-	return &Player{hp: 100, ShootHitInformation: make(map[uint32]int16)}
+func NewPlayer(respawnPoint int) *Player {
+	return &Player{
+		respawnPoint:        respawnPoint,
+		hp:                  100,
+		ShootHitInformation: make(map[uint32]int16),
+	}
 }
 
 //	func (p *Player) GetPlayerDeltaState() PlayerPosition {
@@ -128,5 +133,5 @@ func (p *Player) ReflectPlayerPosition(playerPosition *PlayerPosition) {
 	p.yawAngle += (*playerPosition).YawAngle
 }
 
-// 이게 그러면 tick 패킷이 만들어질 때 다 락킹이 걸린다.
+// 이게 그러면 game_tick 패킷이 만들어질 때 다 락킹이 걸린다.
 // 락킹을 하고 싶지 않아

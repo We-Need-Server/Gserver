@@ -90,7 +90,7 @@ package legacy
 //func (n *Network) throwData(data udp.ClientPacketI, userAddr *net.UDPAddr) {
 //	if n.ConnTable[data.GetQPort()] != nil || n.nextSEQTable[data.GetQPort()] == data.GetSEQ() {
 //		n.nextSEQTable[data.GetQPort()] += 1
-//		n.Send("tick", internal_type.NewSEQData(data.GetQPort(), data.GetSEQ()))
+//		n.Send("game_tick", internal_type.NewSEQData(data.GetQPort(), data.GetSEQ()))
 //		n.chanTable[data.GetQPort()] <- data
 //	}
 //}
@@ -109,7 +109,7 @@ package legacy
 //		log.Panicln("메디에이터 등록 실패")
 //	}
 //	n.packetActorTable[qPort] = packetActor
-//	packetActor.Send("tick", packetActor.QPort)
+//	packetActor.Send("game_tick", packetActor.QPort)
 //	go n.packetActorTable[qPort].ProcessLoopPacket()
 //}
 //
