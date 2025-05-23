@@ -56,6 +56,9 @@ func (g *Game) addPlayer(userId uint32, respawnPosition int, team db.Team) {
 	g.players[userId] = player.NewPlayer(respawnPosition, team)
 }
 
+func (g *Game) DeletePlayer(userId uint32) {
+	delete(g.players, userId)
+}
 func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*player.PlayerPosition) {
 	for key, val := range playerPositionMap {
 		//if _, exists := g.players[key]; !exists {
