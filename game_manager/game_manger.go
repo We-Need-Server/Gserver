@@ -36,7 +36,7 @@ func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPack
 		blueScore:            0,
 		redScore:             0,
 		sendTcpPacketFunc:    sendTcpPacketFunc,
-		gameNetwork:          internal.NewGameNetwork(listenUdpAddr),
+		gameNetwork:          internal.NewGameNetwork(listenUdpAddr, userDb.FindUserByQPort),
 		gameTick:             nil,
 		game:                 nil,
 	}
@@ -57,8 +57,8 @@ func (gm *GameManager) StartGameManager() {
 
 func (gm *GameManager) InitGame() {
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
-	gm.game = game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
-	gm.game.ReadyGame()
+	gameInstance := game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
+	gm.game = gameInstance.ReadyGame()
 }
 
 func (gm *GameManager) IncreaseTeamScore(winnerTeam db.Team) {

@@ -1,27 +1,32 @@
 package player
 
+import "WeNeedGameServer/external/db"
+
 type Player struct {
-	respawnPoint        int
-	hp                  int16
-	hpDelta             int16
-	positionX           float32
-	xDelta              float32
-	positionZ           float32
-	zDelta              float32
-	yawAngle            float32
-	yawDelta            float32
-	ptAngle             float32
-	ptDelta             float32
-	jp                  bool
-	isAlive             bool
+	respawnPoint int
+	team         db.Team
+	isAlive      bool
+	hp           int16
+	hpDelta      int16
+	positionX    float32
+	xDelta       float32
+	positionZ    float32
+	zDelta       float32
+	yawAngle     float32
+	yawDelta     float32
+	ptAngle      float32
+	ptDelta      float32
+	jp           bool
+
 	isShoot             bool
 	isReload            bool
 	ShootHitInformation map[uint32]int16
 }
 
-func NewPlayer(respawnPoint int) *Player {
+func NewPlayer(respawnPoint int, team db.Team) *Player {
 	return &Player{
 		respawnPoint:        respawnPoint,
+		team:                team,
 		hp:                  100,
 		ShootHitInformation: make(map[uint32]int16),
 	}
@@ -31,7 +36,7 @@ func NewPlayer(respawnPoint int) *Player {
 //		return NewPlayerPosition(p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
 //	}
 func (p *Player) GetPlayerState() *PlayerPosition {
-	return NewPlayerPosition(p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
+	return NewPlayerPosition(p.respawnPoint, p.team, p.isAlive, p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
 }
 
 func (p *Player) ReflectDeltaValues() {
@@ -123,14 +128,14 @@ func (p *Player) ReflectHitInformation() {
 }
 
 func (p *Player) ReflectPlayerPosition(playerPosition *PlayerPosition) {
-	p.positionX += (*playerPosition).PositionX
-	p.positionZ += (*playerPosition).PositionZ
-	p.hp -= (*playerPosition).Hp
-	p.jp = (*playerPosition).Jp
-	p.isShoot = (*playerPosition).IsShoot
+	p.positionX += playerPosition.PositionX
+	p.positionZ += playerPosition.PositionZ
+	p.hp -= playerPosition.Hp
+	p.jp = playerPosition.Jp
+	p.isShoot = playerPosition.IsShoot
 	p.isReload = playerPosition.IsReload
-	p.ptAngle += (*playerPosition).PtAngle
-	p.yawAngle += (*playerPosition).YawAngle
+	p.ptAngle += playerPosition.PtAngle
+	p.yawAngle += playerPosition.YawAngle
 }
 
 // 이게 그러면 game_tick 패킷이 만들어질 때 다 락킹이 걸린다.

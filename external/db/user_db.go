@@ -95,6 +95,23 @@ func (db *Db) Login(userId uint32, userConn net.Conn) error {
 	}
 }
 
+func (db *Db) CheckLogin(userId uint32) bool {
+	if db.userList[userId].QPort == 0 || db.userList[userId].TcpConn == nil {
+		return false
+	} else {
+		return true
+	}
+}
+
+func (db *Db) FindUserByQPort(qPort uint32) uint32 {
+	for key, val := range db.userList {
+		if val.QPort == qPort {
+			return key
+		}
+	}
+	return 0
+}
+
 func (db *Db) ResetUser(userId uint32, team Team) {
 	db.userList[userId].QPort = 0
 	db.userList[userId].TcpConn = nil
