@@ -70,16 +70,25 @@ func (db *Db) DecreaseTeamAliveCount(team Team) {
 	}
 }
 
+func (db *Db) IncreaseTeamAliveCount(team Team) {
+	if team == RedTeam {
+		atomic.AddInt64(&db.redTeamAliveCount, 1)
+	} else {
+		atomic.AddInt64(&db.blueTeamAliveCount, 1)
+	}
+}
+
 func (db *Db) Login(userId uint32, userConn net.Conn) error {
 	if u, exists := db.userList[userId]; exists {
 		u.TcpConn = userConn
 		u.QPort = db.qPortArr[len(db.qPortArr)-1]
 		db.qPortArr = db.qPortArr[:len(db.qPortArr)-1]
-		if u.Team {
+		if u.Team == RedTeam {
 			db.RedTeamDb[userId] = u
 		} else {
 			db.BlueTeamDb[userId] = u
 		}
+		db.IncreaseTeamAliveCount(u.Team)
 		return nil
 	} else {
 		return fmt.Errorf("login failed")
@@ -96,10 +105,11 @@ func (db *Db) ResetUser(userId uint32, team Team) {
 	}
 }
 
-func (db *Db) GetTeamAlivePlayerCount(team Team) uint16 {
-	if team {
-		return uint16(len(db.BlueTeamDb))
-	} else {
-		return uint16(len(db.RedTeamDb))
-	}
-}
+// 더 이상 사용하지 않음(그리고 로직도 명확하지 않음)
+//func (db *Db) GetTeamAlivePlayerCount(team Team) uint16 {
+//	if team {
+//		return uint16(len(db.BlueTeamDb))
+//	} else {
+//		return uint16(len(db.RedTeamDb))
+//	}
+//}
