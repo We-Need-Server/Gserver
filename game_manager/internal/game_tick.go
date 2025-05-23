@@ -21,7 +21,7 @@ type GameTick struct {
 	actorStatusMap    map[uint32]*ActorStatus
 	stopPacket        *userver.StopPacket
 	playerPositionMap map[uint32]*player.PlayerPosition
-	findUserFunc      func(uint32) uint32
+	findUserFunc      func(uint32) bool
 }
 
 type ActorStatus struct {
@@ -34,7 +34,7 @@ func newActorStatus() *ActorStatus {
 	return &ActorStatus{}
 }
 
-func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, findUserFunc func(uint32) uint32) *GameTick {
+func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, findUserFunc func(uint32) bool) *GameTick {
 	ticks := [60]map[uint32]*player.PlayerPosition{}
 	for i := range ticks {
 		ticks[i] = make(map[uint32]*player.PlayerPosition)
@@ -143,7 +143,7 @@ func (gt *GameTick) processTick() {
 	gameState := gt.game.GetGameState()
 
 	for qPort, userConnStatus := range gt.udpSender.ConnTable {
-		if gt.findUserFunc(qPort) != 0 {
+		if gt.findUserFunc(userConnStatus.UserId) {
 			gt.registerActorStatus(qPort)
 			actorStatus := gt.actorStatusMap[qPort]
 			var tickPacket *userver.TickPacket
