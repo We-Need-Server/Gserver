@@ -71,7 +71,7 @@ func (r *UdpReceiver) tempHandleNewConnection(qPort uint32, userAddr *net.UDPAdd
 	r.chanTable[qPort] = make(chan udp.PacketI)
 	r.connTable[qPort] = userAddr
 	r.nextSeqTable[qPort] = 1
-	networkActor := actor.NewUdpActor(qPort, userAddr, r.chanTable[qPort], &r.nChanManager.CmChan)
+	networkActor := actor.NewUdpActor(qPort, userAddr, r.chanTable[qPort], r.nChanManager.CmChan)
 	r.networkActorTable[qPort] = networkActor
 	go r.networkActorTable[qPort].ProcessLoopPacket()
 }
