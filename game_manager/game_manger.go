@@ -15,8 +15,6 @@ type GameManager struct {
 	matchScore           uint16 // 게임이 총 몇 판 몇 선제일때의 몇 판
 	blueScore            uint16 // 라운드 승리 횟수
 	redScore             uint16
-	blueAlivePlayerCount uint16
-	redAlivePlayerCount  uint16
 	finalWinnerTeam      uint8
 	sendTcpPacketFunc    func(message *tcp.ReceiverMessage)
 	game                 *game.Game
@@ -33,54 +31,42 @@ func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPack
 		matchScore:           matchScore,
 		blueScore:            0,
 		redScore:             0,
-		blueAlivePlayerCount: 0,
-		redAlivePlayerCount:  0,
 		finalWinnerTeam:      0,
 		sendTcpPacketFunc:    sendTcpPacketFunc,
 		game:                 nil,
 	}
 }
 
-func (gm *GameManager) InitAlivePlayer() {
-	gm.blueAlivePlayerCount = gm.userDb.GetTeamAlivePlayerCount(db.BlueTeam)
-	gm.redAlivePlayerCount = gm.userDb.GetTeamAlivePlayerCount(db.RedTeam)
-}
+//func (gm *GameManager) InitAlivePlayer() {
+//	gm.blueAlivePlayerCount = uint16(gm.userDb.GetTeamAliveCount(db.BlueTeam))
+//	gm.redAlivePlayerCount = gm.userDb.GetTeamAlivePlayerCount(db.RedTeam)
+//}
 
 func (gm *GameManager) InitGame() {
-	gm.InitAlivePlayer()
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
 	gm.game = game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.decreasePlayer)
 }
 
-func (gm *GameManager) IncreaseScore(winnerTeam db.Team) {
-	gm.matchScore -= 1
-	if winnerTeam {
+func (gm *GameManager) IncreaseTeamScore(winnerTeam db.Team) {
+	if winnerTeam == db.RedTeam {
 		gm.redScore += 1
-		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage('E', tserver.NewRoundEndPacket('R', gm.blueScore, gm.redScore)))
 	} else {
 		gm.blueScore += 1
-		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage('E', tserver.NewRoundEndPacket('B', gm.blueScore, gm.redScore)))
 	}
+}
 
-	// matchScore가 0이면 게임 종료 패킷을 던진다.
-	// matchScore가 0이 아닐 때는 게임을 초기화 후 라운드 시작 패킷과 라운드 이니셜라이저 패킷을 던진다.
+func (gm *GameManager) ReadyNextRound(winnerTeam db.Team) {
+	gm.matchScore -= 1
+	gm.IncreaseTeamScore(winnerTeam)
+	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage('E', tserver.NewRoundEndPacket(winnerTeam, gm.blueScore, gm.redScore)))
 	if gm.matchScore == 0 {
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage('O', tserver.NewGameOverPacket()))
-	} else {
-
 	}
 }
 
 func (gm *GameManager) decreasePlayer(deadPlayerTeam db.Team) {
-	if deadPlayerTeam {
-		gm.redAlivePlayerCount -= 1
-		if gm.redAlivePlayerCount == 0 {
-			gm.IncreaseScore(db.BlueTeam)
-		}
-	} else {
-		gm.blueAlivePlayerCount -= 1
-		if gm.blueAlivePlayerCount == 0 {
-			gm.IncreaseScore(db.RedTeam)
-		}
+	gm.userDb.DecreaseTeamAliveCount(deadPlayerTeam)
+	if gm.userDb.GetTeamAliveCount(deadPlayerTeam) == 0 {
+		gm.ReadyNextRound(!deadPlayerTeam)
 	}
 }
