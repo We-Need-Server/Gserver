@@ -27,7 +27,7 @@ func NewLobby(listenUdpAddr string, listenTcpAddr string) *Lobby {
 	}
 }
 
-func (l *Lobby) communicateTcpSender(message *tcp.ReceiverMessage) {
+func (l *Lobby) communicateTcpSender(message *tcp.Message) {
 	l.tcpSender.ProcessMessage(message)
 }
 

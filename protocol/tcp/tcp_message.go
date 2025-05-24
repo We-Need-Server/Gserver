@@ -7,31 +7,27 @@ const (
 	SendByUniCast
 )
 
-type ReceiverMessage struct {
+type Message struct {
 	// 브로드 캐스팅 할지 여부
 	SenderType SendingType
 	// 어떤 유저한테 보낼지 결정
 	UserId uint32
-	// 어떤 메시지를 보내야 할지 결정
-	PKind uint8
 	// 데이터
 	Data PacketI
 }
 
-func NewBroadCastMessage(pKind uint8, data PacketI) *ReceiverMessage {
-	return &ReceiverMessage{
+func NewBroadCastMessage(data PacketI) *Message {
+	return &Message{
 		SenderType: SendByBroadCast,
 		UserId:     0,
-		PKind:      pKind,
 		Data:       data,
 	}
 }
 
-func NewUniCastMessage(userId uint32, pKind uint8, data PacketI) *ReceiverMessage {
-	return &ReceiverMessage{
+func NewUniCastMessage(userId uint32, data PacketI) *Message {
+	return &Message{
 		SenderType: SendByUniCast,
 		UserId:     userId,
-		PKind:      pKind,
 		Data:       data,
 	}
 }
