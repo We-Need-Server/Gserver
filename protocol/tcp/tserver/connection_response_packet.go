@@ -23,7 +23,3 @@ func NewConnectionResponsePacket(qPort uint32, udpAddr string) *ConnectionRespon
 func (p *ConnectionResponsePacket) Serialize() []byte {
 	return []byte{}
 }
-
-func (p *ConnectionResponsePacket) DeSerialize() {
-
-}

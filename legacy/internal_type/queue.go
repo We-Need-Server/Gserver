@@ -5,7 +5,7 @@ package internal_type
 //	"container/list"
 //)
 //
-//types Queue[T any] struct {
+//internal_types Queue[T any] struct {
 //	q *list.List
 //}
 //

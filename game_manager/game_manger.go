@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+type RoundStatus uint16
+
+const ()
+
 // 스냅샷 방식으로 살아있는 플레이어 수를 정한다.
 type GameManager struct {
 	userSpawnPositionArr []int
@@ -52,13 +56,18 @@ func (gm *GameManager) StartGameManager() {
 	go gm.gameNetwork.UdpReceiver.StartUdp()
 	gm.InitGame()
 	gm.gameTick = internal.NewGameTick(60, gm.game, gm.gameNetwork.UdpSender, gm.userDb.CheckLogin)
-	go gm.gameTick.StartGameLoop()
+	gm.gameTick.StartGameLoop()
 }
 
 func (gm *GameManager) InitGame() {
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
 	gameInstance := game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
 	gm.game = gameInstance.ReadyGame()
+	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage('R', tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
+}
+
+func (gm *GameManager) SendGameInitPacket(userId uint32) {
+	gm.sendTcpPacketFunc(tcp.NewUniCastMessage(userId, 'R', tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
 }
 
 func (gm *GameManager) IncreaseTeamScore(winnerTeam db.Team) {
@@ -76,8 +85,10 @@ func (gm *GameManager) ReadyNextRound(winnerTeam db.Team) {
 	time.Sleep(5 * time.Second)
 	if gm.matchScore == 0 {
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage('O', tserver.NewGameOverPacket()))
+		// 여기서 gameTick을 종료시키는 방법을 찾아야 한다. 보니까 컨텍스트를 쓸 수 있을 거 같은데 어떻게 하는게 좋을까
 		gm.game = nil
 	} else {
+		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage('S', tserver.NewRoundStartPacket()))
 		gm.InitGame()
 	}
 }

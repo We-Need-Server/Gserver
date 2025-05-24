@@ -10,7 +10,7 @@ package legacy
 //	"net"
 //)
 //
-//types Network struct {
+//internal_types Network struct {
 //	chanTable        map[uint32]chan udp.PacketI
 //	ConnTable        map[uint32]*net.UDPAddr
 //	nextSEQTable     map[uint32]uint32

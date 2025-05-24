@@ -1,7 +1,7 @@
 package sender
 
 import (
-	"WeNeedGameServer/game_manager/internal/types"
+	"WeNeedGameServer/game_manager/internal/internal_types"
 	"WeNeedGameServer/protocol/udp"
 	"fmt"
 	"log"
@@ -9,13 +9,13 @@ import (
 )
 
 type UdpSender struct {
-	ConnTable    map[uint32]*types.UdpUserConnStatus
+	ConnTable    map[uint32]*internal_types.UdpUserConnStatus
 	NextSeqTable map[uint32]uint32
 	NChan        chan udp.PacketI
 	udpConn      *net.UDPConn
 }
 
-func NewUdpSender(connTable map[uint32]*types.UdpUserConnStatus, nextSeqTable map[uint32]uint32, nChan chan udp.PacketI, udpConn *net.UDPConn) *UdpSender {
+func NewUdpSender(connTable map[uint32]*internal_types.UdpUserConnStatus, nextSeqTable map[uint32]uint32, nChan chan udp.PacketI, udpConn *net.UDPConn) *UdpSender {
 	return &UdpSender{
 		ConnTable:    connTable,
 		NextSeqTable: nextSeqTable,

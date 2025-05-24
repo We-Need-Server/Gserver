@@ -3,8 +3,8 @@ package internal
 import (
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/game_manager/internal/internal_types"
 	"WeNeedGameServer/game_manager/internal/sender"
-	"WeNeedGameServer/game_manager/internal/types"
 	"WeNeedGameServer/protocol/udp/uclient"
 	"WeNeedGameServer/protocol/udp/userver"
 	"fmt"
@@ -13,7 +13,7 @@ import (
 )
 
 type GameTick struct {
-	tickTime          uint32
+	TickTime          uint32
 	ticker            *time.Ticker
 	game              *game.Game
 	udpSender         *sender.UdpSender
@@ -40,7 +40,7 @@ func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, f
 		ticks[i] = make(map[uint32]*player.PlayerPosition)
 	}
 	return &GameTick{
-		tickTime:          0,
+		TickTime:          0,
 		ticker:            time.NewTicker(time.Second / time.Duration(tickTime)),
 		game:              game,
 		udpSender:         udpSender,
@@ -71,7 +71,7 @@ func (gt *GameTick) rActorStatus(packet *uclient.TickRPacket) {
 	fmt.Println(gt.actorStatusMap[packet.GetQPort()].Flags)
 }
 
-func (gt *GameTick) updateUserSEQ(seqData *types.SEQData) {
+func (gt *GameTick) updateUserSEQ(seqData *internal_types.SEQData) {
 	if val, exists := gt.actorStatusMap[seqData.QPort]; exists && val.UserSEQ+1 == seqData.SEQ {
 		gt.actorStatusMap[seqData.QPort].UserSEQ = seqData.SEQ
 	}
@@ -137,7 +137,7 @@ func (gt *GameTick) processTick() {
 		//fmt.Println("while", gt.playerPositionMap)
 	}
 	//fmt.Println("out", *gt.playerPositionMap)
-	gt.ticks[gt.tickTime%60] = gt.playerPositionMap
+	gt.ticks[gt.TickTime%60] = gt.playerPositionMap
 	gt.game.ReflectPlayers(gt.playerPositionMap)
 	//fmt.Println("out2", *gt.playerPositionMap)
 	gameState := gt.game.GetGameState()
@@ -148,20 +148,20 @@ func (gt *GameTick) processTick() {
 			actorStatus := gt.actorStatusMap[qPort]
 			var tickPacket *userver.TickPacket
 			if (actorStatus.Flags & (1 << 7)) != 0 {
-				tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gameState)
+				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gameState)
 			} else if (actorStatus.Flags & (1 << 6)) != 0 {
-				restoreTickCount := gt.tickTime - actorStatus.RTickNumber
+				restoreTickCount := gt.TickTime - actorStatus.RTickNumber
 				if restoreTickCount >= 60 {
 					fmt.Println("좌표값 패킷 발사")
 					actorStatus.Flags = (actorStatus.Flags &^ (1 << 6)) | (1 << 7)
-					tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gameState)
+					tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gameState)
 				} else {
 					fmt.Println("재전송 패킷 발사")
 					cloneGameDeltaState := make(map[uint32]*player.PlayerPosition)
 					for k, v := range gt.playerPositionMap {
 						cloneGameDeltaState[k] = v
 					}
-					for i := actorStatus.RTickNumber; i < gt.tickTime; i++ {
+					for i := actorStatus.RTickNumber; i < gt.TickTime; i++ {
 						tickIdx := i % 60
 						for qPort, playerPosition := range gt.ticks[tickIdx] {
 							if pos, exists := cloneGameDeltaState[qPort]; exists {
@@ -176,11 +176,11 @@ func (gt *GameTick) processTick() {
 							}
 						}
 					}
-					tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
+					tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
 				}
 			} else {
 				fmt.Println("game_tick packet", gt.playerPositionMap)
-				tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gt.playerPositionMap)
+				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gt.playerPositionMap)
 			}
 			_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userConnStatus.Conn)
 			if err != nil {
@@ -194,29 +194,29 @@ func (gt *GameTick) processTick() {
 	}
 	//fmt.Println("Game state sent to", len(*gt.udpSender.ConnTable), "clients")
 	gt.playerPositionMap = nil
-	gt.tickTime += 1
+	gt.TickTime += 1
 }
 
 //func (gt *GameTick) processTick() {
 //	gameDeltaState := gt.game.GetGameDeltaState()
 //
-//	gt.ticks[gt.tickTime%60] = gameDeltaState
+//	gt.ticks[gt.TickTime%60] = gameDeltaState
 //	gameState := gt.game.GetGameState()
 //	for qPort, userAddr := range *gt.udpSender.ConnTable {
 //		actorStatus := gt.actorStatusMap[qPort]
 //		var tickPacket *userver.TickPacket
 //		if (actorStatus.Flags & 1 << 7) != 0 {
-//			tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+//			tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
 //		} else if (actorStatus.Flags & 1 << 6) != 0 {
-//			restoreTickCount := gt.tickTime - actorStatus.RTickNumber
+//			restoreTickCount := gt.TickTime - actorStatus.RTickNumber
 //			if restoreTickCount >= 60 {
-//				tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags&^(1<<6), gameState)
+//				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags&^(1<<6), gameState)
 //			} else {
 //				cloneGameDeltaState := make(map[uint32]player.PlayerPosition)
 //				for k, v := range gameDeltaState {
 //					cloneGameDeltaState[k] = v
 //				}
-//				for i := actorStatus.RTickNumber; i < gt.tickTime; i++ {
+//				for i := actorStatus.RTickNumber; i < gt.TickTime; i++ {
 //					tickIdx := i % 60
 //					for qPort, playerPosition := range gt.ticks[tickIdx] {
 //						if pos, exists := cloneGameDeltaState[qPort]; exists {
@@ -231,10 +231,10 @@ func (gt *GameTick) processTick() {
 //						}
 //					}
 //				}
-//				tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
+//				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameState)
 //			}
 //		} else {
-//			tickPacket = userver.NewTickPacket(gt.tickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
+//			tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags, gameDeltaState)
 //		}
 //
 //		_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userAddr)
@@ -246,6 +246,6 @@ func (gt *GameTick) processTick() {
 //		actorStatus.RTickNumber = 0
 //	}
 //	gt.game.ResetHPDelta()
-//	gt.tickTime += 1
+//	gt.TickTime += 1
 //	//fmt.Println("Game state sent to", len(gt.networkInstance.ConnTable), "clients")
 //}

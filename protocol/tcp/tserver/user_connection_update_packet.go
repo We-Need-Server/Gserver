@@ -15,7 +15,3 @@ func NewUserConnectionUpdatePacket(userList []uint32) *UserConnectionUpdatePacke
 func (p *UserConnectionUpdatePacket) Serialize() []byte {
 	return []byte{}
 }
-
-func (p *UserConnectionUpdatePacket) DeSerialize() {
-
-}

@@ -1,4 +1,4 @@
-package types
+package internal_types
 
 type SEQData struct {
 	QPort uint32

@@ -1,17 +1,15 @@
 package tserver
 
-import (
-	"WeNeedGameServer/game_manager/internal/types"
-)
-
 type RoundStartPacket struct {
-	PKind              uint8                   `json:"packetKind"`
-	UserSpawnStatusArr []_type.UserSpawnStatus `json:"userSpawnStatusArr"`
+	PKind uint8 `json:"packetKind"`
 }
 
-func NewRoundStartPacket(userSpawnStatus []_type.UserSpawnStatus) *RoundStartPacket {
+func NewRoundStartPacket() *RoundStartPacket {
 	return &RoundStartPacket{
-		PKind:              'S',
-		UserSpawnStatusArr: userSpawnStatus,
+		PKind: 'S',
 	}
+}
+
+func (p *RoundStartPacket) Serialize() []byte {
+	return []byte{}
 }

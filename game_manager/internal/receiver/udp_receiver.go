@@ -2,7 +2,7 @@ package receiver
 
 import (
 	"WeNeedGameServer/game_manager/internal/actor"
-	"WeNeedGameServer/game_manager/internal/types"
+	"WeNeedGameServer/game_manager/internal/internal_types"
 	"WeNeedGameServer/protocol/udp"
 	"fmt"
 	"log"
@@ -11,7 +11,7 @@ import (
 
 type UdpReceiver struct {
 	chanTable         map[uint32]chan udp.PacketI
-	connTable         map[uint32]*types.UdpUserConnStatus
+	connTable         map[uint32]*internal_types.UdpUserConnStatus
 	networkActorTable map[uint32]*actor.UdpActor
 	nextSeqTable      map[uint32]uint32
 	nChan             chan udp.PacketI
@@ -20,7 +20,7 @@ type UdpReceiver struct {
 	findUserFunc      func(uint32) uint32
 }
 
-func NewUdpReceiver(connTable map[uint32]*types.UdpUserConnStatus, nextSeqTable map[uint32]uint32, nChan chan udp.PacketI, udpConn *net.UDPConn, findUserFunc func(uint32) uint32) *UdpReceiver {
+func NewUdpReceiver(connTable map[uint32]*internal_types.UdpUserConnStatus, nextSeqTable map[uint32]uint32, nChan chan udp.PacketI, udpConn *net.UDPConn, findUserFunc func(uint32) uint32) *UdpReceiver {
 	return &UdpReceiver{
 		chanTable:         make(map[uint32]chan udp.PacketI),
 		connTable:         connTable,
@@ -53,8 +53,8 @@ func (r *UdpReceiver) handlePacket(clientPacket []byte, endPoint int, userAddr *
 
 	if QPort := r.connTable[data.GetQPort()]; QPort == nil {
 		r.handleNewConnection(data.GetQPort(), userAddr)
-		r.throwData(data)
 	}
+	r.throwData(data)
 }
 
 func (r *UdpReceiver) throwData(data udp.ClientPacketI) {
@@ -73,7 +73,7 @@ func (r *UdpReceiver) throwData(data udp.ClientPacketI) {
 func (r *UdpReceiver) handleNewConnection(qPort uint32, userAddr *net.UDPAddr) {
 	if userId := r.findUserFunc(qPort); userId != 0 {
 		r.chanTable[qPort] = make(chan udp.PacketI)
-		r.connTable[qPort] = types.NewUdpUserConnStatus(userAddr, userId)
+		r.connTable[qPort] = internal_types.NewUdpUserConnStatus(userAddr, userId)
 		r.nextSeqTable[qPort] = 1
 		networkActor := actor.NewUdpActor(qPort, userAddr, r.chanTable[qPort], r.nChanManager.CmChan)
 		r.networkActorTable[qPort] = networkActor

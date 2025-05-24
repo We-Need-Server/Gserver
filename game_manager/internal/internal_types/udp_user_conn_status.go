@@ -1,4 +1,4 @@
-package types
+package internal_types
 
 import "net"
 

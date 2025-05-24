@@ -1,6 +1,7 @@
 package game
 
 import (
+	"WeNeedGameServer/common"
 	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/game/player"
 )
@@ -43,13 +44,21 @@ func (g *Game) ReadyGame() *Game {
 
 func (g *Game) GetGameState() map[uint32]*player.PlayerPosition {
 	gameState := make(map[uint32]*player.PlayerPosition)
-	for qPort, p := range g.players {
-		gameState[qPort] = p.GetPlayerState()
-		if !gameState[qPort].IsAlive {
-			g.decreasePlayerFunc(gameState[qPort].Team)
+	for userId, p := range g.players {
+		gameState[userId] = p.GetPlayerState()
+		if !gameState[userId].IsAlive {
+			g.decreasePlayerFunc(gameState[userId].Team)
 		}
 	}
 	return gameState
+}
+
+func (g *Game) GetPlayerSpawnStatusList() []*common.UserSpawnStatus {
+	var userSpawnStatusArr []*common.UserSpawnStatus
+	for key, val := range g.players {
+		userSpawnStatusArr = append(userSpawnStatusArr, common.NewUserSpawnStatus(key, int16(val.RespawnPoint)))
+	}
+	return userSpawnStatusArr
 }
 
 func (g *Game) addPlayer(userId uint32, respawnPosition int, team db.Team) {

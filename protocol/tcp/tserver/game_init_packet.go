@@ -1,17 +1,27 @@
 package tserver
 
 import (
-	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/common"
 )
 
 type GameInitPacket struct {
-	PKind             uint32
-	PlayerPositionMap map[uint32]*player.PlayerPosition
+	PKind              uint32                    `json:"packetKind"`
+	TickNumber         uint32                    `json:"tickNumber"`
+	BlueScore          uint16                    `json:"blueScore"`
+	RedScore           uint16                    `json:"redScore"`
+	UserSpawnStatusArr []*common.UserSpawnStatus `json:"userSpawnStatusArr"`
 }
 
-func NewGameInitPacket(playerPositionMap map[uint32]*player.PlayerPosition) *GameInitPacket {
+func NewGameInitPacket(tickNumber uint32, blueScore uint16, redScore uint16, userSpawnStatusArr []*common.UserSpawnStatus) *GameInitPacket {
 	return &GameInitPacket{
-		PKind:             'G',
-		PlayerPositionMap: playerPositionMap,
+		PKind:              'R',
+		TickNumber:         tickNumber,
+		BlueScore:          blueScore,
+		RedScore:           redScore,
+		UserSpawnStatusArr: userSpawnStatusArr,
 	}
+}
+
+func (p *GameInitPacket) Serialize() []byte {
+	return []byte{}
 }

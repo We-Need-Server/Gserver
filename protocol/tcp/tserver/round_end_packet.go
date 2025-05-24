@@ -27,10 +27,6 @@ func NewRoundEndPacket(winnerTeam db.Team, blueScore uint16, redScore uint16) *R
 	}
 }
 
-func (p *RoundEndPacket) DeSerialize() {
-
-}
-
 func (p *RoundEndPacket) Serialize() []byte {
 	return []byte{}
 }

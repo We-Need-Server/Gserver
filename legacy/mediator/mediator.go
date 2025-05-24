@@ -3,18 +3,18 @@ package mediator
 //
 //import "fmt"
 //
-//types Component interface {
+//internal_types Component interface {
 //	Register(m *Mediator)
 //	Send(receiverName string, message interface{})
 //	Receive(senderName string, message interface{})
 //}
 //
-//types Interface interface {
+//internal_types Interface interface {
 //	Register()
 //	Notify()
 //}
 //
-//types Mediator struct {
+//internal_types Mediator struct {
 //	components map[string]Component
 //}
 //

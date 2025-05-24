@@ -8,10 +8,6 @@ func NewGameOverPacket() *GameOverPacket {
 	return &GameOverPacket{PKind: 'O'}
 }
 
-func (p *GameOverPacket) DeSerialize() {
-
-}
-
 func (p *GameOverPacket) Serialize() []byte {
 	return []byte{}
 }

@@ -1,16 +1,16 @@
 package internal
 
 import (
+	"WeNeedGameServer/game_manager/internal/internal_types"
 	"WeNeedGameServer/game_manager/internal/receiver"
 	"WeNeedGameServer/game_manager/internal/sender"
-	"WeNeedGameServer/game_manager/internal/types"
 	"WeNeedGameServer/protocol/udp"
 	"log"
 	"net"
 )
 
 type GameNetwork struct {
-	udpConnTable  map[uint32]*types.UdpUserConnStatus
+	udpConnTable  map[uint32]*internal_types.UdpUserConnStatus
 	nextSeqTable  map[uint32]uint32
 	nChan         chan udp.PacketI
 	UdpReceiver   *receiver.UdpReceiver
@@ -22,7 +22,7 @@ type GameNetwork struct {
 
 func NewGameNetwork(listenUdpAddr string, findUserFunc func(uint32) uint32) *GameNetwork {
 	return &GameNetwork{
-		udpConnTable:  make(map[uint32]*types.UdpUserConnStatus),
+		udpConnTable:  make(map[uint32]*internal_types.UdpUserConnStatus),
 		nextSeqTable:  make(map[uint32]uint32),
 		nChan:         make(chan udp.PacketI),
 		UdpReceiver:   nil,

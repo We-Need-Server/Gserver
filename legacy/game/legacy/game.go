@@ -6,7 +6,7 @@ package legacy
 //	"fmt"
 //)
 //
-//types Game struct {
+//internal_types Game struct {
 //	Players map[uint32]*player.Player
 //}
 //
