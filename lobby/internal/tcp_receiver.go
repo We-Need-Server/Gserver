@@ -131,6 +131,7 @@ func (r *TcpReceiver) processData(conn net.Conn, b []byte) {
 			switch *r.gameStatus {
 			case game_manager.GameReady:
 				if len(r.redTeamDb) > 0 && len(r.blueTeamDb) > 0 {
+					fmt.Println(len(r.redTeamDb), len(r.blueTeamDb))
 					r.startGameTimer()
 				} else {
 					r.cancelGameTimer()
