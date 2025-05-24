@@ -83,7 +83,7 @@ func (r *TcpReceiver) startGameTimer() {
 	}
 
 	// 새로운 30초 타이머 시작
-	r.gameTimer = time.NewTimer(30 * time.Second)
+	r.gameTimer = time.NewTimer(5 * time.Second)
 	r.isTimerActive = true
 
 	go func() {
