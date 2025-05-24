@@ -67,8 +67,8 @@ func (gt *GameTick) rActorStatus(packet *uclient.TickRPacket) {
 	gt.registerActorStatus(packet.GetQPort())
 	gt.actorStatusMap[packet.GetQPort()].Flags = 1 << 6
 	gt.actorStatusMap[packet.GetQPort()].RTickNumber = packet.RTickNumber
-	fmt.Println("비트 테스트")
-	fmt.Println(gt.actorStatusMap[packet.GetQPort()].Flags)
+	//fmt.Println("비트 테스트")
+	//fmt.Println(gt.actorStatusMap[packet.GetQPort()].Flags)
 }
 
 func (gt *GameTick) updateUserSEQ(seqData *internal_types.SEQData) {
@@ -89,7 +89,7 @@ func (gt *GameTick) StartGameLoop() {
 }
 
 func (gt *GameTick) dequeuePacket() {
-	fmt.Println()
+	//fmt.Println()
 	playerPositionMap := make(map[uint32]*player.PlayerPosition)
 	for {
 		p := <-gt.udpSender.NChan
@@ -117,9 +117,9 @@ func (gt *GameTick) dequeuePacket() {
 			}
 			if p, ok := p.(*userver.DeltaPacket); ok {
 				playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId].CalculatePlayerPosition(p.PlayerPosition)
-				fmt.Println(*playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId])
+				//fmt.Println(*playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId])
 				for key, val := range *p.HitInformationMap {
-					if _, exists := playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId]; !exists {
+					if _, exists := playerPositionMap[key]; !exists {
 						playerPositionMap[key] = player.NewPlayerPositionD()
 					}
 					playerPositionMap[key].Hp += val
@@ -179,12 +179,12 @@ func (gt *GameTick) processTick() {
 					tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
 				}
 			} else {
-				fmt.Println("game_tick packet", gt.playerPositionMap)
+				//fmt.Println("game_tick packet", gt.playerPositionMap)
 				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gt.playerPositionMap)
 			}
-			fmt.Println("tick")
-			fmt.Println(tickPacket.Serialize())
-			fmt.Println(userConnStatus.Conn)
+			//fmt.Println("tick")
+			//fmt.Println(tickPacket.Serialize())
+			//fmt.Println(userConnStatus.Conn)
 			_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userConnStatus.Conn)
 			if err != nil {
 				log.Println("Failed to send message:", err)
