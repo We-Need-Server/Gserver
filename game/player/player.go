@@ -27,7 +27,7 @@ func NewPlayer(respawnPoint int, team db.Team) *Player {
 	return &Player{
 		RespawnPoint:        respawnPoint,
 		Team:                team,
-		hp:                  100,
+		hp:                  0,
 		isAlive:             true,
 		ShootHitInformation: make(map[uint32]int16),
 	}
@@ -94,8 +94,8 @@ func (p *Player) DamageHP(hpDelta int16) {
 }
 
 func (p *Player) ReflectDamageHP() {
-	p.hp -= p.hpDelta
-	if p.hp <= 0 {
+	p.hp += p.hpDelta
+	if p.hp >= 100 {
 		p.isAlive = false
 	}
 	p.hpDelta = 0

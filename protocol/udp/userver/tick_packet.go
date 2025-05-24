@@ -76,10 +76,6 @@ func (p *TickPacket) Serialize() []byte {
 			fmt.Println("RE-Tick")
 		}
 
-		buf.WriteByte('R')
-		buf.WriteByte('P')
-		binary.Write(buf, binary.LittleEndian, playerPosition.RespawnPoint)
-
 	}
 	fmt.Println(buf.Bytes())
 	return buf.Bytes()
