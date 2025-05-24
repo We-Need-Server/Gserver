@@ -1,14 +1,11 @@
 package main
 
 import (
-	"WeNeedGameServer/game"
-	"WeNeedGameServer/game/internal/tick"
-	"WeNeedGameServer/game_manager/internal"
-	"WeNeedGameServer/lobby/internal/db"
-	"WeNeedGameServer/protocol/register"
+	"WeNeedGameServer/external/db"
+	"WeNeedGameServer/lobby"
 )
 
-var PacketRegisterInstance = make(register.PacketRegister)
+//var PacketRegisterInstance = make(register.PacketRegister)
 
 //func main() {
 //	mediatorInstance := mediator.NewMediator()
@@ -28,12 +25,17 @@ var PacketRegisterInstance = make(register.PacketRegister)
 func main() {
 	userDbInstance := db.NewUserDb()
 	userDbInstance.Init()
-	networkInstance := internal.NewNetwork(":20000", ":20001")
-	udpReceiver, udpSender := networkInstance.ReadyUdp()
-	go udpReceiver.StartUdp()
-	gameInstance := game.NewGame()
-	tickInstance := tick.NewGameTick(60, gameInstance, udpSender)
-	tickInstance.StartGameLoop()
+	lobbyInstance := lobby.NewLobby(userDbInstance, ":20001", ":20000", 10)
+	tcpReceiver, _ := lobbyInstance.ReadyTcp()
+	tcpReceiver.StartTcp()
+	//userDbInstance := db.NewUserDb()
+	//userDbInstance.Init()
+	//networkInstance := internal.NewNetwork(":20000", ":20001")
+	//udpReceiver, udpSender := networkInstance.ReadyUdp()
+	//go udpReceiver.StartUdp()
+	//gameInstance := game.NewGame()
+	//tickInstance := tick.NewGameTick(60, gameInstance, udpSender)
+	//tickInstance.StartGameLoop()
 }
 
 //

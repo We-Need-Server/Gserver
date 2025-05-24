@@ -61,12 +61,12 @@ func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPack
 func (gm *GameManager) StartGameManager() {
 	gm.gameNetwork.ReadyUdp()
 	go gm.gameNetwork.UdpReceiver.StartUdp()
-	gm.InitGame()
+	gm.initGame()
 	gm.gameTick = internal.NewGameTick(60, gm.game, gm.gameNetwork.UdpSender, gm.userDb.CheckLogin)
-	gm.gameTick.StartGameLoop()
+	go gm.gameTick.StartGameLoop()
 }
 
-func (gm *GameManager) InitGame() {
+func (gm *GameManager) initGame() {
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
 	gameInstance := game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
 	gm.game = gameInstance.ReadyGame()
@@ -78,7 +78,7 @@ func (gm *GameManager) SendGameInitPacket(userId uint32) {
 	gm.sendTcpPacketFunc(tcp.NewUniCastMessage(userId, tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
 }
 
-func (gm *GameManager) IncreaseTeamScore(winnerTeam db.Team) {
+func (gm *GameManager) increaseTeamScore(winnerTeam db.Team) {
 	if winnerTeam == db.RedTeam {
 		gm.redScore += 1
 	} else {
@@ -86,9 +86,9 @@ func (gm *GameManager) IncreaseTeamScore(winnerTeam db.Team) {
 	}
 }
 
-func (gm *GameManager) ReadyNextRound(winnerTeam db.Team) {
+func (gm *GameManager) readyNextRound(winnerTeam db.Team) {
 	gm.matchScore -= 1
-	gm.IncreaseTeamScore(winnerTeam)
+	gm.increaseTeamScore(winnerTeam)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundEndPacket(winnerTeam, gm.blueScore, gm.redScore)))
 	time.Sleep(5 * time.Second)
 	if gm.matchScore == 0 {
@@ -98,7 +98,7 @@ func (gm *GameManager) ReadyNextRound(winnerTeam db.Team) {
 		gm.game = nil
 	} else {
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundStartPacket()))
-		gm.InitGame()
+		gm.initGame()
 	}
 }
 
@@ -106,6 +106,6 @@ func (gm *GameManager) decreasePlayer(deadPlayerTeam db.Team) {
 	gm.userDb.DecreaseTeamAliveCount(deadPlayerTeam)
 	if gm.userDb.GetTeamAliveCount(deadPlayerTeam) == 0 {
 		gm.GameStatus = RoundEnd
-		gm.ReadyNextRound(!deadPlayerTeam)
+		gm.readyNextRound(!deadPlayerTeam)
 	}
 }

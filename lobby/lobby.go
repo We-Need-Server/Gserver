@@ -48,6 +48,6 @@ func (l *Lobby) ReadyTcp() (*internal.TcpReceiver, *internal.TcpSender) {
 	l.tcpListener = tcpLn
 	l.tcpSender = internal.NewTcpSender(l.listenUdpAddr, l.userDb.BlueTeamDb, l.userDb.RedTeamDb)
 	l.gameManager = game_manager.NewGameManager(10, l.userDb, l.matchScore, l.communicateTcpSender, l.listenUdpAddr)
-	l.tcpReceiver = internal.NewTcpReceiver(tcpLn, l.userDb.Login, l.userDb.BlueTeamDb, l.userDb.BlueTeamDb, l.communicateTcpSender, l.matchScore, l.listenUdpAddr, l.gameManager.StartGameManager)
+	l.tcpReceiver = internal.NewTcpReceiver(tcpLn, l.userDb.Login, l.userDb.BlueTeamDb, l.userDb.BlueTeamDb, l.communicateTcpSender, l.matchScore, l.listenUdpAddr, l.gameManager.StartGameManager, &l.gameManager.GameStatus, l.gameManager.SendGameInitPacket)
 	return l.tcpReceiver, l.tcpSender
 }
