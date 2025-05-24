@@ -40,8 +40,8 @@ func (na *UdpActor) processEventPacket(packet *uclient.EventPacket) {
 		na.processCommandPayload(packet.Payload, packet.PayloadEndpoint)
 	}
 
-	fmt.Printf("패킷 수신 - 사용자: %s, QPort: %d\n", na.userAddr, na.qPort)
-	fmt.Printf("패킷 내용: %+v\n", packet)
+	//fmt.Printf("패킷 수신 - 사용자: %s, QPort: %d\n", na.userAddr, na.qPort)
+	//fmt.Printf("패킷 내용: %+v\n", packet)
 }
 
 func (na *UdpActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
