@@ -4,6 +4,7 @@ import (
 	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/protocol/tcp"
 	"fmt"
+	"time"
 )
 
 type TcpSender struct {
@@ -21,6 +22,7 @@ func NewTcpSender(listenUdpAddr string, blueTeamDb map[uint32]*db.User, redTeamD
 }
 
 func (s *TcpSender) ProcessMessage(message *tcp.Message) {
+	time.Sleep(3 * time.Second)
 	switch message.SenderType {
 	case tcp.SendByBroadCast:
 		s.sendByBroadCast(message.Data)
