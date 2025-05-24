@@ -28,6 +28,7 @@ func NewPlayer(respawnPoint int, team db.Team) *Player {
 		RespawnPoint:        respawnPoint,
 		team:                team,
 		hp:                  100,
+		isAlive:             true,
 		ShootHitInformation: make(map[uint32]int16),
 	}
 }

@@ -25,6 +25,7 @@ func NewUdpSender(connTable map[uint32]*internal_types.UdpUserConnStatus, nextSe
 }
 
 func (s *UdpSender) SendUdpPacket(b []byte, udpAddr *net.UDPAddr) (int, error) {
+	fmt.Println("udp send")
 	fmt.Println(b)
 	status, err := s.udpConn.WriteToUDP(b, udpAddr)
 	if err != nil {
