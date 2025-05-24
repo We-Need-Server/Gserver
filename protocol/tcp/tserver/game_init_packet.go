@@ -7,7 +7,7 @@ import (
 
 type GameInitPacket struct {
 	PKind              uint8                     `json:"-"`
-	TickNumber         uint32                    `json:"-"`
+	TickNumber         uint32                    `json:"d"`
 	BlueScore          uint16                    `json:"blueScore"`
 	RedScore           uint16                    `json:"redScore"`
 	UserSpawnStatusArr []*common.UserSpawnStatus `json:"userSpawnStatusArr"`
