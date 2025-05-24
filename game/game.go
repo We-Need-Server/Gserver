@@ -4,6 +4,7 @@ import (
 	"WeNeedGameServer/common"
 	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/game/player"
+	"fmt"
 )
 
 type Game struct {
@@ -47,6 +48,7 @@ func (g *Game) GetGameState() map[uint32]*player.PlayerPosition {
 	for userId, p := range g.players {
 		gameState[userId] = p.GetPlayerState()
 		if !gameState[userId].IsAlive {
+			fmt.Println("유저가 죽었습니다", userId, gameState[userId].Hp, gameState[userId].IsAlive)
 			g.decreasePlayerFunc(gameState[userId].Team)
 		}
 	}
