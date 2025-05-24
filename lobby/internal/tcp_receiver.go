@@ -73,6 +73,7 @@ func (r *TcpReceiver) handleConnection(conn net.Conn) {
 
 // 30초 타이머 시작 함수
 func (r *TcpReceiver) startGameTimer() {
+	fmt.Println("실행 준비")
 	r.timerMutex.Lock()
 	defer r.timerMutex.Unlock()
 
