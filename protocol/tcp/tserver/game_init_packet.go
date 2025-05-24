@@ -6,7 +6,7 @@ import (
 )
 
 type GameInitPacket struct {
-	PKind              uint32                    `json:"packetKind"`
+	PKind              uint8                     `json:"-"`
 	TickNumber         uint32                    `json:"tickNumber"`
 	BlueScore          uint16                    `json:"blueScore"`
 	RedScore           uint16                    `json:"redScore"`
@@ -28,5 +28,9 @@ func (p *GameInitPacket) Serialize() []byte {
 	if err != nil {
 		return []byte{}
 	}
-	return data
+	result := make([]byte, 1+len(data))
+	result[0] = p.PKind
+	copy(result[1:], data)
+
+	return result
 }
