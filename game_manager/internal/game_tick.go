@@ -119,7 +119,7 @@ func (gt *GameTick) dequeuePacket() {
 				playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId].CalculatePlayerPosition(p.PlayerPosition)
 				fmt.Println(*playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId])
 				for key, val := range *p.HitInformationMap {
-					if _, exists := playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId]; !exists {
+					if _, exists := playerPositionMap[key]; !exists {
 						playerPositionMap[key] = player.NewPlayerPositionD()
 					}
 					playerPositionMap[key].Hp += val
