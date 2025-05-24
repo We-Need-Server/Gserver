@@ -116,6 +116,7 @@ func (r *TcpReceiver) processData(conn net.Conn, b []byte) {
 		if err != nil {
 			fmt.Println("login fail", connectionRequestPacket.UserId)
 		} else {
+			fmt.Println("로그인 성공", connectionRequestPacket.UserId)
 			r.communicateSenderFunc(tcp.NewUniCastMessage(connectionRequestPacket.UserId, tserver.NewConnectionResponsePacket(qPort, r.listenUdpAddr, r.matchScore)))
 			r.communicateSenderFunc(tcp.NewMultiCastMessage(connectionRequestPacket.UserId, tserver.NewUserConnectionPUpdatePacket([]tserver.UserTeamStatus{tserver.NewUserTeamStatus(connectionRequestPacket.UserId, team)})))
 			var userList []tserver.UserTeamStatus
