@@ -2,6 +2,7 @@ package tserver
 
 import (
 	"WeNeedGameServer/common"
+	"encoding/json"
 )
 
 type GameInitPacket struct {
@@ -23,5 +24,9 @@ func NewGameInitPacket(tickNumber uint32, blueScore uint16, redScore uint16, use
 }
 
 func (p *GameInitPacket) Serialize() []byte {
-	return []byte{}
+	data, err := json.Marshal(p)
+	if err != nil {
+		return []byte{}
+	}
+	return data
 }

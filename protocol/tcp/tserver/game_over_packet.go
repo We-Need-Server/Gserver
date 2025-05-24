@@ -1,5 +1,7 @@
 package tserver
 
+import "encoding/json"
+
 type GameOverPacket struct {
 	PKind uint8 `json:"packetKind"`
 }
@@ -9,5 +11,9 @@ func NewGameOverPacket() *GameOverPacket {
 }
 
 func (p *GameOverPacket) Serialize() []byte {
-	return []byte{}
+	data, err := json.Marshal(p)
+	if err != nil {
+		return []byte{}
+	}
+	return data
 }

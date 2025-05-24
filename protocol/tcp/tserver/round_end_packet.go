@@ -1,6 +1,9 @@
 package tserver
 
-import "WeNeedGameServer/external/db"
+import (
+	"WeNeedGameServer/external/db"
+	"encoding/json"
+)
 
 type RoundEndPacket struct {
 	PKind      uint8  `json:"packetKind"`
@@ -28,5 +31,9 @@ func NewRoundEndPacket(winnerTeam db.Team, blueScore uint16, redScore uint16) *R
 }
 
 func (p *RoundEndPacket) Serialize() []byte {
-	return []byte{}
+	data, err := json.Marshal(p)
+	if err != nil {
+		return []byte{}
+	}
+	return data
 }

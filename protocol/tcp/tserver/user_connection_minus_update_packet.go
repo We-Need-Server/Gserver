@@ -1,5 +1,7 @@
 package tserver
 
+import "encoding/json"
+
 type UserConnectionMUpdatePacket struct {
 	PKind    uint8    `json:"packetKind"`
 	UserList []uint32 `json:"userList"`
@@ -13,5 +15,9 @@ func NewUserConnectionMUpdatePacket(userList []uint32) *UserConnectionMUpdatePac
 }
 
 func (p *UserConnectionMUpdatePacket) Serialize() []byte {
-	return []byte{}
+	data, err := json.Marshal(p)
+	if err != nil {
+		return []byte{}
+	}
+	return data
 }

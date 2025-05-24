@@ -1,5 +1,7 @@
 package tserver
 
+import "encoding/json"
+
 type RoundStartPacket struct {
 	PKind uint8 `json:"packetKind"`
 }
@@ -11,5 +13,9 @@ func NewRoundStartPacket() *RoundStartPacket {
 }
 
 func (p *RoundStartPacket) Serialize() []byte {
-	return []byte{}
+	data, err := json.Marshal(p)
+	if err != nil {
+		return []byte{}
+	}
+	return data
 }
