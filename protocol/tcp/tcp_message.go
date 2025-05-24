@@ -5,6 +5,7 @@ type SendingType uint8
 const (
 	SendByBroadCast SendingType = iota
 	SendByUniCast
+	SendByMultiCast
 )
 
 type Message struct {
