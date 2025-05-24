@@ -78,7 +78,7 @@ func (db *Db) IncreaseTeamAliveCount(team Team) {
 	}
 }
 
-func (db *Db) Login(userId uint32, userConn net.Conn) error {
+func (db *Db) Login(userId uint32, userConn net.Conn) (uint32, Team, error) {
 	if u, exists := db.userList[userId]; exists {
 		u.TcpConn = userConn
 		u.QPort = db.qPortArr[len(db.qPortArr)-1]
@@ -89,9 +89,9 @@ func (db *Db) Login(userId uint32, userConn net.Conn) error {
 			db.BlueTeamDb[userId] = u
 		}
 		db.IncreaseTeamAliveCount(u.Team)
-		return nil
+		return u.QPort, u.Team, nil
 	} else {
-		return fmt.Errorf("login failed")
+		return 0, false, fmt.Errorf("login failed")
 	}
 }
 

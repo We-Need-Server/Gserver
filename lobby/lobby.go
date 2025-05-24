@@ -2,6 +2,7 @@ package lobby
 
 import (
 	"WeNeedGameServer/external/db"
+	"WeNeedGameServer/game_manager"
 	"WeNeedGameServer/lobby/internal"
 	"WeNeedGameServer/protocol/tcp"
 	"log"
@@ -15,15 +16,19 @@ type Lobby struct {
 	tcpSender     *internal.TcpSender
 	listenUdpAddr string
 	listenTcpAddr string
+	matchScore    uint16
+	gameManager   *game_manager.GameManager
 }
 
-func NewLobby(listenUdpAddr string, listenTcpAddr string) *Lobby {
+func NewLobby(userDb *db.Db, listenUdpAddr string, listenTcpAddr string, matchScore uint16) *Lobby {
 	return &Lobby{
-		userDb:        db.NewUserDb(),
+		userDb:        userDb,
 		tcpReceiver:   nil,
 		tcpSender:     nil,
 		listenUdpAddr: listenUdpAddr,
 		listenTcpAddr: listenTcpAddr,
+		matchScore:    matchScore,
+		gameManager:   nil,
 	}
 }
 
@@ -41,7 +46,8 @@ func (l *Lobby) ReadyTcp() (*internal.TcpReceiver, *internal.TcpSender) {
 		log.Panicln("리슨 오류")
 	}
 	l.tcpListener = tcpLn
-	l.tcpReceiver = internal.NewTcpReceiver(tcpLn, l.userDb.Login, l.communicateTcpSender)
 	l.tcpSender = internal.NewTcpSender(l.listenUdpAddr, l.userDb.BlueTeamDb, l.userDb.RedTeamDb)
+	l.gameManager = game_manager.NewGameManager(10, l.userDb, l.matchScore, l.communicateTcpSender, l.listenUdpAddr)
+	l.tcpReceiver = internal.NewTcpReceiver(tcpLn, l.userDb.Login, l.userDb.BlueTeamDb, l.userDb.BlueTeamDb, l.communicateTcpSender, l.matchScore, l.listenUdpAddr, l.gameManager.StartGameManager)
 	return l.tcpReceiver, l.tcpSender
 }

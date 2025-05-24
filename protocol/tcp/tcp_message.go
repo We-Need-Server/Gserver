@@ -32,3 +32,11 @@ func NewUniCastMessage(userId uint32, data PacketI) *Message {
 		Data:       data,
 	}
 }
+
+func NewMultiCastMessage(excludedUserId uint32, data PacketI) *Message {
+	return &Message{
+		SenderType: SendByMultiCast,
+		UserId:     excludedUserId,
+		Data:       data,
+	}
+}
