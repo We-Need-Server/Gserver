@@ -59,17 +59,14 @@ func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPack
 //}
 
 func (gm *GameManager) StartGameManager() {
-	if gm.GameStatus == GameReady {
-		gm.GameStatus = RoundStart
-		gm.gameNetwork.ReadyUdp()
-		go gm.gameNetwork.UdpReceiver.StartUdp()
-		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundStartPacket()))
-		gm.initGame()
-		gm.gameTick = internal.NewGameTick(60, gm.game, gm.gameNetwork.UdpSender, gm.userDb.CheckLogin)
-		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
-
-		go gm.gameTick.StartGameLoop()
-	}
+	gm.gameNetwork.ReadyUdp()
+	go gm.gameNetwork.UdpReceiver.StartUdp()
+	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundStartPacket()))
+	gm.initGame()
+	gm.gameTick = internal.NewGameTick(60, gm.game, gm.gameNetwork.UdpSender, gm.userDb.CheckLogin)
+	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
+	gm.GameStatus = RoundStart
+	go gm.gameTick.StartGameLoop()
 }
 
 func (gm *GameManager) initGame() {
