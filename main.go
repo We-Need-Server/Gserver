@@ -1,13 +1,11 @@
 package main
 
 import (
-	"WeNeedGameServer/game"
-	"WeNeedGameServer/network"
-	"WeNeedGameServer/register"
-	"WeNeedGameServer/tick"
+	"WeNeedGameServer/external/db"
+	"WeNeedGameServer/lobby"
 )
 
-var PacketRegisterInstance = make(register.PacketRegister)
+//var PacketRegisterInstance = make(register.PacketRegister)
 
 //func main() {
 //	mediatorInstance := mediator.NewMediator()
@@ -18,19 +16,26 @@ var PacketRegisterInstance = make(register.PacketRegister)
 //	}
 //	go networkInstance.Start()
 //	gameTickInstance := legacy2.NewGameTick(0, gameInstance, networkInstance)
-//	if _, err := mediatorInstance.Register("tick", gameTickInstance); err != nil {
+//	if _, err := mediatorInstance.Register("game_tick", gameTickInstance); err != nil {
 //		log.Panicln("메디에이터 등록 실패")
 //	}
 //	gameTickInstance.StartGameLoop()
 //}
 
 func main() {
-	networkInstance := network.NewNetwork(":20000")
-	ur, us := networkInstance.ReadyUDP()
-	go ur.StartUDP()
-	gameInstance := game.NewGame()
-	tickInstance := tick.NewGameTick(60, gameInstance, us)
-	tickInstance.StartGameLoop()
+	userDbInstance := db.NewUserDb()
+	userDbInstance.Init()
+	lobbyInstance := lobby.NewLobby(userDbInstance, ":20001", ":20000", 10)
+	tcpReceiver, _ := lobbyInstance.ReadyTcp()
+	tcpReceiver.StartTcp()
+	//userDbInstance := db.NewUserDb()
+	//userDbInstance.Init()
+	//networkInstance := internal.NewNetwork(":20000", ":20001")
+	//udpReceiver, udpSender := networkInstance.ReadyUdp()
+	//go udpReceiver.StartUdp()
+	//gameInstance := game.NewGame()
+	//tickInstance := tick.NewGameTick(60, gameInstance, udpSender)
+	//tickInstance.StartGameLoop()
 }
 
 //
