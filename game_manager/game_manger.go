@@ -7,7 +7,6 @@ import (
 	"WeNeedGameServer/protocol/tcp"
 	"WeNeedGameServer/protocol/tcp/tserver"
 	"WeNeedGameServer/util"
-	"fmt"
 	"time"
 )
 
@@ -60,7 +59,6 @@ func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPack
 //}
 
 func (gm *GameManager) StartGameManager() {
-	fmt.Println("게임 시작합니다.")
 	gm.gameNetwork.ReadyUdp()
 	go gm.gameNetwork.UdpReceiver.StartUdp()
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundStartPacket()))

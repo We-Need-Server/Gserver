@@ -8,7 +8,6 @@ import (
 )
 
 type Game struct {
-	Round                uint16
 	blueTeam             map[uint32]*db.User
 	redTeam              map[uint32]*db.User
 	userSpawnPositionArr []int
@@ -17,9 +16,8 @@ type Game struct {
 }
 
 // 이제 게임 부분만 구축하면 끝!
-func NewGame(round uint16, blueTeam map[uint32]*db.User, redTeam map[uint32]*db.User, userSpawnPositionArr []int, decreasePlayerFunc func(team db.Team)) *Game {
+func NewGame(blueTeam map[uint32]*db.User, redTeam map[uint32]*db.User, userSpawnPositionArr []int, decreasePlayerFunc func(team db.Team)) *Game {
 	return &Game{
-		Round:                round,
 		blueTeam:             blueTeam,
 		redTeam:              redTeam,
 		userSpawnPositionArr: userSpawnPositionArr,
@@ -32,13 +30,13 @@ func NewGame(round uint16, blueTeam map[uint32]*db.User, redTeam map[uint32]*db.
 func (g *Game) ReadyGame() *Game {
 	playerPositionIndex := 0
 	// 블루팀 스폰
-	for key := range g.blueTeam {
+	for key, _ := range g.blueTeam {
 		g.addPlayer(key, -1*g.userSpawnPositionArr[playerPositionIndex], db.BlueTeam)
 		playerPositionIndex += 1
 	}
 	playerPositionIndex = 0
 	// 레드팀 스폰
-	for key := range g.redTeam {
+	for key, _ := range g.redTeam {
 		g.addPlayer(key, g.userSpawnPositionArr[playerPositionIndex], db.RedTeam)
 		playerPositionIndex += 1
 	}
@@ -51,7 +49,6 @@ func (g *Game) GetGameState() map[uint32]*player.PlayerPosition {
 		gameState[userId] = p.GetPlayerState()
 		if !gameState[userId].IsAlive {
 			fmt.Println("유저가 죽었습니다", userId, gameState[userId].Hp, gameState[userId].IsAlive)
-			gameState[userId].IsAlive = true
 			g.decreasePlayerFunc(gameState[userId].Team)
 		}
 	}
@@ -67,7 +64,7 @@ func (g *Game) GetPlayerSpawnStatusList() []*common.UserSpawnStatus {
 }
 
 func (g *Game) addPlayer(userId uint32, respawnPosition int, team db.Team) {
-	g.players[userId] = player.NewPlayer(respawnPosition, team, g.decreasePlayerFunc)
+	g.players[userId] = player.NewPlayer(respawnPosition, team)
 }
 
 func (g *Game) DeletePlayer(userId uint32) {
@@ -75,9 +72,9 @@ func (g *Game) DeletePlayer(userId uint32) {
 }
 func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*player.PlayerPosition) {
 	for key, val := range playerPositionMap {
-		if _, exists := g.players[key]; !exists {
-			g.addPlayer(key, val.RespawnPoint, val.Team)
-		}
+		//if _, exists := g.players[key]; !exists {
+		//	g.addPlayer(key)
+		//}
 		g.players[key].ReflectPlayerPosition(val)
 	}
 }
