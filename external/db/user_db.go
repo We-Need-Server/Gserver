@@ -97,6 +97,7 @@ func (db *Db) Login(userId uint32, userConn net.Conn) (uint32, Team, error) {
 
 func (db *Db) FindUserByQPort(qPort uint32) uint32 {
 	for key, val := range db.userList {
+		fmt.Println(val)
 		if val.QPort == qPort {
 			return key
 		}
