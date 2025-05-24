@@ -73,6 +73,7 @@ func (r *TcpReceiver) handleConnection(conn net.Conn) {
 
 // 30초 타이머 시작 함수
 func (r *TcpReceiver) startGameTimer() {
+	fmt.Println("실행 준비")
 	r.timerMutex.Lock()
 	defer r.timerMutex.Unlock()
 
@@ -82,7 +83,7 @@ func (r *TcpReceiver) startGameTimer() {
 	}
 
 	// 새로운 30초 타이머 시작
-	r.gameTimer = time.NewTimer(30 * time.Second)
+	r.gameTimer = time.NewTimer(5 * time.Second)
 	r.isTimerActive = true
 
 	go func() {
@@ -116,6 +117,7 @@ func (r *TcpReceiver) processData(conn net.Conn, b []byte) {
 		if err != nil {
 			fmt.Println("login fail", connectionRequestPacket.UserId)
 		} else {
+			fmt.Println("로그인 성공", connectionRequestPacket.UserId)
 			r.communicateSenderFunc(tcp.NewUniCastMessage(connectionRequestPacket.UserId, tserver.NewConnectionResponsePacket(qPort, r.listenUdpAddr, r.matchScore)))
 			r.communicateSenderFunc(tcp.NewMultiCastMessage(connectionRequestPacket.UserId, tserver.NewUserConnectionPUpdatePacket([]tserver.UserTeamStatus{tserver.NewUserTeamStatus(connectionRequestPacket.UserId, team)})))
 			var userList []tserver.UserTeamStatus
@@ -129,6 +131,7 @@ func (r *TcpReceiver) processData(conn net.Conn, b []byte) {
 			switch *r.gameStatus {
 			case game_manager.GameReady:
 				if len(r.redTeamDb) > 0 && len(r.blueTeamDb) > 0 {
+					fmt.Println(len(r.redTeamDb), len(r.blueTeamDb))
 					r.startGameTimer()
 				} else {
 					r.cancelGameTimer()
