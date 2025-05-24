@@ -72,9 +72,9 @@ func (g *Game) DeletePlayer(userId uint32) {
 }
 func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*player.PlayerPosition) {
 	for key, val := range playerPositionMap {
-		//if _, exists := g.players[key]; !exists {
-		//	g.addPlayer(key)
-		//}
+		if _, exists := g.players[key]; !exists {
+			g.addPlayer(key, val.RespawnPoint, val.Team)
+		}
 		g.players[key].ReflectPlayerPosition(val)
 	}
 }

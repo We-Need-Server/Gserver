@@ -4,7 +4,7 @@ import "WeNeedGameServer/external/db"
 
 type Player struct {
 	RespawnPoint int
-	team         db.Team
+	Team         db.Team
 	isAlive      bool
 	hp           int16
 	hpDelta      int16
@@ -26,7 +26,7 @@ type Player struct {
 func NewPlayer(respawnPoint int, team db.Team) *Player {
 	return &Player{
 		RespawnPoint:        respawnPoint,
-		team:                team,
+		Team:                team,
 		hp:                  100,
 		isAlive:             true,
 		ShootHitInformation: make(map[uint32]int16),
@@ -37,7 +37,7 @@ func NewPlayer(respawnPoint int, team db.Team) *Player {
 //		return NewPlayerPosition(p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
 //	}
 func (p *Player) GetPlayerState() *PlayerPosition {
-	return NewPlayerPosition(p.RespawnPoint, p.team, p.isAlive, p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
+	return NewPlayerPosition(p.RespawnPoint, p.Team, p.isAlive, p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
 }
 
 func (p *Player) ReflectDeltaValues() {
