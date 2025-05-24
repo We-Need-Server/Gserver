@@ -82,7 +82,7 @@ func (r *TcpReceiver) safeStartGame() {
 	})
 }
 
-// 30초 타이머 시작 함수
+// 5초 타이머 시작 함수
 func (r *TcpReceiver) startGameTimer() {
 	fmt.Println("실행 준비")
 	r.timerMutex.Lock()
