@@ -128,7 +128,6 @@ func (r *TcpReceiver) processData(conn net.Conn, b []byte) {
 			r.communicateSenderFunc(tcp.NewUniCastMessage(connectionRequestPacket.UserId, tserver.NewUserConnectionPUpdatePacket(userList)))
 			switch *r.gameStatus {
 			case game_manager.GameReady:
-				r.startGameFunc()
 				if len(r.redTeamDb) > 0 && len(r.blueTeamDb) > 0 {
 					r.startGameTimer()
 				} else {
