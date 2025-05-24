@@ -71,7 +71,10 @@ func (r *UdpReceiver) throwData(data udp.ClientPacketI) {
 }
 
 func (r *UdpReceiver) handleNewConnection(qPort uint32, userAddr *net.UDPAddr) {
+	fmt.Println("handle new Connection")
 	if userId := r.findUserFunc(qPort); userId != 0 {
+		fmt.Println("handle connection")
+		fmt.Println("userId", userId)
 		r.chanTable[qPort] = make(chan udp.PacketI)
 		r.connTable[qPort] = internal_types.NewUdpUserConnStatus(userAddr, userId)
 		r.nextSeqTable[qPort] = 1

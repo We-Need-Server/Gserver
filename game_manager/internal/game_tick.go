@@ -182,6 +182,9 @@ func (gt *GameTick) processTick() {
 				fmt.Println("game_tick packet", gt.playerPositionMap)
 				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gt.playerPositionMap)
 			}
+			fmt.Println("tick")
+			fmt.Println(tickPacket.Serialize())
+			fmt.Println(userConnStatus.Conn)
 			_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userConnStatus.Conn)
 			if err != nil {
 				log.Println("Failed to send message:", err)
