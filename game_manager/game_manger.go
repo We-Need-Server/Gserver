@@ -7,6 +7,7 @@ import (
 	"WeNeedGameServer/protocol/tcp"
 	"WeNeedGameServer/protocol/tcp/tserver"
 	"WeNeedGameServer/util"
+	"fmt"
 	"time"
 )
 
@@ -92,6 +93,7 @@ func (gm *GameManager) increaseTeamScore(winnerTeam db.Team) {
 }
 
 func (gm *GameManager) readyNextRound(winnerTeam db.Team) {
+	fmt.Println("다음 라운드 실행")
 	gm.matchScore -= 1
 	gm.increaseTeamScore(winnerTeam)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundEndPacket(winnerTeam, gm.blueScore, gm.redScore)))
@@ -108,6 +110,7 @@ func (gm *GameManager) readyNextRound(winnerTeam db.Team) {
 }
 
 func (gm *GameManager) decreasePlayer(deadPlayerTeam db.Team) {
+	fmt.Println("플레이더 죽음", deadPlayerTeam)
 	gm.userDb.DecreaseTeamAliveCount(deadPlayerTeam)
 	if gm.userDb.GetTeamAliveCount(deadPlayerTeam) == 0 {
 		gm.GameStatus = RoundEnd
