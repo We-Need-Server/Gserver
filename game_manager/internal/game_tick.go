@@ -163,8 +163,8 @@ func (gt *GameTick) processTick() {
 					}
 					for i := actorStatus.RTickNumber; i < gt.TickTime; i++ {
 						tickIdx := i % 60
-						for qPort, playerPosition := range gt.ticks[tickIdx] {
-							if pos, exists := cloneGameDeltaState[qPort]; exists {
+						for userId, playerPosition := range gt.ticks[tickIdx] {
+							if pos, exists := cloneGameDeltaState[userId]; exists {
 								pos.Hp += playerPosition.Hp
 								pos.PositionX += playerPosition.PositionX
 								pos.PositionZ += playerPosition.PositionZ
@@ -172,7 +172,7 @@ func (gt *GameTick) processTick() {
 								pos.YawAngle += playerPosition.YawAngle
 								pos.Jp = playerPosition.Jp
 								pos.IsShoot = playerPosition.IsShoot
-								cloneGameDeltaState[qPort] = pos
+								cloneGameDeltaState[userId] = pos
 							}
 						}
 					}
