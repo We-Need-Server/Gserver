@@ -17,7 +17,7 @@ type GameTick struct {
 	ticker            *time.Ticker
 	game              *game.Game
 	udpSender         *sender.UdpSender
-	ticks             [60]*TickState
+	ticks             []*TickState
 	actorStatusMap    map[uint32]*ActorStatus
 	stopPacket        *userver.StopPacket
 	playerPositionMap map[uint32]*player.PlayerPosition
@@ -47,11 +47,7 @@ func NewTickState(round uint16, playerPosition map[uint32]*player.PlayerPosition
 }
 
 func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, findUserFunc func(uint32) bool) *GameTick {
-	var ticks [60]*TickState
-	for i := range ticks {
-		ticks[i].round = 0
-		ticks[i].playerPosition = make(map[uint32]*player.PlayerPosition)
-	}
+	ticks := make([]*TickState, 60)
 	return &GameTick{
 		TickTime:          0,
 		ticker:            time.NewTicker(time.Second / time.Duration(tickTime)),
