@@ -15,7 +15,7 @@ import (
 type GameTick struct {
 	TickTime          uint32
 	ticker            *time.Ticker
-	game              *game.Game
+	Game              *game.Game
 	udpSender         *sender.UdpSender
 	ticks             []*TickState
 	actorStatusMap    map[uint32]*ActorStatus
@@ -51,7 +51,7 @@ func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, f
 	return &GameTick{
 		TickTime:          0,
 		ticker:            time.NewTicker(time.Second / time.Duration(tickTime)),
-		game:              game,
+		Game:              game,
 		udpSender:         udpSender,
 		ticks:             ticks,
 		actorStatusMap:    make(map[uint32]*ActorStatus),
@@ -146,10 +146,10 @@ func (gt *GameTick) processTick() {
 		//fmt.Println("while", gt.playerPositionMap)
 	}
 	//fmt.Println("out", *gt.playerPositionMap)
-	gt.ticks[gt.TickTime%60] = NewTickState(gt.game.Round, gt.playerPositionMap)
-	gt.game.ReflectPlayers(gt.playerPositionMap)
+	gt.ticks[gt.TickTime%60] = NewTickState(gt.Game.Round, gt.playerPositionMap)
+	gt.Game.ReflectPlayers(gt.playerPositionMap)
 	//fmt.Println("out2", *gt.playerPositionMap)
-	gameState := gt.game.GetGameState()
+	gameState := gt.Game.GetGameState()
 
 	for qPort, userConnStatus := range gt.udpSender.ConnTable {
 		if gt.findUserFunc(userConnStatus.UserId) {
@@ -172,7 +172,7 @@ func (gt *GameTick) processTick() {
 					}
 					for i := actorStatus.RTickNumber; i < gt.TickTime; i++ {
 						tickIdx := i % 60
-						if gt.game.Round == gt.ticks[tickIdx].round {
+						if gt.Game.Round == gt.ticks[tickIdx].round {
 							for userId, playerPosition := range gt.ticks[tickIdx].playerPosition {
 								if pos, exists := cloneGameDeltaState[userId]; exists {
 									pos.Hp += playerPosition.Hp
@@ -203,7 +203,7 @@ func (gt *GameTick) processTick() {
 			actorStatus.Flags = 0
 			actorStatus.RTickNumber = 0
 		} else {
-			gt.game.DeletePlayer(userConnStatus.UserId)
+			gt.Game.DeletePlayer(userConnStatus.UserId)
 		}
 	}
 	//fmt.Println("Game state sent to", len(*gt.udpSender.ConnTable), "clients")
@@ -212,10 +212,10 @@ func (gt *GameTick) processTick() {
 }
 
 //func (gt *GameTick) processTick() {
-//	gameDeltaState := gt.game.GetGameDeltaState()
+//	gameDeltaState := gt.Game.GetGameDeltaState()
 //
 //	gt.ticks[gt.TickTime%60] = gameDeltaState
-//	gameState := gt.game.GetGameState()
+//	gameState := gt.Game.GetGameState()
 //	for qPort, userAddr := range *gt.udpSender.ConnTable {
 //		actorStatus := gt.actorStatusMap[qPort]
 //		var tickPacket *userver.TickPacket
@@ -259,7 +259,7 @@ func (gt *GameTick) processTick() {
 //		actorStatus.Flags = 0
 //		actorStatus.RTickNumber = 0
 //	}
-//	gt.game.ResetHPDelta()
+//	gt.Game.ResetHPDelta()
 //	gt.TickTime += 1
 //	//fmt.Println("Game state sent to", len(gt.networkInstance.ConnTable), "clients")
 //}
