@@ -128,7 +128,7 @@ func (gm *GameManager) checkNextGameStart() {
 	if gm.userDb.GetTeamAliveCount(db.BlueTeam) <= 0 {
 		gm.GameStatus = RoundEnd
 		gm.readyNextRound(db.RedTeam)
-	} else {
+	} else if gm.userDb.GetTeamAliveCount(db.RedTeam) <= 0 {
 		gm.GameStatus = RoundEnd
 		gm.readyNextRound(db.BlueTeam)
 	}
