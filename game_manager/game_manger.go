@@ -28,6 +28,7 @@ type GameManager struct {
 	matchScore           uint16 // 게임이 총 몇 판 몇 선제일때의 몇 판
 	blueScore            uint16 // 라운드 승리 횟수
 	redScore             uint16
+	round                uint16 // 현재 라운드
 	finalWinnerTeam      uint8
 	sendTcpPacketFunc    func(message *tcp.Message)
 	gameNetwork          *internal.GameNetwork
@@ -47,6 +48,7 @@ func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPack
 		matchScore:           matchScore,
 		blueScore:            0,
 		redScore:             0,
+		round:                0,
 		sendTcpPacketFunc:    sendTcpPacketFunc,
 		gameNetwork:          internal.NewGameNetwork(listenUdpAddr, userDb.FindUserByQPort),
 		gameTick:             nil,
@@ -71,8 +73,9 @@ func (gm *GameManager) StartGameManager() {
 }
 
 func (gm *GameManager) initGame() {
+	gm.round += 1
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
-	gameInstance := game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
+	gameInstance := game.NewGame(gm.round, gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
 	gm.game = gameInstance.ReadyGame()
 	if gm.GameStatus != GameReady {
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))

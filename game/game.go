@@ -8,6 +8,7 @@ import (
 )
 
 type Game struct {
+	Round                uint16
 	blueTeam             map[uint32]*db.User
 	redTeam              map[uint32]*db.User
 	userSpawnPositionArr []int
@@ -16,8 +17,9 @@ type Game struct {
 }
 
 // 이제 게임 부분만 구축하면 끝!
-func NewGame(blueTeam map[uint32]*db.User, redTeam map[uint32]*db.User, userSpawnPositionArr []int, decreasePlayerFunc func(team db.Team)) *Game {
+func NewGame(round uint16, blueTeam map[uint32]*db.User, redTeam map[uint32]*db.User, userSpawnPositionArr []int, decreasePlayerFunc func(team db.Team)) *Game {
 	return &Game{
+		Round:                round,
 		blueTeam:             blueTeam,
 		redTeam:              redTeam,
 		userSpawnPositionArr: userSpawnPositionArr,
@@ -48,8 +50,8 @@ func (g *Game) GetGameState() map[uint32]*player.PlayerPosition {
 	for userId, p := range g.players {
 		gameState[userId] = p.GetPlayerState()
 		if !gameState[userId].IsAlive {
-			gameState[userId].IsAlive = true
 			fmt.Println("유저가 죽었습니다", userId, gameState[userId].Hp, gameState[userId].IsAlive)
+			gameState[userId].IsAlive = true
 			g.decreasePlayerFunc(gameState[userId].Team)
 		}
 	}
