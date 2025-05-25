@@ -76,12 +76,14 @@ func (gm *GameManager) initGame() {
 	gm.round += 1
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
 	gameInstance := game.NewGame(gm.round, gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
-	gm.game = gameInstance.ReadyGame()
-	for key, val := range gm.game.GetGameState() {
+	gameInstance.ReadyGame()
+	for key, val := range gameInstance.GetGameState() {
 		fmt.Println("init game")
 		fmt.Println(key, val.Hp)
 	}
+	gm.game = gameInstance
 	if gm.GameStatus != GameReady {
+		gm.gameTick.Game = gameInstance
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
 		gm.GameStatus = RoundStart
 	}
