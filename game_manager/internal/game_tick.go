@@ -17,7 +17,7 @@ type GameTick struct {
 	ticker            *time.Ticker
 	game              *game.Game
 	udpSender         *sender.UdpSender
-	ticks             [60]map[uint32]*player.PlayerPosition
+	ticks             []*TickState
 	actorStatusMap    map[uint32]*ActorStatus
 	stopPacket        *userver.StopPacket
 	playerPositionMap map[uint32]*player.PlayerPosition
@@ -34,11 +34,20 @@ func newActorStatus() *ActorStatus {
 	return &ActorStatus{}
 }
 
-func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, findUserFunc func(uint32) bool) *GameTick {
-	ticks := [60]map[uint32]*player.PlayerPosition{}
-	for i := range ticks {
-		ticks[i] = make(map[uint32]*player.PlayerPosition)
+type TickState struct {
+	round          uint16
+	playerPosition map[uint32]*player.PlayerPosition
+}
+
+func NewTickState(round uint16, playerPosition map[uint32]*player.PlayerPosition) *TickState {
+	return &TickState{
+		round:          round,
+		playerPosition: playerPosition,
 	}
+}
+
+func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, findUserFunc func(uint32) bool) *GameTick {
+	ticks := make([]*TickState, 60)
 	return &GameTick{
 		TickTime:          0,
 		ticker:            time.NewTicker(time.Second / time.Duration(tickTime)),
@@ -137,7 +146,7 @@ func (gt *GameTick) processTick() {
 		//fmt.Println("while", gt.playerPositionMap)
 	}
 	//fmt.Println("out", *gt.playerPositionMap)
-	gt.ticks[gt.TickTime%60] = gt.playerPositionMap
+	gt.ticks[gt.TickTime%60] = NewTickState(gt.game.Round, gt.playerPositionMap)
 	gt.game.ReflectPlayers(gt.playerPositionMap)
 	//fmt.Println("out2", *gt.playerPositionMap)
 	gameState := gt.game.GetGameState()
@@ -163,16 +172,18 @@ func (gt *GameTick) processTick() {
 					}
 					for i := actorStatus.RTickNumber; i < gt.TickTime; i++ {
 						tickIdx := i % 60
-						for userId, playerPosition := range gt.ticks[tickIdx] {
-							if pos, exists := cloneGameDeltaState[userId]; exists {
-								pos.Hp += playerPosition.Hp
-								pos.PositionX += playerPosition.PositionX
-								pos.PositionZ += playerPosition.PositionZ
-								pos.PtAngle += playerPosition.PtAngle
-								pos.YawAngle += playerPosition.YawAngle
-								pos.Jp = playerPosition.Jp
-								pos.IsShoot = playerPosition.IsShoot
-								cloneGameDeltaState[userId] = pos
+						if gt.game.Round == gt.ticks[tickIdx].round {
+							for userId, playerPosition := range gt.ticks[tickIdx].playerPosition {
+								if pos, exists := cloneGameDeltaState[userId]; exists {
+									pos.Hp += playerPosition.Hp
+									pos.PositionX += playerPosition.PositionX
+									pos.PositionZ += playerPosition.PositionZ
+									pos.PtAngle += playerPosition.PtAngle
+									pos.YawAngle += playerPosition.YawAngle
+									pos.Jp = playerPosition.Jp
+									pos.IsShoot = playerPosition.IsShoot
+									cloneGameDeltaState[userId] = pos
+								}
 							}
 						}
 					}
