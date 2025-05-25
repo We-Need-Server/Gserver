@@ -94,13 +94,11 @@ func (p *Player) DamageHP(hpDelta int16) {
 	p.hpDelta += hpDelta
 }
 
-func (p *Player) ReflectDamageHP() {
-	p.hp += p.hpDelta
+func (p *Player) ReflectDamageHP(hpDelta int16) {
+	p.hp += hpDelta
 	if p.hp >= 100 {
 		p.isAlive = false
-		p.decreasePlayerFunc(p.Team)
 	}
-	p.hpDelta = 0
 }
 
 // false
@@ -133,7 +131,7 @@ func (p *Player) ReflectHitInformation() {
 func (p *Player) ReflectPlayerPosition(playerPosition *PlayerPosition) {
 	p.positionX += playerPosition.PositionX
 	p.positionZ += playerPosition.PositionZ
-	p.hp -= playerPosition.Hp
+	p.ReflectDamageHP(playerPosition.Hp)
 	p.jp = playerPosition.Jp
 	p.isShoot = playerPosition.IsShoot
 	p.isReload = playerPosition.IsReload
