@@ -77,6 +77,7 @@ func (gm *GameManager) initGame() {
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
 	gameInstance := game.NewGame(gm.round, gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
 	gameInstance.ReadyGame()
+	gm.userDb.ResetTeamAliveCount()
 	for key, val := range gameInstance.GetGameState() {
 		fmt.Println("init game")
 		fmt.Println(key, val.Hp)

@@ -62,6 +62,13 @@ func (db *Db) GetTeamAliveCount(team Team) int64 {
 	}
 }
 
+func (db *Db) ResetTeamAliveCount() {
+	db.blueTeamAliveCount = int64(len(db.BlueTeamDb))
+	db.redTeamAliveCount = int64(len(db.RedTeamDb))
+	fmt.Println("reset")
+	fmt.Println(db.blueTeamAliveCount, db.redTeamAliveCount)
+}
+
 func (db *Db) DecreaseTeamAliveCount(team Team) {
 	if team == RedTeam {
 		atomic.AddInt64(&db.redTeamAliveCount, -1)
