@@ -100,25 +100,25 @@ func (gt *GameTick) dequeuePacket() {
 			gt.playerPositionMap = tempMap
 			break
 		case 'I':
-			if p, ok := p.(*uclient.TickIPacket); ok {
-				gt.iActorStatus(p)
+			if tickIPacket, ok := p.(*uclient.TickIPacket); ok {
+				gt.iActorStatus(tickIPacket)
 			}
 			break
 		case 'R':
-			fmt.Println("왔다잉 재전송 패킷")
-			if p, ok := p.(*uclient.TickRPacket); ok {
-				gt.rActorStatus(p)
+			//fmt.Println("왔다잉 재전송 패킷")
+			if tickRPacket, ok := p.(*uclient.TickRPacket); ok {
+				gt.rActorStatus(tickRPacket)
 			}
 			break
 		case 'D':
-			fmt.Println("delta")
+			//fmt.Println("delta")
 			if _, exists := playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId]; !exists {
 				playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId] = player.NewPlayerPositionD()
 			}
-			if p, ok := p.(*userver.DeltaPacket); ok {
-				playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId].CalculatePlayerPosition(p.PlayerPosition)
-				//fmt.Println(*playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId])
-				for key, val := range *p.HitInformationMap {
+			if deltaPacket, ok := p.(*userver.DeltaPacket); ok {
+				playerPositionMap[gt.udpSender.ConnTable[deltaPacket.GetQPort()].UserId].CalculatePlayerPosition(deltaPacket.PlayerPosition)
+				//fmt.Println(*playerPositionMap[gt.udpSender.ConnTable[deltaPacket.GetQPort()].UserId])
+				for key, val := range *deltaPacket.HitInformationMap {
 					if _, exists := playerPositionMap[key]; !exists {
 						playerPositionMap[key] = player.NewPlayerPositionD()
 					}

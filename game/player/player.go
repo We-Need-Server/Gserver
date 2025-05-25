@@ -3,33 +3,34 @@ package player
 import "WeNeedGameServer/external/db"
 
 type Player struct {
-	RespawnPoint int
-	team         db.Team
-	isAlive      bool
-	hp           int16
-	hpDelta      int16
-	positionX    float32
-	xDelta       float32
-	positionZ    float32
-	zDelta       float32
-	yawAngle     float32
-	yawDelta     float32
-	ptAngle      float32
-	ptDelta      float32
-	jp           bool
-
+	RespawnPoint        int
+	Team                db.Team
+	isAlive             bool
+	hp                  int16
+	hpDelta             int16
+	positionX           float32
+	xDelta              float32
+	positionZ           float32
+	zDelta              float32
+	yawAngle            float32
+	yawDelta            float32
+	ptAngle             float32
+	ptDelta             float32
+	jp                  bool
 	isShoot             bool
 	isReload            bool
 	ShootHitInformation map[uint32]int16
+	decreasePlayerFunc  func(team db.Team)
 }
 
-func NewPlayer(respawnPoint int, team db.Team) *Player {
+func NewPlayer(respawnPoint int, team db.Team, decreasePlayerFunc func(team db.Team)) *Player {
 	return &Player{
 		RespawnPoint:        respawnPoint,
-		team:                team,
-		hp:                  100,
+		Team:                team,
+		hp:                  0,
 		isAlive:             true,
 		ShootHitInformation: make(map[uint32]int16),
+		decreasePlayerFunc:  decreasePlayerFunc,
 	}
 }
 
@@ -37,7 +38,7 @@ func NewPlayer(respawnPoint int, team db.Team) *Player {
 //		return NewPlayerPosition(p.hpDelta, p.xDelta, p.zDelta, p.yawDelta, p.ptDelta, p.jp, p.isShoot)
 //	}
 func (p *Player) GetPlayerState() *PlayerPosition {
-	return NewPlayerPosition(p.RespawnPoint, p.team, p.isAlive, p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
+	return NewPlayerPosition(p.RespawnPoint, p.Team, p.isAlive, p.hp, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
 }
 
 func (p *Player) ReflectDeltaValues() {
@@ -93,12 +94,11 @@ func (p *Player) DamageHP(hpDelta int16) {
 	p.hpDelta += hpDelta
 }
 
-func (p *Player) ReflectDamageHP() {
-	p.hp -= p.hpDelta
-	if p.hp <= 0 {
+func (p *Player) ReflectDamageHP(hpDelta int16) {
+	p.hp += hpDelta
+	if p.hp >= 100 {
 		p.isAlive = false
 	}
-	p.hpDelta = 0
 }
 
 // false
@@ -131,7 +131,7 @@ func (p *Player) ReflectHitInformation() {
 func (p *Player) ReflectPlayerPosition(playerPosition *PlayerPosition) {
 	p.positionX += playerPosition.PositionX
 	p.positionZ += playerPosition.PositionZ
-	p.hp -= playerPosition.Hp
+	p.ReflectDamageHP(playerPosition.Hp)
 	p.jp = playerPosition.Jp
 	p.isShoot = playerPosition.IsShoot
 	p.isReload = playerPosition.IsReload

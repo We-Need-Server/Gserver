@@ -48,6 +48,7 @@ func (g *Game) GetGameState() map[uint32]*player.PlayerPosition {
 	for userId, p := range g.players {
 		gameState[userId] = p.GetPlayerState()
 		if !gameState[userId].IsAlive {
+			gameState[userId].IsAlive = true
 			fmt.Println("유저가 죽었습니다", userId, gameState[userId].Hp, gameState[userId].IsAlive)
 			g.decreasePlayerFunc(gameState[userId].Team)
 		}
@@ -64,7 +65,7 @@ func (g *Game) GetPlayerSpawnStatusList() []*common.UserSpawnStatus {
 }
 
 func (g *Game) addPlayer(userId uint32, respawnPosition int, team db.Team) {
-	g.players[userId] = player.NewPlayer(respawnPosition, team)
+	g.players[userId] = player.NewPlayer(respawnPosition, team, g.decreasePlayerFunc)
 }
 
 func (g *Game) DeletePlayer(userId uint32) {
