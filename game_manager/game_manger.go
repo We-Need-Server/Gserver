@@ -66,7 +66,7 @@ func (gm *GameManager) StartGameManager() {
 	go gm.gameNetwork.UdpReceiver.StartUdp()
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundStartPacket()))
 	gm.initGame()
-	gm.gameTick = internal.NewGameTick(60, gm.game, gm.gameNetwork.UdpSender, gm.userDb.CheckLogin)
+	gm.gameTick = internal.NewGameTick(60, gm.game, gm.gameNetwork.UdpSender, gm.userDb.CheckLogin, gm.checkNextGameStart)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
 	gm.GameStatus = RoundStart
 	go gm.gameTick.StartGameLoop()
@@ -122,8 +122,14 @@ func (gm *GameManager) readyNextRound(winnerTeam db.Team) {
 func (gm *GameManager) decreasePlayer(deadPlayerTeam db.Team) {
 	fmt.Println("플레이더 죽음", deadPlayerTeam)
 	gm.userDb.DecreaseTeamAliveCount(deadPlayerTeam)
-	if gm.userDb.GetTeamAliveCount(deadPlayerTeam) == 0 {
+}
+
+func (gm *GameManager) checkNextGameStart() {
+	if gm.userDb.GetTeamAliveCount(db.BlueTeam) <= 0 {
 		gm.GameStatus = RoundEnd
-		gm.readyNextRound(!deadPlayerTeam)
+		gm.readyNextRound(db.RedTeam)
+	} else {
+		gm.GameStatus = RoundEnd
+		gm.readyNextRound(db.BlueTeam)
 	}
 }

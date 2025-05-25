@@ -13,15 +13,16 @@ import (
 )
 
 type GameTick struct {
-	TickTime          uint32
-	ticker            *time.Ticker
-	Game              *game.Game
-	udpSender         *sender.UdpSender
-	ticks             []*TickState
-	actorStatusMap    map[uint32]*ActorStatus
-	stopPacket        *userver.StopPacket
-	playerPositionMap map[uint32]*player.PlayerPosition
-	findUserFunc      func(uint32) bool
+	TickTime           uint32
+	ticker             *time.Ticker
+	Game               *game.Game
+	udpSender          *sender.UdpSender
+	ticks              []*TickState
+	actorStatusMap     map[uint32]*ActorStatus
+	stopPacket         *userver.StopPacket
+	playerPositionMap  map[uint32]*player.PlayerPosition
+	findUserFunc       func(uint32) bool
+	checkNextRoundFunc func()
 }
 
 type ActorStatus struct {
@@ -46,18 +47,19 @@ func NewTickState(round uint16, playerPosition map[uint32]*player.PlayerPosition
 	}
 }
 
-func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, findUserFunc func(uint32) bool) *GameTick {
+func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, findUserFunc func(uint32) bool, checkNextRound func()) *GameTick {
 	ticks := make([]*TickState, 60)
 	return &GameTick{
-		TickTime:          0,
-		ticker:            time.NewTicker(time.Second / time.Duration(tickTime)),
-		Game:              game,
-		udpSender:         udpSender,
-		ticks:             ticks,
-		actorStatusMap:    make(map[uint32]*ActorStatus),
-		stopPacket:        userver.NewStopPacket(),
-		playerPositionMap: nil,
-		findUserFunc:      findUserFunc,
+		TickTime:           0,
+		ticker:             time.NewTicker(time.Second / time.Duration(tickTime)),
+		Game:               game,
+		udpSender:          udpSender,
+		ticks:              ticks,
+		actorStatusMap:     make(map[uint32]*ActorStatus),
+		stopPacket:         userver.NewStopPacket(),
+		playerPositionMap:  nil,
+		findUserFunc:       findUserFunc,
+		checkNextRoundFunc: checkNextRound,
 	}
 }
 
@@ -209,6 +211,7 @@ func (gt *GameTick) processTick() {
 	//fmt.Println("Game state sent to", len(*gt.udpSender.ConnTable), "clients")
 	gt.playerPositionMap = nil
 	gt.TickTime += 1
+	gt.checkNextRoundFunc()
 }
 
 //func (gt *GameTick) processTick() {
