@@ -64,7 +64,7 @@ func (g *Game) GetPlayerSpawnStatusList() []*common.UserSpawnStatus {
 }
 
 func (g *Game) addPlayer(userId uint32, respawnPosition int, team db.Team) {
-	g.players[userId] = player.NewPlayer(respawnPosition, team)
+	g.players[userId] = player.NewPlayer(respawnPosition, team, g.decreasePlayerFunc)
 }
 
 func (g *Game) DeletePlayer(userId uint32) {

@@ -7,7 +7,6 @@ import (
 	"WeNeedGameServer/protocol/udp/uclient"
 	"WeNeedGameServer/protocol/udp/userver"
 	"WeNeedGameServer/util"
-	"fmt"
 	"math"
 	"net"
 )
@@ -52,43 +51,43 @@ func (na *UdpActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
 		switch payloadCommand {
 		case command.FB:
 			zDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
-			fmt.Println("FB", zDelta)
+			//fmt.Println("FB", zDelta)
 			playerPosition.PositionZ += zDelta
 			//a.actorPlayer.MoveForward(zDelta)
 			i += 6
 			break
 		case command.LR:
 			xDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
-			fmt.Println(xDelta)
+			//fmt.Println(xDelta)
 			playerPosition.PositionX += xDelta
 			//a.actorPlayer.MoveSide(xDelta)
-			fmt.Println("LB", xDelta)
+			//fmt.Println("LB", xDelta)
 			i += 6
 			break
 		case command.YW:
 			yawDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
 			//a.actorPlayer.TransferYaw(yawDelta)
-			fmt.Println("YW", yawDelta)
+			//fmt.Println("YW", yawDelta)
 			playerPosition.YawAngle += yawDelta
 			i += 6
 			break
 		case command.PT:
 			ptDelta := math.Float32frombits(util.ConvertBinaryToUint32(payload[i+2 : i+6]))
 			//a.actorPlayer.TransferPT(ptDelta)
-			fmt.Println("PT", ptDelta)
+			//fmt.Println("PT", ptDelta)
 			playerPosition.PtAngle += ptDelta
 			i += 6
 			break
 		case command.JP:
 			//jp := util.ByteToBool(payload[i+2])
 			//a.actorPlayer.TurnJP(jp)
-			fmt.Println("JP")
+			//fmt.Println("JP")
 			playerPosition.Jp = true
 			i += 2
 			break
 		case command.SH:
 			//a.actorPlayer.TurnIsShoot()
-			fmt.Println("SH")
+			//fmt.Println("SH")
 			playerPosition.IsShoot = true
 			i += 2
 			break
@@ -96,7 +95,7 @@ func (na *UdpActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
 			userQPort := util.ConvertBinaryToUint32(payload[i+2 : i+6])
 			hpDelta := util.ConvertBinaryToInt16(payload[i+6 : i+8])
 			//a.actorPlayer.StoreHitInformation(userQPort, hpDelta)
-			fmt.Println("HT", userQPort, hpDelta)
+			//fmt.Println("HT", userQPort, hpDelta)
 			hitInformationMap[userQPort] += hpDelta
 			i += 8
 			break

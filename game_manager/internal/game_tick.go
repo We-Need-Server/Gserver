@@ -105,13 +105,13 @@ func (gt *GameTick) dequeuePacket() {
 			}
 			break
 		case 'R':
-			fmt.Println("왔다잉 재전송 패킷")
+			//fmt.Println("왔다잉 재전송 패킷")
 			if p, ok := p.(*uclient.TickRPacket); ok {
 				gt.rActorStatus(p)
 			}
 			break
 		case 'D':
-			fmt.Println("delta")
+			//fmt.Println("delta")
 			if _, exists := playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId]; !exists {
 				playerPositionMap[gt.udpSender.ConnTable[p.GetQPort()].UserId] = player.NewPlayerPositionD()
 			}

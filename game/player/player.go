@@ -3,33 +3,34 @@ package player
 import "WeNeedGameServer/external/db"
 
 type Player struct {
-	RespawnPoint int
-	Team         db.Team
-	isAlive      bool
-	hp           int16
-	hpDelta      int16
-	positionX    float32
-	xDelta       float32
-	positionZ    float32
-	zDelta       float32
-	yawAngle     float32
-	yawDelta     float32
-	ptAngle      float32
-	ptDelta      float32
-	jp           bool
-
+	RespawnPoint        int
+	Team                db.Team
+	isAlive             bool
+	hp                  int16
+	hpDelta             int16
+	positionX           float32
+	xDelta              float32
+	positionZ           float32
+	zDelta              float32
+	yawAngle            float32
+	yawDelta            float32
+	ptAngle             float32
+	ptDelta             float32
+	jp                  bool
 	isShoot             bool
 	isReload            bool
 	ShootHitInformation map[uint32]int16
+	decreasePlayerFunc  func(team db.Team)
 }
 
-func NewPlayer(respawnPoint int, team db.Team) *Player {
+func NewPlayer(respawnPoint int, team db.Team, decreasePlayerFunc func(team db.Team)) *Player {
 	return &Player{
 		RespawnPoint:        respawnPoint,
 		Team:                team,
 		hp:                  0,
 		isAlive:             true,
 		ShootHitInformation: make(map[uint32]int16),
+		decreasePlayerFunc:  decreasePlayerFunc,
 	}
 }
 
@@ -97,6 +98,7 @@ func (p *Player) ReflectDamageHP() {
 	p.hp += p.hpDelta
 	if p.hp >= 100 {
 		p.isAlive = false
+		p.decreasePlayerFunc(p.Team)
 	}
 	p.hpDelta = 0
 }
