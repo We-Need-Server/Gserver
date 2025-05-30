@@ -66,7 +66,7 @@ func (gm *GameManager) StartGameManager() {
 	go gm.gameNetwork.UdpReceiver.StartUdp()
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundStartPacket()))
 	gm.initGame()
-	gm.gameTick = internal.NewGameTick(60, gm.game, gm.gameNetwork.UdpSender, gm.userDb.CheckLogin)
+	gm.gameTick = internal.NewGameTick(60, &gm.round, gm.game, gm.gameNetwork.UdpSender, gm.userDb.CheckLogin)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
 	gm.GameStatus = RoundStart
 	go gm.gameTick.StartGameLoop()
@@ -75,7 +75,8 @@ func (gm *GameManager) StartGameManager() {
 func (gm *GameManager) initGame() {
 	gm.round += 1
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
-	gameInstance := game.NewGame(gm.round, gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
+	// 라운드를 여기서 주는게 아니라 포인터로 주게끔 하는게 낫지
+	gameInstance := game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
 	gameInstance.ReadyGame()
 	for key, val := range gameInstance.GetGameState() {
 		fmt.Println("init game")

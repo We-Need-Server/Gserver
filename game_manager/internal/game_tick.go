@@ -15,6 +15,7 @@ import (
 type GameTick struct {
 	TickTime          uint32
 	ticker            *time.Ticker
+	round             *uint16
 	Game              *game.Game
 	udpSender         *sender.UdpSender
 	ticks             []*TickState
@@ -46,11 +47,12 @@ func NewTickState(round uint16, playerPosition map[uint32]*player.PlayerPosition
 	}
 }
 
-func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, findUserFunc func(uint32) bool) *GameTick {
+func NewGameTick(tickTime int64, round *uint16, game *game.Game, udpSender *sender.UdpSender, findUserFunc func(uint32) bool) *GameTick {
 	ticks := make([]*TickState, 60)
 	return &GameTick{
 		TickTime:          0,
 		ticker:            time.NewTicker(time.Second / time.Duration(tickTime)),
+		round:             round,
 		Game:              game,
 		udpSender:         udpSender,
 		ticks:             ticks,
@@ -146,7 +148,8 @@ func (gt *GameTick) processTick() {
 		//fmt.Println("while", gt.playerPositionMap)
 	}
 	//fmt.Println("out", *gt.playerPositionMap)
-	gt.ticks[gt.TickTime%60] = NewTickState(gt.Game.Round, gt.playerPositionMap)
+	// 틱에서 포인터로 처리하는 방향으로 간다.
+	gt.ticks[gt.TickTime%60] = NewTickState(*gt.round, gt.playerPositionMap)
 	gt.Game.ReflectPlayers(gt.playerPositionMap)
 	//fmt.Println("out2", *gt.playerPositionMap)
 	gameState := gt.Game.GetGameState()
@@ -172,7 +175,7 @@ func (gt *GameTick) processTick() {
 					}
 					for i := actorStatus.RTickNumber; i < gt.TickTime; i++ {
 						tickIdx := i % 60
-						if gt.Game.Round == gt.ticks[tickIdx].round {
+						if *gt.round == gt.ticks[tickIdx].round {
 							for userId, playerPosition := range gt.ticks[tickIdx].playerPosition {
 								if pos, exists := cloneGameDeltaState[userId]; exists {
 									pos.Hp += playerPosition.Hp
