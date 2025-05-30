@@ -2,7 +2,6 @@ package uclient
 
 import (
 	"WeNeedGameServer/util"
-	"fmt"
 )
 
 type EventPacket struct {
@@ -27,7 +26,6 @@ func ParseEventPacket(np []byte, endPoint int) *EventPacket {
 	SEQ := util.ConvertBinaryToUint32(np[5:9])
 	Payload := np[9:endPoint]
 	PayloadEndpoint := endPoint - 9
-	fmt.Println(pKind, qPort, SEQ, Payload, PayloadEndpoint)
 	return newEventPacket(pKind, qPort, SEQ, Payload, PayloadEndpoint)
 }
 

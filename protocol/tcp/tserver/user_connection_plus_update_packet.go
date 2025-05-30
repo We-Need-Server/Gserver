@@ -25,7 +25,7 @@ func NewUserTeamStatus(userId uint32, team db.Team) UserTeamStatus {
 }
 
 type UserConnectionPUpdatePacket struct {
-	PKind    uint8            `json:"packetKind"`
+	PKind    uint8            `json:"-"`
 	UserList []UserTeamStatus `json:"userList"`
 }
 
@@ -41,5 +41,9 @@ func (p *UserConnectionPUpdatePacket) Serialize() []byte {
 	if err != nil {
 		return []byte{}
 	}
-	return data
+	result := make([]byte, 1+len(data))
+	result[0] = p.PKind
+	copy(result[1:], data)
+
+	return result
 }

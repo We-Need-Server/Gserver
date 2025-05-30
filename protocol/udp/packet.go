@@ -43,7 +43,7 @@ func ParsePacketByKind(np []byte, endPoint int) (ClientPacketI, error) {
 
 	pKind := np[0]
 
-	fmt.Println("pkind", pKind)
+	//fmt.Println("pkind", pKind)
 
 	switch pKind {
 	case 'N':

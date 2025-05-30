@@ -3,7 +3,7 @@ package tserver
 import "encoding/json"
 
 type UserConnectionMUpdatePacket struct {
-	PKind    uint8    `json:"packetKind"`
+	PKind    uint8    `json:"-"`
 	UserList []uint32 `json:"userList"`
 }
 
@@ -19,5 +19,9 @@ func (p *UserConnectionMUpdatePacket) Serialize() []byte {
 	if err != nil {
 		return []byte{}
 	}
-	return data
+	result := make([]byte, 1+len(data))
+	result[0] = p.PKind
+	copy(result[1:], data)
+
+	return result
 }

@@ -26,8 +26,8 @@ func (p *TickPacket) Serialize() []byte {
 	binary.Write(buf, binary.LittleEndian, p.UserSequenceNumber)
 	binary.Write(buf, binary.LittleEndian, p.Flags)
 	for qPort, playerPosition := range p.UserPositions {
-		fmt.Println("packet")
-		fmt.Println(qPort, playerPosition.PositionX, playerPosition.PositionZ, playerPosition.Hp, playerPosition.IsShoot)
+		//fmt.Println("packet")
+		//fmt.Println(qPort, playerPosition.RespawnPoint)
 
 		buf.WriteByte('I')
 		buf.WriteByte('D')
@@ -76,11 +76,7 @@ func (p *TickPacket) Serialize() []byte {
 			fmt.Println("RE-Tick")
 		}
 
-		buf.WriteByte('R')
-		buf.WriteByte('P')
-		binary.Write(buf, binary.LittleEndian, playerPosition.RespawnPoint)
-
 	}
-	fmt.Println(buf.Bytes())
+	//fmt.Println(buf.Bytes())
 	return buf.Bytes()
 }
