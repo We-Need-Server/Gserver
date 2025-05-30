@@ -49,6 +49,12 @@ func (p *Player) ReflectDamageHP(hpDelta int16) {
 	}
 }
 
+// hp를 0으로 만드는 건 별로 좋은 방식이 아니니까, 다른 방식으로 바꿔야 한다.
+func (p *Player) ProcessDead() {
+	p.isAlive = true
+	p.hp = 0
+}
+
 func (p *Player) ReflectPlayerPosition(playerPosition *PlayerPosition) {
 	p.positionX += playerPosition.PositionX
 	p.positionZ += playerPosition.PositionZ
