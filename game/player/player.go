@@ -45,6 +45,7 @@ func (p *Player) ReflectDamageHP(hpDelta int16) {
 	p.hp += hpDelta
 	if p.hp >= 100 {
 		p.isAlive = false
+		p.hp = 0
 	}
 }
 
