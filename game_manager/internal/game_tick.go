@@ -158,6 +158,8 @@ func (gt *GameTick) processTick() {
 	//fmt.Println("out", *gt.playerPositionMap)
 	// 틱에서 포인터로 처리하는 방향으로 간다.
 	gt.ticks[gt.TickTime%60] = NewTickState(*gt.round, gt.playerPositionMap)
+
+	// 일단 해당 틱 시점에 나온 모든 이벤트 패킷을
 	gt.Game.ReflectPlayers(gt.playerPositionMap)
 	//fmt.Println("out2", *gt.playerPositionMap)
 	gameState := gt.Game.GetGameState()
