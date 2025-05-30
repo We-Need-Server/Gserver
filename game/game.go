@@ -32,13 +32,13 @@ func NewGame(round uint16, blueTeam map[uint32]*db.User, redTeam map[uint32]*db.
 func (g *Game) ReadyGame() *Game {
 	playerPositionIndex := 0
 	// 블루팀 스폰
-	for key, _ := range g.blueTeam {
+	for key := range g.blueTeam {
 		g.addPlayer(key, -1*g.userSpawnPositionArr[playerPositionIndex], db.BlueTeam)
 		playerPositionIndex += 1
 	}
 	playerPositionIndex = 0
 	// 레드팀 스폰
-	for key, _ := range g.redTeam {
+	for key := range g.redTeam {
 		g.addPlayer(key, g.userSpawnPositionArr[playerPositionIndex], db.RedTeam)
 		playerPositionIndex += 1
 	}
