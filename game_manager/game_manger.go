@@ -86,6 +86,8 @@ func (gm *GameManager) initGame() {
 	gm.game = gameInstance
 	if gm.GameStatus != GameReady {
 		gm.gameTick.Game = gameInstance
+		fmt.Println("blue", gm.blueScore)
+		fmt.Println("red", gm.redScore)
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
 		gm.GameStatus = RoundStart
 	}
@@ -107,6 +109,8 @@ func (gm *GameManager) readyNextRound(winnerTeam db.Team) {
 	fmt.Println("다음 라운드 실행")
 	gm.matchScore -= 1
 	gm.increaseTeamScore(winnerTeam)
+	fmt.Println("blue", gm.blueScore)
+	fmt.Println("red", gm.redScore)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundEndPacket(winnerTeam, gm.blueScore, gm.redScore)))
 	time.Sleep(5 * time.Second)
 	if gm.matchScore == 0 {
