@@ -78,6 +78,7 @@ func (gm *GameManager) initGame() {
 	// 라운드를 여기서 주는게 아니라 포인터로 주게끔 하는게 낫지
 	gameInstance := game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
 	gameInstance.ReadyGame()
+	gm.userDb.ResetTeamAliveCount()
 	for key, val := range gameInstance.GetGameState() {
 		fmt.Println("init game")
 		fmt.Println(key, val.Hp)
@@ -120,7 +121,7 @@ func (gm *GameManager) readyNextRound(winnerTeam db.Team) {
 }
 
 func (gm *GameManager) decreasePlayer(deadPlayerTeam db.Team) {
-	fmt.Println("플레이더 죽음", deadPlayerTeam)
+	//fmt.Println("플레이더 죽음", deadPlayerTeam)
 	gm.userDb.DecreaseTeamAliveCount(deadPlayerTeam)
 	if gm.userDb.GetTeamAliveCount(deadPlayerTeam) == 0 {
 		gm.GameStatus = RoundEnd

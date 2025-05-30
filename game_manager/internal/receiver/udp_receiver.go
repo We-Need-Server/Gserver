@@ -4,6 +4,7 @@ import (
 	"WeNeedGameServer/game_manager/internal/actor"
 	"WeNeedGameServer/game_manager/internal/internal_types"
 	"WeNeedGameServer/protocol/udp"
+	"fmt"
 	"log"
 	"net"
 )
@@ -49,7 +50,7 @@ func (r *UdpReceiver) handlePacket(clientPacket []byte, endPoint int, userAddr *
 	if err != nil {
 		log.Panicln("잘못된 요청")
 	}
-
+	fmt.Println(data.GetQPort(), data.GetSEQ())
 	if QPort := r.connTable[data.GetQPort()]; QPort == nil {
 		r.handleNewConnection(data.GetQPort(), userAddr)
 	}

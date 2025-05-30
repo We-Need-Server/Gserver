@@ -77,13 +77,13 @@ func (db *Db) DecreaseTeamAliveCount(team Team) {
 	}
 }
 
-func (db *Db) IncreaseTeamAliveCount(team Team) {
-	if team == RedTeam {
-		atomic.AddInt64(&db.redTeamAliveCount, 1)
-	} else {
-		atomic.AddInt64(&db.blueTeamAliveCount, 1)
-	}
-}
+//func (db *Db) IncreaseTeamAliveCount(team Team) {
+//	if team == RedTeam {
+//		atomic.AddInt64(&db.redTeamAliveCount, 1)
+//	} else {
+//		atomic.AddInt64(&db.blueTeamAliveCount, 1)
+//	}
+//}
 
 func (db *Db) Login(userId uint32, userConn net.Conn) (uint32, Team, error) {
 	if u, exists := db.userList[userId]; exists {
@@ -95,7 +95,6 @@ func (db *Db) Login(userId uint32, userConn net.Conn) (uint32, Team, error) {
 		} else {
 			db.BlueTeamDb[userId] = u
 		}
-		db.IncreaseTeamAliveCount(u.Team)
 		return u.QPort, u.Team, nil
 	} else {
 		return 0, false, fmt.Errorf("login failed")
