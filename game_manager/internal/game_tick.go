@@ -23,6 +23,7 @@ type GameTick struct {
 	stopPacket        *userver.StopPacket
 	playerPositionMap map[uint32]*player.PlayerPosition
 	findUserFunc      func(uint32) bool
+	isTickProcess     bool
 }
 
 type ActorStatus struct {
@@ -60,6 +61,7 @@ func NewGameTick(tickTime int64, round *uint16, game *game.Game, udpSender *send
 		stopPacket:        userver.NewStopPacket(),
 		playerPositionMap: nil,
 		findUserFunc:      findUserFunc,
+		isTickProcess:     false,
 	}
 }
 
@@ -94,7 +96,10 @@ func (gt *GameTick) StartGameLoop() {
 	for {
 		select {
 		case <-gt.ticker.C:
-			gt.processTick()
+			if !gt.isTickProcess {
+				gt.processTick()
+			}
+
 		}
 	}
 }
@@ -142,7 +147,10 @@ func (gt *GameTick) dequeuePacket() {
 	}
 }
 
+// 1초에 60번 실행
+
 func (gt *GameTick) processTick() {
+	gt.isTickProcess = true
 	gt.udpSender.NChan <- userver.NewStopPacket()
 	for gt.playerPositionMap == nil {
 		//fmt.Println("while", gt.playerPositionMap)
@@ -211,7 +219,10 @@ func (gt *GameTick) processTick() {
 	}
 	//fmt.Println("Game state sent to", len(*gt.udpSender.ConnTable), "clients")
 	gt.playerPositionMap = nil
+	fmt.Println("Tick 숫자")
+	fmt.Println(gt.TickTime)
 	gt.TickTime += 1
+	gt.isTickProcess = false
 }
 
 //func (gt *GameTick) processTick() {

@@ -70,6 +70,7 @@ func (db *Db) ResetTeamAliveCount() {
 }
 
 func (db *Db) DecreaseTeamAliveCount(team Team) {
+	fmt.Println("플레이어 인원 수 감소")
 	if team == RedTeam {
 		atomic.AddInt64(&db.redTeamAliveCount, -1)
 	} else {
