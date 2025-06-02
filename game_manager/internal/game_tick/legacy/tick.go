@@ -3,7 +3,7 @@ package legacy
 //
 //import (
 //	legacy2 "WeNeedGameServer/game/legacy"
-//	"WeNeedGameServer/game/player"
+//	"WeNeedGameServer/game/entity"
 //	"WeNeedGameServer/legacy/internal_type"
 //	"WeNeedGameServer/legacy/mediator"
 //	"WeNeedGameServer/legacy/network/legacy"
@@ -21,7 +21,7 @@ package legacy
 //	networkInstance *legacy.Network
 //	stopChan        chan struct{}
 //	Mediator        *mediator.Mediator
-//	Ticks           [60]map[uint32]player.PlayerPosition
+//	Ticks           [60]map[uint32]entity.PlayerPosition
 //	ActorStatusMap  map[uint32]*ActorStatus
 //}
 //
@@ -36,9 +36,9 @@ package legacy
 //}
 //
 //func NewGameTick(tickTime uint32, game *legacy2.Game, networkInstance *legacy.Network) *GameTick {
-//	ticks := [60]map[uint32]player.PlayerPosition{}
+//	ticks := [60]map[uint32]entity.PlayerPosition{}
 //	for i := range ticks {
-//		ticks[i] = make(map[uint32]player.PlayerPosition)
+//		ticks[i] = make(map[uint32]entity.PlayerPosition)
 //	}
 //	return &GameTick{
 //		TickTime:        tickTime,
@@ -135,7 +135,7 @@ package legacy
 //			if restoreTickCount >= 60 {
 //				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), actorStatus.UserSEQ, actorStatus.Flags&^(1<<6), gameState)
 //			} else {
-//				cloneGameDeltaState := make(map[uint32]player.PlayerPosition)
+//				cloneGameDeltaState := make(map[uint32]entity.PlayerPosition)
 //				for k, v := range gameDeltaState {
 //					cloneGameDeltaState[k] = v
 //				}

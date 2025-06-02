@@ -1,4 +1,4 @@
-package player
+package entity
 
 //import (
 //	"testing"
@@ -48,7 +48,7 @@ package player
 //		info.YawDelta != original.YawDelta ||
 //		info.PTAngle != original.PTAngle ||
 //		info.PTDelta != original.PTDelta {
-//		t.Error("GetPlayerInfo() did not return the correct player information")
+//		t.Error("GetPlayerInfo() did not return the correct entity information")
 //	}
 //}
 //

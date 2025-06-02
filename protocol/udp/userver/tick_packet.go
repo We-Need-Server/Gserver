@@ -1,21 +1,21 @@
 package userver
 
 import (
-	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/game/entity"
 	"bytes"
 	"encoding/binary"
 	"fmt"
 )
 
 type TickPacket struct {
-	TickNumber         uint32                            `json:"tickNumber"`
-	Timestamp          int64                             `json:"timestamp"`
-	UserSequenceNumber uint32                            `json:"userSequenceNumber"`
-	Flags              uint8                             `json:"flags"`
-	UserPositions      map[uint32]*player.PlayerPosition `json:"userPositions"` // 내부 처리용 맵
+	TickNumber         uint32                         `json:"tickNumber"`
+	Timestamp          int64                          `json:"timestamp"`
+	UserSequenceNumber uint32                         `json:"userSequenceNumber"`
+	Flags              uint8                          `json:"flags"`
+	PlayerStateMap     map[uint32]*entity.PlayerState `json:"userPositions"` // 내부 처리용 맵
 }
 
-func NewTickPacket(TickNumber uint32, Timestamp int64, UserSequenceNumber uint32, Flags uint8, UserPositions map[uint32]*player.PlayerPosition) *TickPacket {
+func NewTickPacket(TickNumber uint32, Timestamp int64, UserSequenceNumber uint32, Flags uint8, UserPositions map[uint32]*entity.PlayerState) *TickPacket {
 	return &TickPacket{TickNumber, Timestamp, UserSequenceNumber, Flags, UserPositions}
 }
 
@@ -25,52 +25,52 @@ func (p *TickPacket) Serialize() []byte {
 	binary.Write(buf, binary.LittleEndian, p.Timestamp)
 	binary.Write(buf, binary.LittleEndian, p.UserSequenceNumber)
 	binary.Write(buf, binary.LittleEndian, p.Flags)
-	for qPort, playerPosition := range p.UserPositions {
+	for qPort, playerState := range p.PlayerStateMap {
 		fmt.Println("packet")
-		fmt.Println(qPort, playerPosition.PositionX, playerPosition.PositionZ, playerPosition.Hp, playerPosition.IsShoot)
+		fmt.Println(qPort, playerState.PositionX, playerState.PositionZ, playerState.Damage, playerState.IsShoot)
 
 		buf.WriteByte('I')
 		buf.WriteByte('D')
 		binary.Write(buf, binary.LittleEndian, qPort)
-		if playerPosition.Hp != 0 {
+		if playerState.Damage != 0 {
 			buf.WriteByte('H')
 			buf.WriteByte('T')
-			binary.Write(buf, binary.LittleEndian, playerPosition.Hp)
+			binary.Write(buf, binary.LittleEndian, playerState.Damage)
 		}
-		if playerPosition.PositionZ != 0 {
+		if playerState.PositionZ != 0 {
 			buf.WriteByte('F')
 			buf.WriteByte('B')
-			binary.Write(buf, binary.LittleEndian, playerPosition.PositionZ)
+			binary.Write(buf, binary.LittleEndian, playerState.PositionZ)
 		}
-		if playerPosition.PositionX != 0 {
+		if playerState.PositionX != 0 {
 			buf.WriteByte('L')
 			buf.WriteByte('R')
-			binary.Write(buf, binary.LittleEndian, playerPosition.PositionX)
+			binary.Write(buf, binary.LittleEndian, playerState.PositionX)
 		}
-		if playerPosition.PtAngle != 0 {
+		if playerState.PtAngle != 0 {
 			buf.WriteByte('P')
 			buf.WriteByte('T')
-			binary.Write(buf, binary.LittleEndian, playerPosition.PtAngle)
+			binary.Write(buf, binary.LittleEndian, playerState.PtAngle)
 		}
-		if playerPosition.YawAngle != 0 {
+		if playerState.YawAngle != 0 {
 			buf.WriteByte('Y')
 			buf.WriteByte('W')
-			binary.Write(buf, binary.LittleEndian, playerPosition.YawAngle)
+			binary.Write(buf, binary.LittleEndian, playerState.YawAngle)
 		}
 
-		if playerPosition.Jp {
+		if playerState.Jp {
 			buf.WriteByte('J')
 			buf.WriteByte('P')
 			fmt.Println("JP-Tick")
 		}
 
-		if playerPosition.IsShoot {
+		if playerState.IsShoot {
 			buf.WriteByte('S')
 			buf.WriteByte('H')
 			fmt.Println("SH-Tick")
 		}
 
-		if playerPosition.IsReload {
+		if playerState.IsReload {
 			buf.WriteByte('R')
 			buf.WriteByte('E')
 			fmt.Println("RE-Tick")
@@ -78,7 +78,7 @@ func (p *TickPacket) Serialize() []byte {
 
 		buf.WriteByte('R')
 		buf.WriteByte('P')
-		binary.Write(buf, binary.LittleEndian, playerPosition.RespawnPoint)
+		binary.Write(buf, binary.LittleEndian, playerState.RespawnPoint)
 
 	}
 	fmt.Println(buf.Bytes())

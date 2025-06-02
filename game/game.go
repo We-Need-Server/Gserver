@@ -3,7 +3,7 @@ package game
 import (
 	"WeNeedGameServer/common"
 	"WeNeedGameServer/external/db"
-	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/game/entity"
 )
 
 type Game struct {
@@ -11,17 +11,16 @@ type Game struct {
 	redTeam              map[uint32]*db.User
 	userSpawnPositionArr []int
 	decreasePlayerFunc   func(team db.Team)
-	players              map[uint32]*player.Player
+	players              map[uint32]*entity.Player
 }
 
-// 이제 게임 부분만 구축하면 끝!
 func NewGame(blueTeam map[uint32]*db.User, redTeam map[uint32]*db.User, userSpawnPositionArr []int, decreasePlayerFunc func(team db.Team)) *Game {
 	return &Game{
 		blueTeam:             blueTeam,
 		redTeam:              redTeam,
 		userSpawnPositionArr: userSpawnPositionArr,
 		decreasePlayerFunc:   decreasePlayerFunc,
-		players:              make(map[uint32]*player.Player),
+		players:              make(map[uint32]*entity.Player),
 	}
 
 }
@@ -42,8 +41,8 @@ func (g *Game) ReadyGame() *Game {
 	return g
 }
 
-func (g *Game) GetGameState() map[uint32]*player.PlayerPosition {
-	gameState := make(map[uint32]*player.PlayerPosition)
+func (g *Game) GetGameState() map[uint32]*entity.PlayerState {
+	gameState := make(map[uint32]*entity.PlayerState)
 	for userId, p := range g.players {
 		gameState[userId] = p.GetPlayerState()
 		if !gameState[userId].IsAlive {
@@ -62,17 +61,15 @@ func (g *Game) GetPlayerSpawnStatusList() []*common.UserSpawnStatus {
 }
 
 func (g *Game) addPlayer(userId uint32, respawnPosition int, team db.Team) {
-	g.players[userId] = player.NewPlayer(respawnPosition, team)
+	g.players[userId] = entity.NewPlayer(respawnPosition, team)
 }
 
 func (g *Game) DeletePlayer(userId uint32) {
 	delete(g.players, userId)
 }
-func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*player.PlayerPosition) {
+
+func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*entity.PlayerState) {
 	for key, val := range playerPositionMap {
-		//if _, exists := g.players[key]; !exists {
-		//	g.addPlayer(key)
-		//}
-		g.players[key].ReflectPlayerPosition(val)
+		g.players[key].ReflectPlayer(val)
 	}
 }

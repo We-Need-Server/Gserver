@@ -1,12 +1,12 @@
-package player
+package entity
 
 import "WeNeedGameServer/external/db"
 
-type PlayerPosition struct {
+type PlayerState struct {
 	RespawnPoint int
 	Team         db.Team
 	IsAlive      bool
-	Hp           int16
+	Damage       int16
 	PositionX    float32
 	PositionZ    float32
 	YawAngle     float32
@@ -16,11 +16,11 @@ type PlayerPosition struct {
 	IsReload     bool
 }
 
-func NewPlayerPositionD() *PlayerPosition {
-	return &PlayerPosition{
+func NewPlayerStateDefault() *PlayerState {
+	return &PlayerState{
 		RespawnPoint: 0,
 		Team:         false,
-		Hp:           0,     // 기본 체력
+		Damage:       0,     // 기본 체력
 		PositionX:    0.0,   // 기본 X 위치
 		PositionZ:    0.0,   // 기본 Z 위치
 		YawAngle:     0.0,   // 기본 요 각도
@@ -32,13 +32,13 @@ func NewPlayerPositionD() *PlayerPosition {
 	}
 }
 
-func (p *PlayerPosition) CalculatePlayerPosition(calP *PlayerPosition) {
+func (p *PlayerState) CalculatePlayerState(calP *PlayerState) {
 	p.RespawnPoint = calP.RespawnPoint
 	p.Team = calP.Team
 	p.IsAlive = p.IsAlive && calP.IsAlive
 	p.PositionX += calP.PositionX
 	p.PositionZ += calP.PositionZ
-	p.Hp += calP.Hp
+	p.Damage += calP.Damage
 	p.PtAngle += calP.PtAngle
 	p.YawAngle += calP.YawAngle
 	p.Jp = p.Jp || calP.Jp
@@ -47,12 +47,12 @@ func (p *PlayerPosition) CalculatePlayerPosition(calP *PlayerPosition) {
 
 }
 
-func NewPlayerPosition(respawnPoint int, team db.Team, isAlive bool, hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool, isReload bool) *PlayerPosition {
-	return &PlayerPosition{
+func NewPlayerState(respawnPoint int, team db.Team, isAlive bool, hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool, isReload bool) *PlayerState {
+	return &PlayerState{
 		RespawnPoint: respawnPoint,
 		Team:         team,
 		IsAlive:      isAlive,
-		Hp:           hp,
+		Damage:       hp,
 		PositionX:    positionX,
 		PositionZ:    positionZ,
 		YawAngle:     yawAngle,
