@@ -14,7 +14,7 @@ package legacy
 //	"time"
 //)
 //
-//type GameTick struct {
+//game_type GameTick struct {
 //	TickTime        uint32
 //	Ticker          *time.Ticker
 //	Game            *legacy2.Game
@@ -25,7 +25,7 @@ package legacy
 //	ActorStatusMap  map[uint32]*ActorStatus
 //}
 //
-//type ActorStatus struct {
+//game_type ActorStatus struct {
 //	Flags       uint8
 //	UserSEQ     uint32
 //	RTickNumber uint32
@@ -62,7 +62,7 @@ package legacy
 //
 //func (gt *GameTick) Receive(senderName string, message interface{}) {
 //	if senderName == "network" {
-//		switch pkt := message.(type) {
+//		switch pkt := message.(game_type) {
 //		case *udp_client2.TickIPacket:
 //			gt.iActorStatus(pkt)
 //		case *udp_client2.TickRPacket:

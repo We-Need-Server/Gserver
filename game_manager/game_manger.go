@@ -4,6 +4,7 @@ import (
 	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/game"
 	"WeNeedGameServer/game_manager/internal"
+	"WeNeedGameServer/game_type"
 	"WeNeedGameServer/protocol/tcp"
 	"WeNeedGameServer/protocol/tcp/tserver"
 	"WeNeedGameServer/util"
@@ -78,15 +79,15 @@ func (gm *GameManager) SendGameInitPacket(userId uint32) {
 	gm.sendTcpPacketFunc(tcp.NewUniCastMessage(userId, tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
 }
 
-func (gm *GameManager) increaseTeamScore(winnerTeam db.Team) {
-	if winnerTeam == db.RedTeam {
+func (gm *GameManager) increaseTeamScore(winnerTeam game_type.Team) {
+	if winnerTeam == game_type.RedTeam {
 		gm.redScore += 1
 	} else {
 		gm.blueScore += 1
 	}
 }
 
-func (gm *GameManager) readyNextRound(winnerTeam db.Team) {
+func (gm *GameManager) readyNextRound(winnerTeam game_type.Team) {
 	gm.matchScore -= 1
 	gm.increaseTeamScore(winnerTeam)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundEndPacket(winnerTeam, gm.blueScore, gm.redScore)))
@@ -102,7 +103,7 @@ func (gm *GameManager) readyNextRound(winnerTeam db.Team) {
 	}
 }
 
-func (gm *GameManager) decreasePlayer(deadPlayerTeam db.Team) {
+func (gm *GameManager) decreasePlayer(deadPlayerTeam game_type.Team) {
 	gm.userDb.DecreaseTeamAliveCount(deadPlayerTeam)
 	if gm.userDb.GetTeamAliveCount(deadPlayerTeam) == 0 {
 		gm.GameStatus = RoundEnd

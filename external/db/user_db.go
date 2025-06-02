@@ -1,17 +1,11 @@
 package db
 
 import (
+	"WeNeedGameServer/game_type"
 	"WeNeedGameServer/util"
 	"fmt"
 	"net"
 	"sync/atomic"
-)
-
-type Team bool
-
-const (
-	BlueTeam Team = false
-	RedTeam       = true
 )
 
 type Db struct {
@@ -38,52 +32,52 @@ func NewUserDb() *Db {
 }
 
 func (db *Db) Init() {
-	db.AddUser(16, BlueTeam)
-	db.AddUser(32, BlueTeam)
-	db.AddUser(64, BlueTeam)
-	db.AddUser(128, BlueTeam)
-	db.AddUser(256, BlueTeam)
-	db.AddUser(8, RedTeam)
-	db.AddUser(24, RedTeam)
-	db.AddUser(48, RedTeam)
-	db.AddUser(96, RedTeam)
-	db.AddUser(192, RedTeam)
+	db.AddUser(16, game_type.BlueTeam)
+	db.AddUser(32, game_type.BlueTeam)
+	db.AddUser(64, game_type.BlueTeam)
+	db.AddUser(128, game_type.BlueTeam)
+	db.AddUser(256, game_type.BlueTeam)
+	db.AddUser(8, game_type.RedTeam)
+	db.AddUser(24, game_type.RedTeam)
+	db.AddUser(48, game_type.RedTeam)
+	db.AddUser(96, game_type.RedTeam)
+	db.AddUser(192, game_type.RedTeam)
 }
 
-func (db *Db) AddUser(userId uint32, team Team) {
+func (db *Db) AddUser(userId uint32, team game_type.Team) {
 	db.userList[userId] = NewUser(team)
 }
 
-func (db *Db) GetTeamAliveCount(team Team) int64 {
-	if team == RedTeam {
+func (db *Db) GetTeamAliveCount(team game_type.Team) int64 {
+	if team == game_type.RedTeam {
 		return db.redTeamAliveCount
 	} else {
 		return db.blueTeamAliveCount
 	}
 }
 
-func (db *Db) DecreaseTeamAliveCount(team Team) {
-	if team == RedTeam {
+func (db *Db) DecreaseTeamAliveCount(team game_type.Team) {
+	if team == game_type.RedTeam {
 		atomic.AddInt64(&db.redTeamAliveCount, -1)
 	} else {
 		atomic.AddInt64(&db.blueTeamAliveCount, -1)
 	}
 }
 
-func (db *Db) IncreaseTeamAliveCount(team Team) {
-	if team == RedTeam {
+func (db *Db) IncreaseTeamAliveCount(team game_type.Team) {
+	if team == game_type.RedTeam {
 		atomic.AddInt64(&db.redTeamAliveCount, 1)
 	} else {
 		atomic.AddInt64(&db.blueTeamAliveCount, 1)
 	}
 }
 
-func (db *Db) Login(userId uint32, userConn net.Conn) (uint32, Team, error) {
+func (db *Db) Login(userId uint32, userConn net.Conn) (uint32, game_type.Team, error) {
 	if u, exists := db.userList[userId]; exists {
 		u.TcpConn = userConn
 		u.QPort = db.qPortArr[len(db.qPortArr)-1]
 		db.qPortArr = db.qPortArr[:len(db.qPortArr)-1]
-		if u.Team == RedTeam {
+		if u.Team == game_type.RedTeam {
 			db.RedTeamDb[userId] = u
 		} else {
 			db.BlueTeamDb[userId] = u
@@ -112,7 +106,7 @@ func (db *Db) CheckLogin(userId uint32) bool {
 	}
 }
 
-func (db *Db) ResetUser(userId uint32, team Team) {
+func (db *Db) ResetUser(userId uint32, team game_type.Team) {
 	db.userList[userId].QPort = 0
 	db.userList[userId].TcpConn = nil
 	if team {

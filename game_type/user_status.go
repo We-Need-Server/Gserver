@@ -1,4 +1,4 @@
-package common
+package game_type
 
 type UserSpawnStatus struct {
 	UserId       uint32 `json:"userId"`

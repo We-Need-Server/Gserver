@@ -13,15 +13,15 @@ import (
 )
 
 type GameTick struct {
-	TickTime          uint32
-	ticker            *time.Ticker
-	game              *game.Game
-	udpSender         *sender.UdpSender
-	ticks             [60]map[uint32]*entity.PlayerState
-	actorStatusMap    map[uint32]*ActorStatus
-	stopPacket        *userver.StopPacket
-	playerPositionMap map[uint32]*entity.PlayerState
-	findUserFunc      func(uint32) bool
+	TickTime       uint32
+	ticker         *time.Ticker
+	game           *game.Game
+	udpSender      *sender.UdpSender
+	ticks          [60]map[uint32]*entity.PlayerState
+	actorStatusMap map[uint32]*ActorStatus
+	stopPacket     *userver.StopPacket
+	playerStateMap map[uint32]*entity.PlayerState
+	findUserFunc   func(uint32) bool
 }
 
 type ActorStatus struct {
@@ -40,15 +40,15 @@ func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, f
 		ticks[i] = make(map[uint32]*entity.PlayerState)
 	}
 	return &GameTick{
-		TickTime:          0,
-		ticker:            time.NewTicker(time.Second / time.Duration(tickTime)),
-		game:              game,
-		udpSender:         udpSender,
-		ticks:             ticks,
-		actorStatusMap:    make(map[uint32]*ActorStatus),
-		stopPacket:        userver.NewStopPacket(),
-		playerPositionMap: nil,
-		findUserFunc:      findUserFunc,
+		TickTime:       0,
+		ticker:         time.NewTicker(time.Second / time.Duration(tickTime)),
+		game:           game,
+		udpSender:      udpSender,
+		ticks:          ticks,
+		actorStatusMap: make(map[uint32]*ActorStatus),
+		stopPacket:     userver.NewStopPacket(),
+		playerStateMap: nil,
+		findUserFunc:   findUserFunc,
 	}
 }
 
@@ -90,14 +90,14 @@ func (gt *GameTick) StartGameLoop() {
 
 func (gt *GameTick) dequeuePacket() {
 	fmt.Println()
-	playerPositionMap := make(map[uint32]*entity.PlayerState)
+	playerStateMap := make(map[uint32]*entity.PlayerState)
 	for {
 		p := <-gt.udpSender.NChan
 		switch p.GetPacketKind() {
 		case 'S':
-			tempMap := playerPositionMap
-			playerPositionMap = make(map[uint32]*entity.PlayerState)
-			gt.playerPositionMap = tempMap
+			tempMap := playerStateMap
+			playerStateMap = make(map[uint32]*entity.PlayerState)
+			gt.playerStateMap = tempMap
 			break
 		case 'I':
 			if p, ok := p.(*uclient.TickIPacket); ok {
@@ -112,17 +112,17 @@ func (gt *GameTick) dequeuePacket() {
 			break
 		case 'D':
 			fmt.Println("delta")
-			if _, exists := playerPositionMap[p.GetQPort()]; !exists {
-				playerPositionMap[p.GetQPort()] = entity.NewPlayerStateDefault()
+			if _, exists := playerStateMap[p.GetQPort()]; !exists {
+				playerStateMap[p.GetQPort()] = entity.NewPlayerStateDefault()
 			}
 			if p, ok := p.(*userver.DeltaPacket); ok {
-				playerPositionMap[p.GetQPort()].CalculatePlayerState(p.PlayerPosition)
-				fmt.Println(*playerPositionMap[p.GetQPort()])
+				playerStateMap[p.GetQPort()].CalculatePlayerState(p.PlayerPosition)
+				fmt.Println(*playerStateMap[p.GetQPort()])
 				for key, val := range *p.HitInformationMap {
-					if _, exists := playerPositionMap[p.GetQPort()]; !exists {
-						playerPositionMap[key] = entity.NewPlayerStateDefault()
+					if _, exists := playerStateMap[p.GetQPort()]; !exists {
+						playerStateMap[key] = entity.NewPlayerStateDefault()
 					}
-					playerPositionMap[key].Damage += val
+					playerStateMap[key].Damage += val
 				}
 
 			}
@@ -133,13 +133,15 @@ func (gt *GameTick) dequeuePacket() {
 
 func (gt *GameTick) processTick() {
 	gt.udpSender.NChan <- userver.NewStopPacket()
-	for gt.playerPositionMap == nil {
-		//fmt.Println("while", gt.playerPositionMap)
+	for gt.playerStateMap == nil {
+		//fmt.Println("while", gt.playerStateMap)
 	}
-	//fmt.Println("out", *gt.playerPositionMap)
-	gt.ticks[gt.TickTime%60] = gt.playerPositionMap
-	gt.game.ReflectPlayers(gt.playerPositionMap)
-	//fmt.Println("out2", *gt.playerPositionMap)
+	//fmt.Println("out", *gt.playerStateMap)
+	gt.ticks[gt.TickTime%60] = gt.playerStateMap
+	gt.game.ReflectPlayers(gt.playerStateMap)
+	//fmt.Println("out2", *gt.playerStateMap)
+	// 여기서 종료까지 같은 스레드에서 해버리는게 문제
+	// 이거 때문에 이전 라운드에 대한 정보를 다음 라운드가 가져가버림
 	gameState := gt.game.GetGameState()
 
 	for qPort, userConnStatus := range gt.udpSender.ConnTable {
@@ -158,7 +160,7 @@ func (gt *GameTick) processTick() {
 				} else {
 					fmt.Println("재전송 패킷 발사")
 					cloneGameDeltaState := make(map[uint32]*entity.PlayerState)
-					for k, v := range gt.playerPositionMap {
+					for k, v := range gt.playerStateMap {
 						cloneGameDeltaState[k] = v
 					}
 					for i := actorStatus.RTickNumber; i < gt.TickTime; i++ {
@@ -179,8 +181,8 @@ func (gt *GameTick) processTick() {
 					tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
 				}
 			} else {
-				fmt.Println("game_tick packet", gt.playerPositionMap)
-				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gt.playerPositionMap)
+				fmt.Println("game_tick packet", gt.playerStateMap)
+				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gt.playerStateMap)
 			}
 			_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userConnStatus.Conn)
 			if err != nil {
@@ -193,6 +195,6 @@ func (gt *GameTick) processTick() {
 		}
 	}
 	//fmt.Println("Game state sent to", len(*gt.udpSender.ConnTable), "clients")
-	gt.playerPositionMap = nil
+	gt.playerStateMap = nil
 	gt.TickTime += 1
 }

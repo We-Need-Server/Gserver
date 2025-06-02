@@ -3,6 +3,7 @@ package internal
 import (
 	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/game_manager"
+	"WeNeedGameServer/game_type"
 	"WeNeedGameServer/protocol/tcp"
 	"WeNeedGameServer/protocol/tcp/tclient"
 	"WeNeedGameServer/protocol/tcp/tserver"
@@ -15,7 +16,7 @@ import (
 
 type TcpReceiver struct {
 	tcpListener            *net.TCPListener
-	loginFunc              func(uint32, net.Conn) (uint32, db.Team, error)
+	loginFunc              func(uint32, net.Conn) (uint32, game_type.Team, error)
 	blueTeamDb             map[uint32]*db.User
 	redTeamDb              map[uint32]*db.User
 	communicateSenderFunc  func(*tcp.Message)
@@ -31,7 +32,7 @@ type TcpReceiver struct {
 	isTimerActive bool
 }
 
-func NewTcpReceiver(tcpListener *net.TCPListener, loginFunc func(uint32, net.Conn) (uint32, db.Team, error), blueTeamDb map[uint32]*db.User, redTeamDb map[uint32]*db.User, communicateSenderFunc func(*tcp.Message), matchScore uint16, listenUdpAddr string, startGameFunc func(), gameStatus *game_manager.GameStatus, sendGameInitPacketFunc func(uint32)) *TcpReceiver {
+func NewTcpReceiver(tcpListener *net.TCPListener, loginFunc func(uint32, net.Conn) (uint32, game_type.Team, error), blueTeamDb map[uint32]*db.User, redTeamDb map[uint32]*db.User, communicateSenderFunc func(*tcp.Message), matchScore uint16, listenUdpAddr string, startGameFunc func(), gameStatus *game_manager.GameStatus, sendGameInitPacketFunc func(uint32)) *TcpReceiver {
 	return &TcpReceiver{
 		tcpListener:            tcpListener,
 		loginFunc:              loginFunc,

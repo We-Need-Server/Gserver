@@ -1,19 +1,19 @@
 package tserver
 
 import (
-	"WeNeedGameServer/common"
+	"WeNeedGameServer/game_type"
 	"encoding/json"
 )
 
 type GameInitPacket struct {
-	PKind              uint32                    `json:"packetKind"`
-	TickNumber         uint32                    `json:"tickNumber"`
-	BlueScore          uint16                    `json:"blueScore"`
-	RedScore           uint16                    `json:"redScore"`
-	UserSpawnStatusArr []*common.UserSpawnStatus `json:"userSpawnStatusArr"`
+	PKind              uint32                       `json:"packetKind"`
+	TickNumber         uint32                       `json:"tickNumber"`
+	BlueScore          uint16                       `json:"blueScore"`
+	RedScore           uint16                       `json:"redScore"`
+	UserSpawnStatusArr []*game_type.UserSpawnStatus `json:"userSpawnStatusArr"`
 }
 
-func NewGameInitPacket(tickNumber uint32, blueScore uint16, redScore uint16, userSpawnStatusArr []*common.UserSpawnStatus) *GameInitPacket {
+func NewGameInitPacket(tickNumber uint32, blueScore uint16, redScore uint16, userSpawnStatusArr []*game_type.UserSpawnStatus) *GameInitPacket {
 	return &GameInitPacket{
 		PKind:              'R',
 		TickNumber:         tickNumber,

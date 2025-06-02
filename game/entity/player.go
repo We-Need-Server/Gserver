@@ -1,33 +1,25 @@
 package entity
 
-import "WeNeedGameServer/external/db"
+import "WeNeedGameServer/game_type"
 
 type Player struct {
 	RespawnPoint int
-	team         db.Team
+	team         game_type.Team
 	isAlive      bool
 	damage       int16
 	positionX    float32
-	xDelta       float32
 	positionZ    float32
-	zDelta       float32
 	yawAngle     float32
-	yawDelta     float32
 	ptAngle      float32
-	ptDelta      float32
 	jp           bool
-
-	isShoot             bool
-	isReload            bool
-	ShootHitInformation map[uint32]int16
+	isShoot      bool
+	isReload     bool
 }
 
-func NewPlayer(respawnPoint int, team db.Team) *Player {
+func NewPlayer(respawnPoint int, team game_type.Team) *Player {
 	return &Player{
-		RespawnPoint:        respawnPoint,
-		team:                team,
-		damage:              0,
-		ShootHitInformation: make(map[uint32]int16),
+		RespawnPoint: respawnPoint,
+		team:         team,
 	}
 }
 
