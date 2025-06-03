@@ -46,6 +46,7 @@ func (g *Game) GetGameState() map[uint32]*game_type.PlayerState {
 	for userId, p := range g.players {
 		gameState[userId] = p.GetPlayerState()
 		if !gameState[userId].IsAlive {
+			g.DeletePlayer(userId)
 			g.decreasePlayerFunc(gameState[userId].Team)
 		}
 	}
@@ -70,6 +71,8 @@ func (g *Game) DeletePlayer(userId uint32) {
 
 func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*game_type.PlayerState) {
 	for key, val := range playerPositionMap {
-		g.players[key].ReflectPlayer(val)
+		if _, exists := g.players[key]; exists {
+			g.players[key].ReflectPlayer(val)
+		}
 	}
 }

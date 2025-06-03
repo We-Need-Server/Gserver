@@ -117,14 +117,12 @@ func (gt *GameTick) dequeuePacket() {
 			}
 			if p, ok := p.(*userver.DeltaPacket); ok {
 				playerStateMap[p.GetQPort()].CalculatePlayerState(p.PlayerPosition)
-				fmt.Println(*playerStateMap[p.GetQPort()])
 				for key, val := range *p.HitInformationMap {
 					if _, exists := playerStateMap[p.GetQPort()]; !exists {
 						playerStateMap[key] = game_type.NewPlayerStateDefault()
 					}
 					playerStateMap[key].Damage += val
 				}
-
 			}
 			break
 		}
@@ -165,16 +163,16 @@ func (gt *GameTick) processTick() {
 					}
 					for i := actorStatus.RTickNumber; i < gt.TickTime; i++ {
 						tickIdx := i % 60
-						for qPort, playerPosition := range gt.ticks[tickIdx] {
-							if pos, exists := cloneGameDeltaState[qPort]; exists {
-								pos.Damage += playerPosition.Damage
-								pos.PositionX += playerPosition.PositionX
-								pos.PositionZ += playerPosition.PositionZ
-								pos.PtAngle += playerPosition.PtAngle
-								pos.YawAngle += playerPosition.YawAngle
-								pos.Jp = playerPosition.Jp
-								pos.IsShoot = playerPosition.IsShoot
-								cloneGameDeltaState[qPort] = pos
+						for userId, playerState := range gt.ticks[tickIdx] {
+							if pos, exists := cloneGameDeltaState[userId]; exists {
+								pos.Damage += playerState.Damage
+								pos.PositionX += playerState.PositionX
+								pos.PositionZ += playerState.PositionZ
+								pos.PtAngle += playerState.PtAngle
+								pos.YawAngle += playerState.YawAngle
+								pos.Jp = playerState.Jp
+								pos.IsShoot = playerState.IsShoot
+								cloneGameDeltaState[userId] = pos
 							}
 						}
 					}
@@ -191,6 +189,7 @@ func (gt *GameTick) processTick() {
 			actorStatus.Flags = 0
 			actorStatus.RTickNumber = 0
 		} else {
+			// 여기서는 게임 인스턴스를 죽이는 것보다는 connTable에서 제거하는 게 낫나?
 			gt.game.DeletePlayer(userConnStatus.UserId)
 		}
 	}

@@ -31,6 +31,9 @@ func (p *Player) ReflectPlayer(playerPosition *game_type.PlayerState) {
 	p.positionX += playerPosition.PositionX
 	p.positionZ += playerPosition.PositionZ
 	p.damage += playerPosition.Damage
+	if p.damage >= 100 {
+		p.isAlive = false
+	}
 	p.jp = playerPosition.Jp
 	p.isShoot = playerPosition.IsShoot
 	p.isReload = playerPosition.IsReload
