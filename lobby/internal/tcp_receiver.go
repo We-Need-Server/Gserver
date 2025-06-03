@@ -26,10 +26,13 @@ type TcpReceiver struct {
 	gameStatus             *game_manager.GameStatus
 	sendGameInitPacketFunc func(uint32)
 
-	// 타이머 관련 필드 추가
+	// 타이머 관련 필드
 	gameTimer     *time.Timer
 	timerMutex    sync.Mutex
 	isTimerActive bool
+
+	// startGameFunc 한 번만 실행을 위한 필드
+	startGameOnce sync.Once
 }
 
 func NewTcpReceiver(tcpListener *net.TCPListener, loginFunc func(uint32, net.Conn) (uint32, game_type.Team, error), blueTeamDb map[uint32]*db.User, redTeamDb map[uint32]*db.User, communicateSenderFunc func(*tcp.Message), matchScore uint16, listenUdpAddr string, startGameFunc func(), gameStatus *game_manager.GameStatus, sendGameInitPacketFunc func(uint32)) *TcpReceiver {
@@ -72,8 +75,17 @@ func (r *TcpReceiver) handleConnection(conn net.Conn) {
 	}
 }
 
-// 30초 타이머 시작 함수
+// startGameFunc를 안전하게 한 번만 실행하는 함수
+func (r *TcpReceiver) safeStartGame() {
+	r.startGameOnce.Do(func() {
+		fmt.Println("게임 시작!")
+		r.startGameFunc()
+	})
+}
+
+// 5초 타이머 시작 함수
 func (r *TcpReceiver) startGameTimer() {
+	fmt.Println("실행 준비")
 	r.timerMutex.Lock()
 	defer r.timerMutex.Unlock()
 
@@ -82,8 +94,8 @@ func (r *TcpReceiver) startGameTimer() {
 		r.gameTimer.Stop()
 	}
 
-	// 새로운 30초 타이머 시작
-	r.gameTimer = time.NewTimer(30 * time.Second)
+	// 새로운 5초 타이머 시작
+	r.gameTimer = time.NewTimer(5 * time.Second)
 	r.isTimerActive = true
 
 	go func() {
@@ -92,8 +104,8 @@ func (r *TcpReceiver) startGameTimer() {
 		r.isTimerActive = false
 		r.timerMutex.Unlock()
 
-		// 30초 후 게임 시작
-		r.startGameFunc()
+		// 안전하게 게임 시작 (한 번만 실행됨)
+		r.safeStartGame()
 	}()
 }
 
@@ -117,7 +129,8 @@ func (r *TcpReceiver) processData(conn net.Conn, b []byte) {
 		if err != nil {
 			fmt.Println("login fail", connectionRequestPacket.UserId)
 		} else {
-			r.communicateSenderFunc(tcp.NewUniCastMessage(connectionRequestPacket.UserId, tserver.NewConnectionResponsePacket(qPort, r.listenUdpAddr, r.matchScore)))
+			fmt.Println("로그인 성공", connectionRequestPacket.UserId)
+			r.communicateSenderFunc(tcp.NewUniCastMessage(connectionRequestPacket.UserId, tserver.NewConnectionResponsePacket(qPort, "weneedserver.iptime.org"+r.listenUdpAddr, r.matchScore)))
 			r.communicateSenderFunc(tcp.NewMultiCastMessage(connectionRequestPacket.UserId, tserver.NewUserConnectionPUpdatePacket([]tserver.UserTeamStatus{tserver.NewUserTeamStatus(connectionRequestPacket.UserId, team)})))
 			var userList []tserver.UserTeamStatus
 			for userId, u := range r.blueTeamDb {
@@ -129,8 +142,8 @@ func (r *TcpReceiver) processData(conn net.Conn, b []byte) {
 			r.communicateSenderFunc(tcp.NewUniCastMessage(connectionRequestPacket.UserId, tserver.NewUserConnectionPUpdatePacket(userList)))
 			switch *r.gameStatus {
 			case game_manager.GameReady:
-				r.startGameFunc()
 				if len(r.redTeamDb) > 0 && len(r.blueTeamDb) > 0 {
+					fmt.Println(len(r.redTeamDb), len(r.blueTeamDb))
 					r.startGameTimer()
 				} else {
 					r.cancelGameTimer()

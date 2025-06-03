@@ -3,10 +3,10 @@ package tserver
 import "encoding/json"
 
 type ConnectionResponsePacket struct {
-	PKind      uint8  `json:"packetKind"`
+	PKind      uint8  `json:"-"`
 	QPort      uint32 `json:"qPort"`
-	UdpAddr    string `json:"udpAddr"`
 	MatchScore uint16 `json:"matchScore"`
+	UdpAddr    string `json:"udpAddr"`
 }
 
 func NewConnectionResponsePacket(qPort uint32, udpAddr string, matchScore uint16) *ConnectionResponsePacket {
@@ -23,5 +23,10 @@ func (p *ConnectionResponsePacket) Serialize() []byte {
 	if err != nil {
 		return []byte{}
 	}
-	return data
+
+	result := make([]byte, 1+len(data))
+	result[0] = p.PKind
+	copy(result[1:], data)
+
+	return result
 }

@@ -50,7 +50,7 @@ func (r *UdpReceiver) handlePacket(clientPacket []byte, endPoint int, userAddr *
 	if err != nil {
 		log.Panicln("잘못된 요청")
 	}
-
+	fmt.Println(data.GetQPort(), data.GetSEQ())
 	if QPort := r.connTable[data.GetQPort()]; QPort == nil {
 		r.handleNewConnection(data.GetQPort(), userAddr)
 	}
@@ -60,8 +60,8 @@ func (r *UdpReceiver) handlePacket(clientPacket []byte, endPoint int, userAddr *
 func (r *UdpReceiver) throwData(data udp.ClientPacketI) {
 	if r.connTable[data.GetQPort()] != nil || r.nextSeqTable[data.GetQPort()] == data.GetSEQ() {
 		r.nextSeqTable[data.GetQPort()] += 1
-		fmt.Println("R 패킷 왔니")
-		fmt.Println(data.GetPacketKind())
+		//fmt.Println("R 패킷 왔니")
+		//fmt.Println(data.GetPacketKind())
 		if data.GetPacketKind() == 'N' {
 			r.chanTable[data.GetQPort()] <- data
 		} else {
@@ -71,7 +71,10 @@ func (r *UdpReceiver) throwData(data udp.ClientPacketI) {
 }
 
 func (r *UdpReceiver) handleNewConnection(qPort uint32, userAddr *net.UDPAddr) {
+	//fmt.Println("handle new Connection")
 	if userId := r.findUserFunc(qPort); userId != 0 {
+		//fmt.Println("handle connection")
+		//fmt.Println("userId", userId)
 		r.chanTable[qPort] = make(chan udp.PacketI)
 		r.connTable[qPort] = internal_types.NewUdpUserConnStatus(userAddr, userId)
 		r.nextSeqTable[qPort] = 1
