@@ -1,28 +1,26 @@
 package game
 
 import (
-	"WeNeedGameServer/common"
 	"WeNeedGameServer/external/db"
-	"WeNeedGameServer/game/player"
-	"fmt"
+	"WeNeedGameServer/game/entity"
+	"WeNeedGameServer/game_type"
 )
 
 type Game struct {
 	blueTeam             map[uint32]*db.User
 	redTeam              map[uint32]*db.User
 	userSpawnPositionArr []int
-	decreasePlayerFunc   func(team db.Team)
-	players              map[uint32]*player.Player
+	decreasePlayerFunc   func(team game_type.Team)
+	players              map[uint32]*entity.Player
 }
 
-// 이제 게임 부분만 구축하면 끝!
-func NewGame(blueTeam map[uint32]*db.User, redTeam map[uint32]*db.User, userSpawnPositionArr []int, decreasePlayerFunc func(team db.Team)) *Game {
+func NewGame(blueTeam map[uint32]*db.User, redTeam map[uint32]*db.User, userSpawnPositionArr []int, decreasePlayerFunc func(team game_type.Team)) *Game {
 	return &Game{
 		blueTeam:             blueTeam,
 		redTeam:              redTeam,
 		userSpawnPositionArr: userSpawnPositionArr,
 		decreasePlayerFunc:   decreasePlayerFunc,
-		players:              make(map[uint32]*player.Player),
+		players:              make(map[uint32]*entity.Player),
 	}
 
 }
@@ -31,51 +29,50 @@ func (g *Game) ReadyGame() *Game {
 	playerPositionIndex := 0
 	// 블루팀 스폰
 	for key, _ := range g.blueTeam {
-		g.addPlayer(key, -1*g.userSpawnPositionArr[playerPositionIndex], db.BlueTeam)
+		g.addPlayer(key, -1*g.userSpawnPositionArr[playerPositionIndex], game_type.BlueTeam)
 		playerPositionIndex += 1
 	}
 	playerPositionIndex = 0
 	// 레드팀 스폰
 	for key, _ := range g.redTeam {
-		g.addPlayer(key, g.userSpawnPositionArr[playerPositionIndex], db.RedTeam)
+		g.addPlayer(key, g.userSpawnPositionArr[playerPositionIndex], game_type.RedTeam)
 		playerPositionIndex += 1
 	}
 	return g
 }
 
-func (g *Game) GetGameState() map[uint32]*player.PlayerPosition {
-	gameState := make(map[uint32]*player.PlayerPosition)
+func (g *Game) GetGameState() map[uint32]*game_type.PlayerState {
+	gameState := make(map[uint32]*game_type.PlayerState)
 	for userId, p := range g.players {
 		gameState[userId] = p.GetPlayerState()
 		if !gameState[userId].IsAlive {
-			g.players[userId].ProcessDead()
-			fmt.Println("유저가 죽었습니다", userId, gameState[userId].Hp, gameState[userId].IsAlive)
+			g.DeletePlayer(userId)
 			g.decreasePlayerFunc(gameState[userId].Team)
 		}
 	}
 	return gameState
 }
 
-func (g *Game) GetPlayerSpawnStatusList() []*common.UserSpawnStatus {
-	var userSpawnStatusArr []*common.UserSpawnStatus
+func (g *Game) GetPlayerSpawnStatusList() []*game_type.UserSpawnStatus {
+	var userSpawnStatusArr []*game_type.UserSpawnStatus
 	for key, val := range g.players {
-		userSpawnStatusArr = append(userSpawnStatusArr, common.NewUserSpawnStatus(key, int16(val.RespawnPoint)))
+		userSpawnStatusArr = append(userSpawnStatusArr, game_type.NewUserSpawnStatus(key, int16(val.RespawnPoint)))
 	}
 	return userSpawnStatusArr
 }
 
-func (g *Game) addPlayer(userId uint32, respawnPosition int, team db.Team) {
-	g.players[userId] = player.NewPlayer(respawnPosition, team, g.decreasePlayerFunc)
+func (g *Game) addPlayer(userId uint32, respawnPosition int, team game_type.Team) {
+	g.players[userId] = entity.NewPlayer(respawnPosition, team)
 }
 
 func (g *Game) DeletePlayer(userId uint32) {
 	delete(g.players, userId)
 }
-func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*player.PlayerPosition) {
+
+func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*game_type.PlayerState) {
 	for key, val := range playerPositionMap {
-		//if _, exists := g.players[key]; !exists {
-		//	g.addPlayer(key)
-		//}
-		g.players[key].ReflectPlayerPosition(val)
+		if _, exists := g.players[key]; exists {
+			g.players[key].ReflectPlayer(val)
+		}
 	}
 }

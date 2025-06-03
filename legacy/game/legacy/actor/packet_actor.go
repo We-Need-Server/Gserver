@@ -15,7 +15,7 @@ type PacketActor struct {
 	QPort      uint32
 	UserAddr   *net.UDPAddr
 	packetChan chan udp.PacketI
-	//actorPlayer *player.Player
+	//actorPlayer *entity.Player
 	Mediator *mediator.Mediator
 }
 

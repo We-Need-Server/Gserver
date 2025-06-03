@@ -2,7 +2,7 @@ package actor
 
 import (
 	"WeNeedGameServer/command"
-	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/game_type"
 	"WeNeedGameServer/protocol/udp"
 	"WeNeedGameServer/protocol/udp/uclient"
 	"WeNeedGameServer/protocol/udp/userver"
@@ -44,7 +44,7 @@ func (na *UdpActor) processEventPacket(packet *uclient.EventPacket) {
 }
 
 func (na *UdpActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
-	playerPosition := player.NewPlayerPositionD()
+	playerPosition := game_type.NewPlayerStateDefault()
 	hitInformationMap := make(map[uint32]int16)
 	for i := 0; i < payLoadEndpoint; {
 		payloadCommand := command.Command(payload[i : i+2])

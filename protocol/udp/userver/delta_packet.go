@@ -1,17 +1,17 @@
 package userver
 
 import (
-	"WeNeedGameServer/game/player"
+	"WeNeedGameServer/game_type"
 )
 
 type DeltaPacket struct {
 	pKind             uint8
 	qPort             uint32
-	PlayerPosition    *player.PlayerPosition
+	PlayerPosition    *game_type.PlayerState
 	HitInformationMap *map[uint32]int16
 }
 
-func NewDeltaPacket(qPort uint32, playerPosition *player.PlayerPosition, hitInformationMap *map[uint32]int16) *DeltaPacket {
+func NewDeltaPacket(qPort uint32, playerPosition *game_type.PlayerState, hitInformationMap *map[uint32]int16) *DeltaPacket {
 	return &DeltaPacket{
 		pKind:             'D',
 		qPort:             qPort,

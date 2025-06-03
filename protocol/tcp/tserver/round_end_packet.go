@@ -1,7 +1,7 @@
 package tserver
 
 import (
-	"WeNeedGameServer/external/db"
+	"WeNeedGameServer/game_type"
 	"encoding/json"
 )
 
@@ -12,8 +12,8 @@ type RoundEndPacket struct {
 	BlueScore  uint16 `json:"blueScore"`
 }
 
-func NewRoundEndPacket(winnerTeam db.Team, blueScore uint16, redScore uint16) *RoundEndPacket {
-	if winnerTeam == db.RedTeam {
+func NewRoundEndPacket(winnerTeam game_type.Team, blueScore uint16, redScore uint16) *RoundEndPacket {
+	if winnerTeam == game_type.RedTeam {
 		return &RoundEndPacket{
 			PKind:      'E',
 			WinnerTeam: 'R',
