@@ -1,7 +1,7 @@
 package userver
 
 import (
-	"WeNeedGameServer/game/entity"
+	"WeNeedGameServer/game_type"
 	"bytes"
 	"encoding/binary"
 	"fmt"
@@ -12,10 +12,10 @@ type TickPacket struct {
 	Timestamp          int64
 	UserSequenceNumber uint32
 	Flags              uint8
-	PlayerStateMap     map[uint32]*entity.PlayerState
+	PlayerStateMap     map[uint32]*game_type.PlayerState
 }
 
-func NewTickPacket(TickNumber uint32, Timestamp int64, UserSequenceNumber uint32, Flags uint8, UserPositions map[uint32]*entity.PlayerState) *TickPacket {
+func NewTickPacket(TickNumber uint32, Timestamp int64, UserSequenceNumber uint32, Flags uint8, UserPositions map[uint32]*game_type.PlayerState) *TickPacket {
 	return &TickPacket{TickNumber, Timestamp, UserSequenceNumber, Flags, UserPositions}
 }
 

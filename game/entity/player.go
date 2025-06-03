@@ -23,11 +23,11 @@ func NewPlayer(respawnPoint int, team game_type.Team) *Player {
 	}
 }
 
-func (p *Player) GetPlayerState() *PlayerState {
-	return NewPlayerState(p.RespawnPoint, p.team, p.isAlive, p.damage, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
+func (p *Player) GetPlayerState() *game_type.PlayerState {
+	return game_type.NewPlayerState(p.RespawnPoint, p.team, p.isAlive, p.damage, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
 }
 
-func (p *Player) ReflectPlayer(playerPosition *PlayerState) {
+func (p *Player) ReflectPlayer(playerPosition *game_type.PlayerState) {
 	p.positionX += playerPosition.PositionX
 	p.positionZ += playerPosition.PositionZ
 	p.damage += playerPosition.Damage

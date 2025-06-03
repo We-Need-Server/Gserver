@@ -1,7 +1,7 @@
 package tserver
 
 import (
-	"WeNeedGameServer/external/db"
+	"WeNeedGameServer/game_type"
 	"encoding/json"
 )
 
@@ -10,8 +10,8 @@ type UserTeamStatus struct {
 	Team   uint8  `json:"team"`
 }
 
-func NewUserTeamStatus(userId uint32, team db.Team) UserTeamStatus {
-	if team == db.RedTeam {
+func NewUserTeamStatus(userId uint32, team game_type.Team) UserTeamStatus {
+	if team == game_type.RedTeam {
 		return UserTeamStatus{
 			UserId: userId,
 			Team:   'R',

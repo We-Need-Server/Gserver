@@ -2,9 +2,9 @@ package internal
 
 import (
 	"WeNeedGameServer/game"
-	"WeNeedGameServer/game/entity"
 	"WeNeedGameServer/game_manager/internal/internal_types"
 	"WeNeedGameServer/game_manager/internal/sender"
+	"WeNeedGameServer/game_type"
 	"WeNeedGameServer/protocol/udp/uclient"
 	"WeNeedGameServer/protocol/udp/userver"
 	"fmt"
@@ -17,10 +17,10 @@ type GameTick struct {
 	ticker         *time.Ticker
 	game           *game.Game
 	udpSender      *sender.UdpSender
-	ticks          [60]map[uint32]*entity.PlayerState
+	ticks          [60]map[uint32]*game_type.PlayerState
 	actorStatusMap map[uint32]*ActorStatus
 	stopPacket     *userver.StopPacket
-	playerStateMap map[uint32]*entity.PlayerState
+	playerStateMap map[uint32]*game_type.PlayerState
 	findUserFunc   func(uint32) bool
 }
 
@@ -35,9 +35,9 @@ func newActorStatus() *ActorStatus {
 }
 
 func NewGameTick(tickTime int64, game *game.Game, udpSender *sender.UdpSender, findUserFunc func(uint32) bool) *GameTick {
-	ticks := [60]map[uint32]*entity.PlayerState{}
+	ticks := [60]map[uint32]*game_type.PlayerState{}
 	for i := range ticks {
-		ticks[i] = make(map[uint32]*entity.PlayerState)
+		ticks[i] = make(map[uint32]*game_type.PlayerState)
 	}
 	return &GameTick{
 		TickTime:       0,
@@ -90,13 +90,13 @@ func (gt *GameTick) StartGameLoop() {
 
 func (gt *GameTick) dequeuePacket() {
 	fmt.Println()
-	playerStateMap := make(map[uint32]*entity.PlayerState)
+	playerStateMap := make(map[uint32]*game_type.PlayerState)
 	for {
 		p := <-gt.udpSender.NChan
 		switch p.GetPacketKind() {
 		case 'S':
 			tempMap := playerStateMap
-			playerStateMap = make(map[uint32]*entity.PlayerState)
+			playerStateMap = make(map[uint32]*game_type.PlayerState)
 			gt.playerStateMap = tempMap
 			break
 		case 'I':
@@ -113,14 +113,14 @@ func (gt *GameTick) dequeuePacket() {
 		case 'D':
 			fmt.Println("delta")
 			if _, exists := playerStateMap[p.GetQPort()]; !exists {
-				playerStateMap[p.GetQPort()] = entity.NewPlayerStateDefault()
+				playerStateMap[p.GetQPort()] = game_type.NewPlayerStateDefault()
 			}
 			if p, ok := p.(*userver.DeltaPacket); ok {
 				playerStateMap[p.GetQPort()].CalculatePlayerState(p.PlayerPosition)
 				fmt.Println(*playerStateMap[p.GetQPort()])
 				for key, val := range *p.HitInformationMap {
 					if _, exists := playerStateMap[p.GetQPort()]; !exists {
-						playerStateMap[key] = entity.NewPlayerStateDefault()
+						playerStateMap[key] = game_type.NewPlayerStateDefault()
 					}
 					playerStateMap[key].Damage += val
 				}
@@ -159,7 +159,7 @@ func (gt *GameTick) processTick() {
 					tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gameState)
 				} else {
 					fmt.Println("재전송 패킷 발사")
-					cloneGameDeltaState := make(map[uint32]*entity.PlayerState)
+					cloneGameDeltaState := make(map[uint32]*game_type.PlayerState)
 					for k, v := range gt.playerStateMap {
 						cloneGameDeltaState[k] = v
 					}

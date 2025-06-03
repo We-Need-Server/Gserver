@@ -1,10 +1,8 @@
-package entity
-
-import "WeNeedGameServer/game_type"
+package game_type
 
 type PlayerState struct {
 	RespawnPoint int
-	Team         game_type.Team
+	Team         Team
 	IsAlive      bool
 	Damage       int16
 	PositionX    float32
@@ -47,7 +45,7 @@ func (p *PlayerState) CalculatePlayerState(calP *PlayerState) {
 
 }
 
-func NewPlayerState(respawnPoint int, team game_type.Team, isAlive bool, hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool, isReload bool) *PlayerState {
+func NewPlayerState(respawnPoint int, team Team, isAlive bool, hp int16, positionX float32, positionZ float32, yawAngle float32, ptAngle float32, jp bool, isShoot bool, isReload bool) *PlayerState {
 	return &PlayerState{
 		RespawnPoint: respawnPoint,
 		Team:         team,

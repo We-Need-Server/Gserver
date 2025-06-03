@@ -41,8 +41,8 @@ func (g *Game) ReadyGame() *Game {
 	return g
 }
 
-func (g *Game) GetGameState() map[uint32]*entity.PlayerState {
-	gameState := make(map[uint32]*entity.PlayerState)
+func (g *Game) GetGameState() map[uint32]*game_type.PlayerState {
+	gameState := make(map[uint32]*game_type.PlayerState)
 	for userId, p := range g.players {
 		gameState[userId] = p.GetPlayerState()
 		if !gameState[userId].IsAlive {
@@ -68,7 +68,7 @@ func (g *Game) DeletePlayer(userId uint32) {
 	delete(g.players, userId)
 }
 
-func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*entity.PlayerState) {
+func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*game_type.PlayerState) {
 	for key, val := range playerPositionMap {
 		g.players[key].ReflectPlayer(val)
 	}
