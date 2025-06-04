@@ -112,13 +112,13 @@ func (gt *GameTick) dequeuePacket() {
 			break
 		case 'D':
 			fmt.Println("delta")
-			if _, exists := playerStateMap[p.GetQPort()]; !exists {
-				playerStateMap[p.GetQPort()] = game_type.NewPlayerStateDefault()
+			if _, exists := playerStateMap[gt.udpSender.ConnTable[p.GetQPort()].UserId]; !exists {
+				playerStateMap[gt.udpSender.ConnTable[p.GetQPort()].UserId] = game_type.NewPlayerStateDefault()
 			}
 			if p, ok := p.(*userver.DeltaPacket); ok {
-				playerStateMap[p.GetQPort()].CalculatePlayerState(p.PlayerPosition)
+				playerStateMap[gt.udpSender.ConnTable[p.GetQPort()].UserId].CalculatePlayerState(p.PlayerPosition)
 				for key, val := range *p.HitInformationMap {
-					if _, exists := playerStateMap[p.GetQPort()]; !exists {
+					if _, exists := playerStateMap[gt.udpSender.ConnTable[p.GetQPort()].UserId]; !exists {
 						playerStateMap[key] = game_type.NewPlayerStateDefault()
 					}
 					playerStateMap[key].Damage += val
@@ -189,7 +189,6 @@ func (gt *GameTick) processTick() {
 			actorStatus.Flags = 0
 			actorStatus.RTickNumber = 0
 		} else {
-			// 여기서는 게임 인스턴스를 죽이는 것보다는 connTable에서 제거하는 게 낫나?
 			gt.game.DeletePlayer(userConnStatus.UserId)
 		}
 	}
