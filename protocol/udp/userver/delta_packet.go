@@ -8,10 +8,10 @@ type DeltaPacket struct {
 	pKind             uint8
 	qPort             uint32
 	PlayerPosition    *game_type.PlayerState
-	HitInformationMap *map[uint32]int16
+	HitInformationMap map[uint32]int16
 }
 
-func NewDeltaPacket(qPort uint32, playerPosition *game_type.PlayerState, hitInformationMap *map[uint32]int16) *DeltaPacket {
+func NewDeltaPacket(qPort uint32, playerPosition *game_type.PlayerState, hitInformationMap map[uint32]int16) *DeltaPacket {
 	return &DeltaPacket{
 		pKind:             'D',
 		qPort:             qPort,
