@@ -20,6 +20,7 @@ func NewPlayer(respawnPoint int, team game_type.Team) *Player {
 	return &Player{
 		RespawnPoint: respawnPoint,
 		team:         team,
+		isAlive:      true,
 	}
 }
 
