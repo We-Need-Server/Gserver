@@ -99,6 +99,7 @@ func (gm *GameManager) readyNextRound(winnerTeam game_type.Team) {
 	gm.matchScore -= 1
 	gm.increaseTeamScore(winnerTeam)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundEndPacket(winnerTeam, gm.blueScore, gm.redScore)))
+	fmt.Println("라운드 종료 패킷 보냄")
 	time.Sleep(5 * time.Second)
 	if gm.matchScore == 0 {
 		gm.GameStatus = GameEnd
@@ -107,6 +108,7 @@ func (gm *GameManager) readyNextRound(winnerTeam game_type.Team) {
 		gm.game = nil
 	} else {
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundStartPacket()))
+		fmt.Println("라운드 시작 패킷 보냄 중간")
 		gm.initGame()
 	}
 }
