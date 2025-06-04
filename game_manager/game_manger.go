@@ -8,6 +8,7 @@ import (
 	"WeNeedGameServer/protocol/tcp"
 	"WeNeedGameServer/protocol/tcp/tserver"
 	"WeNeedGameServer/util"
+	"fmt"
 	"time"
 )
 
@@ -62,9 +63,12 @@ func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPack
 func (gm *GameManager) StartGameManager() {
 	gm.gameNetwork.ReadyUdp()
 	go gm.gameNetwork.UdpReceiver.StartUdp()
+	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundStartPacket()))
+	fmt.Println("라운드 시작 패킷 보냄 맨 처음")
 	gm.initGame()
 	gm.gameTick = internal.NewGameTick(60, gm.game, gm.gameNetwork.UdpSender, gm.userDb.CheckLogin)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
+	fmt.Println("라운드 이니셜라이저 패킷 보냄 맨 처음")
 	gm.GameStatus = RoundStart
 	go gm.gameTick.StartGameLoop()
 }
