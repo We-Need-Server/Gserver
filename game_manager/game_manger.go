@@ -76,6 +76,9 @@ func (gm *GameManager) StartGameManager() {
 func (gm *GameManager) initGame() {
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
 	gameInstance := game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
+	gm.userDb.ResetTeamAliveCount()
+	fmt.Println("BlueTeam", gm.userDb.GetTeamAliveCount(game_type.BlueTeam))
+	fmt.Println("RedTeam", gm.userDb.GetTeamAliveCount(game_type.RedTeam))
 	gm.game = gameInstance.ReadyGame()
 	if gm.GameStatus != GameReady {
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))

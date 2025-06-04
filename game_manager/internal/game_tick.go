@@ -8,7 +8,6 @@ import (
 	"WeNeedGameServer/protocol/udp/uclient"
 	"WeNeedGameServer/protocol/udp/userver"
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -89,7 +88,6 @@ func (gt *GameTick) StartGameLoop() {
 }
 
 func (gt *GameTick) dequeuePacket() {
-	fmt.Println()
 	playerStateMap := make(map[uint32]*game_type.PlayerState)
 	for {
 		p := <-gt.udpSender.NChan
@@ -108,7 +106,6 @@ func (gt *GameTick) dequeuePacket() {
 			}
 			break
 		case 'D':
-			fmt.Println("delta")
 			if _, exists := playerStateMap[gt.udpSender.ConnTable[p.GetQPort()].UserId]; !exists {
 				playerStateMap[gt.udpSender.ConnTable[p.GetQPort()].UserId] = game_type.NewPlayerStateDefault()
 			}
@@ -129,12 +126,9 @@ func (gt *GameTick) dequeuePacket() {
 func (gt *GameTick) processTick() {
 	gt.udpSender.NChan <- userver.NewStopPacket()
 	for gt.playerStateMap == nil {
-		//fmt.Println("while", gt.playerStateMap)
 	}
-	//fmt.Println("out", *gt.playerStateMap)
 	gt.ticks[gt.TickTime%60] = gt.playerStateMap
 	gt.game.ReflectPlayers(gt.playerStateMap)
-	//fmt.Println("out2", *gt.playerStateMap)
 	// 여기서 종료까지 같은 스레드에서 해버리는게 문제
 	// 이거 때문에 이전 라운드에 대한 정보를 다음 라운드가 가져가버림
 	gameState := gt.game.GetGameState()
@@ -176,12 +170,10 @@ func (gt *GameTick) processTick() {
 					tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
 				}
 			} else {
-				fmt.Println("game_tick packet", gt.playerStateMap)
 				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gt.playerStateMap)
 			}
 			_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userConnStatus.Conn)
 			if err != nil {
-				log.Println("Failed to send message:", err)
 			}
 			actorStatus.Flags = 0
 			actorStatus.RTickNumber = 0
