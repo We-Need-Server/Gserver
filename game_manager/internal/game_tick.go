@@ -112,6 +112,7 @@ func (gt *GameTick) dequeuePacket() {
 			if deltaPacket, ok := p.(*userver.DeltaPacket); ok {
 				playerStateMap[gt.udpSender.ConnTable[deltaPacket.GetQPort()].UserId].CalculatePlayerState(deltaPacket.PlayerPosition)
 				for key, val := range deltaPacket.HitInformationMap {
+					fmt.Println("hit information map", key, val)
 					if _, exists := playerStateMap[key]; !exists {
 						playerStateMap[key] = game_type.NewPlayerStateDefault()
 					}
@@ -128,6 +129,7 @@ func (gt *GameTick) processTick() {
 	for gt.playerStateMap == nil {
 	}
 	gt.ticks[gt.TickTime%60] = gt.playerStateMap
+	fmt.Printf("자세한 맵: %+v\n", gt.playerStateMap)
 	gt.game.ReflectPlayers(gt.playerStateMap)
 	gameState := gt.game.GetGameState()
 

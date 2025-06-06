@@ -62,11 +62,13 @@ func (db *UserDb) ResetTeamAliveCount() {
 }
 
 func (db *UserDb) DecreaseTeamAliveCount(team game_type.Team) {
+	fmt.Println("player 죽음 로직 실행")
 	if team == game_type.RedTeam {
 		atomic.AddInt64(&db.redTeamAliveCount, -1)
 	} else {
 		atomic.AddInt64(&db.blueTeamAliveCount, -1)
 	}
+	fmt.Println(db.blueTeamAliveCount, db.redTeamAliveCount)
 }
 
 func (db *UserDb) IncreaseTeamAliveCount(team game_type.Team) {

@@ -113,6 +113,7 @@ func (gm *GameManager) readyNextRound(winnerTeam game_type.Team) {
 
 func (gm *GameManager) decreasePlayer(deadPlayerTeam game_type.Team) {
 	gm.userDb.DecreaseTeamAliveCount(deadPlayerTeam)
+	fmt.Println(gm.userDb.GetTeamAliveCount(deadPlayerTeam))
 	if gm.userDb.GetTeamAliveCount(deadPlayerTeam) == 0 {
 		gm.GameStatus = RoundEnd
 		go gm.readyNextRound(!deadPlayerTeam)
