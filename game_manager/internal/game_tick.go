@@ -129,8 +129,6 @@ func (gt *GameTick) processTick() {
 	}
 	gt.ticks[gt.TickTime%60] = gt.playerStateMap
 	gt.game.ReflectPlayers(gt.playerStateMap)
-	// 여기서 종료까지 같은 스레드에서 해버리는게 문제
-	// 이거 때문에 이전 라운드에 대한 정보를 다음 라운드가 가져가버림
 	gameState := gt.game.GetGameState()
 
 	for qPort, userConnStatus := range gt.udpSender.ConnTable {

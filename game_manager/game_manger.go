@@ -55,11 +55,6 @@ func NewGameManager(playerNum int, userDb *db.UserDb, matchScore uint16, sendTcp
 	}
 }
 
-//func (gm *GameManager) InitAlivePlayer() {
-//	gm.blueAlivePlayerCount = uint16(gm.userDb.GetTeamAliveCount(db.BlueTeam))
-//	gm.redAlivePlayerCount = gm.userDb.GetTeamAlivePlayerCount(db.RedTeam)
-//}
-
 func (gm *GameManager) StartGameManager() {
 	gm.gameNetwork.ReadyUdp()
 	go gm.gameNetwork.UdpReceiver.StartUdp()
