@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 )
 
-type Db struct {
+type UserDb struct {
 	qPortArr           []uint32
 	userList           map[uint32]*User
 	RedTeamDb          map[uint32]*User
@@ -17,13 +17,13 @@ type Db struct {
 	blueTeamAliveCount int64
 }
 
-func NewUserDb() *Db {
+func NewUserDb() *UserDb {
 	qPortArr := make([]uint32, 128)
 	for i := 1; i <= 128; i++ {
 		qPortArr[i-1] = uint32(i)
 	}
 	util.ShuffleUint32Arr(qPortArr)
-	return &Db{
+	return &UserDb{
 		qPortArr:   qPortArr,
 		userList:   make(map[uint32]*User), // 회원 가입 한 유저들
 		RedTeamDb:  make(map[uint32]*User), // 현재 레드팀에서 활성화된 유저들 => 2명
@@ -31,7 +31,7 @@ func NewUserDb() *Db {
 	}
 }
 
-func (db *Db) Init() {
+func (db *UserDb) Init() {
 	db.AddUser(16, game_type.BlueTeam)
 	db.AddUser(32, game_type.BlueTeam)
 	db.AddUser(64, game_type.BlueTeam)
@@ -44,11 +44,11 @@ func (db *Db) Init() {
 	db.AddUser(192, game_type.RedTeam)
 }
 
-func (db *Db) AddUser(userId uint32, team game_type.Team) {
+func (db *UserDb) AddUser(userId uint32, team game_type.Team) {
 	db.userList[userId] = NewUser(team)
 }
 
-func (db *Db) GetTeamAliveCount(team game_type.Team) int64 {
+func (db *UserDb) GetTeamAliveCount(team game_type.Team) int64 {
 	if team == game_type.RedTeam {
 		return db.redTeamAliveCount
 	} else {
@@ -56,12 +56,12 @@ func (db *Db) GetTeamAliveCount(team game_type.Team) int64 {
 	}
 }
 
-func (db *Db) ResetTeamAliveCount() {
+func (db *UserDb) ResetTeamAliveCount() {
 	db.blueTeamAliveCount = int64(len(db.BlueTeamDb))
 	db.redTeamAliveCount = int64(len(db.RedTeamDb))
 }
 
-func (db *Db) DecreaseTeamAliveCount(team game_type.Team) {
+func (db *UserDb) DecreaseTeamAliveCount(team game_type.Team) {
 	if team == game_type.RedTeam {
 		atomic.AddInt64(&db.redTeamAliveCount, -1)
 	} else {
@@ -69,7 +69,7 @@ func (db *Db) DecreaseTeamAliveCount(team game_type.Team) {
 	}
 }
 
-func (db *Db) IncreaseTeamAliveCount(team game_type.Team) {
+func (db *UserDb) IncreaseTeamAliveCount(team game_type.Team) {
 	if team == game_type.RedTeam {
 		atomic.AddInt64(&db.redTeamAliveCount, 1)
 	} else {
@@ -77,7 +77,7 @@ func (db *Db) IncreaseTeamAliveCount(team game_type.Team) {
 	}
 }
 
-func (db *Db) Login(userId uint32, userConn net.Conn) (uint32, game_type.Team, error) {
+func (db *UserDb) Login(userId uint32, userConn net.Conn) (uint32, game_type.Team, error) {
 	if u, exists := db.userList[userId]; exists {
 		u.TcpConn = userConn
 		u.QPort = db.qPortArr[len(db.qPortArr)-1]
@@ -94,7 +94,7 @@ func (db *Db) Login(userId uint32, userConn net.Conn) (uint32, game_type.Team, e
 	}
 }
 
-func (db *Db) FindUserByQPort(qPort uint32) uint32 {
+func (db *UserDb) FindUserByQPort(qPort uint32) uint32 {
 	for key, val := range db.userList {
 		if val.QPort == qPort {
 			return key
@@ -103,7 +103,7 @@ func (db *Db) FindUserByQPort(qPort uint32) uint32 {
 	return 0
 }
 
-func (db *Db) CheckLogin(userId uint32) bool {
+func (db *UserDb) CheckLogin(userId uint32) bool {
 	if db.userList[userId].QPort == 0 || db.userList[userId].TcpConn == nil {
 		return false
 	} else {
@@ -111,7 +111,7 @@ func (db *Db) CheckLogin(userId uint32) bool {
 	}
 }
 
-func (db *Db) ResetUser(userId uint32, team game_type.Team) {
+func (db *UserDb) ResetUser(userId uint32, team game_type.Team) {
 	db.userList[userId].QPort = 0
 	db.userList[userId].TcpConn = nil
 	if team {
@@ -122,7 +122,7 @@ func (db *Db) ResetUser(userId uint32, team game_type.Team) {
 }
 
 // 더 이상 사용하지 않음(그리고 로직도 명확하지 않음)
-//func (db *Db) GetTeamAlivePlayerCount(team Team) uint16 {
+//func (db *UserDb) GetTeamAlivePlayerCount(team Team) uint16 {
 //	if team {
 //		return uint16(len(db.BlueTeamDb))
 //	} else {

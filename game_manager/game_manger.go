@@ -25,7 +25,7 @@ const (
 type GameManager struct {
 	GameStatus           GameStatus
 	userSpawnPositionArr []int
-	userDb               *db.Db
+	userDb               *db.UserDb
 	matchScore           uint16 // 게임이 총 몇 판 몇 선제일때의 몇 판
 	blueScore            uint16 // 라운드 승리 횟수
 	redScore             uint16
@@ -36,7 +36,7 @@ type GameManager struct {
 	game                 *game.Game
 }
 
-func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPacketFunc func(message *tcp.Message), listenUdpAddr string) *GameManager {
+func NewGameManager(playerNum int, userDb *db.UserDb, matchScore uint16, sendTcpPacketFunc func(message *tcp.Message), listenUdpAddr string) *GameManager {
 	userSpawnPositionArr := make([]int, playerNum)
 	for i := 0; i < playerNum; i++ {
 		userSpawnPositionArr[i] = i + 1
