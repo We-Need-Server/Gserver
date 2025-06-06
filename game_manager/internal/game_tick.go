@@ -124,12 +124,17 @@ func (gt *GameTick) dequeuePacket() {
 	}
 }
 
+func (gt *GameTick) SetGame(g *game.Game) {
+	gt.game = g
+}
+
 func (gt *GameTick) processTick() {
 	gt.udpSender.NChan <- userver.NewStopPacket()
 	for gt.playerStateMap == nil {
 	}
 	gt.ticks[gt.TickTime%60] = gt.playerStateMap
 	fmt.Printf("자세한 맵: %+v\n", gt.playerStateMap)
+	// game 포인터가 갈아치워진 걸 인식하지 못했음
 	gt.game.ReflectPlayers(gt.playerStateMap)
 	gameState := gt.game.GetGameState()
 

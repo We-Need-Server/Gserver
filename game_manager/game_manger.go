@@ -76,6 +76,7 @@ func (gm *GameManager) initGame() {
 	fmt.Println("RedTeam", gm.userDb.GetTeamAliveCount(game_type.RedTeam))
 	gm.game = gameInstance.ReadyGame()
 	if gm.GameStatus != GameReady {
+		gm.gameTick.SetGame(gm.game)
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
 		gm.GameStatus = RoundStart
 	}
