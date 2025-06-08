@@ -71,7 +71,7 @@ func (db *UserDb) DecreaseTeamAliveCount(team game_type.Team) {
 	fmt.Println(db.blueTeamAliveCount, db.redTeamAliveCount)
 }
 
-func (db *UserDb) IncreaseTeamAliveCount(team game_type.Team) {
+func (db *UserDb) increaseTeamAliveCount(team game_type.Team) {
 	if team == game_type.RedTeam {
 		atomic.AddInt64(&db.redTeamAliveCount, 1)
 	} else {
@@ -89,7 +89,7 @@ func (db *UserDb) Login(userId uint32, userConn net.Conn) (uint32, game_type.Tea
 		} else {
 			db.BlueTeamDb[userId] = u
 		}
-		db.IncreaseTeamAliveCount(u.Team)
+		db.increaseTeamAliveCount(u.Team)
 		return u.QPort, u.Team, nil
 	} else {
 		return 0, false, fmt.Errorf("login failed")
@@ -116,18 +116,23 @@ func (db *UserDb) CheckLogin(userId uint32) bool {
 func (db *UserDb) ResetUser(userId uint32, team game_type.Team) {
 	db.userList[userId].QPort = 0
 	db.userList[userId].TcpConn = nil
-	if team {
+	if team == game_type.RedTeam {
 		delete(db.RedTeamDb, userId)
 	} else {
 		delete(db.BlueTeamDb, userId)
 	}
 }
 
-// 더 이상 사용하지 않음(그리고 로직도 명확하지 않음)
-//func (db *UserDb) GetTeamAlivePlayerCount(team Team) uint16 {
-//	if team {
-//		return uint16(len(db.BlueTeamDb))
-//	} else {
-//		return uint16(len(db.RedTeamDb))
-//	}
-//}
+func (db *UserDb) GetTeamPlayerUserId(team game_type.Team) []uint32 {
+	var userIdList []uint32
+	if team == game_type.RedTeam {
+		for userId, _ := range db.RedTeamDb {
+			userIdList = append(userIdList, userId)
+		}
+	} else {
+		for userId, _ := range db.BlueTeamDb {
+			userIdList = append(userIdList, userId)
+		}
+	}
+	return userIdList
+}
