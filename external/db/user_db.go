@@ -123,7 +123,7 @@ func (db *UserDb) ResetUser(userId uint32, team game_type.Team) {
 	}
 }
 
-func (db *UserDb) GetTeamPlayerUserId(team game_type.Team) []uint32 {
+func (db *UserDb) GetTeamUserIdList(team game_type.Team) []uint32 {
 	var userIdList []uint32
 	if team == game_type.RedTeam {
 		for userId, _ := range db.RedTeamDb {

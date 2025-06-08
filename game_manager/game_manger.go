@@ -23,17 +23,17 @@ const (
 
 // 스냅샷 방식으로 살아있는 플레이어 수를 정한다.
 type GameManager struct {
-	GameStatus           GameStatus
-	userSpawnPositionArr []int
-	userDb               *db.UserDb
-	matchScore           uint16 // 게임이 총 몇 판 몇 선제일때의 몇 판
-	blueScore            uint16 // 라운드 승리 횟수
-	redScore             uint16
-	finalWinnerTeam      uint8
-	sendTcpPacketFunc    func(message *tcp.Message)
-	gameNetwork          *internal.GameNetwork
-	gameTick             *internal.GameTick
-	game                 *game.Game
+	GameStatus            GameStatus
+	userSpawnPositionList []int
+	userDb                *db.UserDb
+	matchScore            uint16 // 게임이 총 몇 판 몇 선제일때의 몇 판
+	blueScore             uint16 // 라운드 승리 횟수
+	redScore              uint16
+	finalWinnerTeam       uint8
+	sendTcpPacketFunc     func(message *tcp.Message)
+	gameNetwork           *internal.GameNetwork
+	gameTick              *internal.GameTick
+	game                  *game.Game
 }
 
 func NewGameManager(playerNum int, userDb *db.UserDb, matchScore uint16, sendTcpPacketFunc func(message *tcp.Message), listenUdpAddr string) *GameManager {
@@ -42,16 +42,16 @@ func NewGameManager(playerNum int, userDb *db.UserDb, matchScore uint16, sendTcp
 		userSpawnPositionArr[i] = i + 1
 	}
 	return &GameManager{
-		GameStatus:           GameReady,
-		userSpawnPositionArr: userSpawnPositionArr,
-		userDb:               userDb,
-		matchScore:           matchScore,
-		blueScore:            0,
-		redScore:             0,
-		sendTcpPacketFunc:    sendTcpPacketFunc,
-		gameNetwork:          internal.NewGameNetwork(listenUdpAddr, userDb.FindUserByQPort),
-		gameTick:             nil,
-		game:                 nil,
+		GameStatus:            GameReady,
+		userSpawnPositionList: userSpawnPositionArr,
+		userDb:                userDb,
+		matchScore:            matchScore,
+		blueScore:             0,
+		redScore:              0,
+		sendTcpPacketFunc:     sendTcpPacketFunc,
+		gameNetwork:           internal.NewGameNetwork(listenUdpAddr, userDb.FindUserByQPort),
+		gameTick:              nil,
+		game:                  nil,
 	}
 }
 
@@ -69,12 +69,12 @@ func (gm *GameManager) StartGameManager() {
 }
 
 func (gm *GameManager) initGame() {
-	util.ShuffleIntArr(gm.userSpawnPositionArr)
-	gameInstance := game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
+	util.ShuffleIntArr(gm.userSpawnPositionList)
+	gameInstance := game.NewGame(gm.decreasePlayer)
 	gm.userDb.ResetTeamAliveCount()
 	fmt.Println("BlueTeam", gm.userDb.GetTeamAliveCount(game_type.BlueTeam))
 	fmt.Println("RedTeam", gm.userDb.GetTeamAliveCount(game_type.RedTeam))
-	gm.game = gameInstance.ReadyGame()
+	gm.game = gameInstance.ReadyGame(gm.userDb.GetTeamUserIdList(game_type.BlueTeam), gm.userDb.GetTeamUserIdList(game_type.RedTeam), gm.userSpawnPositionList)
 	if gm.GameStatus != GameReady {
 		gm.gameTick.SetGame(gm.game)
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
