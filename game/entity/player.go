@@ -1,6 +1,9 @@
 package entity
 
-import "WeNeedGameServer/game_type"
+import (
+	"WeNeedGameServer/game_type"
+	"fmt"
+)
 
 type Player struct {
 	RespawnPoint int
@@ -28,16 +31,17 @@ func (p *Player) GetPlayerState() *game_type.PlayerState {
 	return game_type.NewPlayerState(p.RespawnPoint, p.team, p.isAlive, p.damage, p.positionX, p.positionZ, p.yawAngle, p.ptAngle, p.jp, p.isShoot, p.isReload)
 }
 
-func (p *Player) ReflectPlayer(playerPosition *game_type.PlayerState) {
-	p.positionX += playerPosition.PositionX
-	p.positionZ += playerPosition.PositionZ
-	p.damage += playerPosition.Damage
+func (p *Player) ReflectPlayer(playerState *game_type.PlayerState) {
+	p.positionX += playerState.PositionX
+	p.positionZ += playerState.PositionZ
+	p.damage += playerState.Damage
+	fmt.Println("player damage", p.damage, playerState.Damage)
 	if p.damage >= 100 {
 		p.isAlive = false
 	}
-	p.jp = playerPosition.Jp
-	p.isShoot = playerPosition.IsShoot
-	p.isReload = playerPosition.IsReload
-	p.ptAngle += playerPosition.PtAngle
-	p.yawAngle += playerPosition.YawAngle
+	p.jp = playerState.Jp
+	p.isShoot = playerState.IsShoot
+	p.isReload = playerState.IsReload
+	p.ptAngle += playerState.PtAngle
+	p.yawAngle += playerState.YawAngle
 }

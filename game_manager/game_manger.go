@@ -8,6 +8,7 @@ import (
 	"WeNeedGameServer/protocol/tcp"
 	"WeNeedGameServer/protocol/tcp/tserver"
 	"WeNeedGameServer/util"
+	"fmt"
 	"time"
 )
 
@@ -24,7 +25,7 @@ const (
 type GameManager struct {
 	GameStatus           GameStatus
 	userSpawnPositionArr []int
-	userDb               *db.Db
+	userDb               *db.UserDb
 	matchScore           uint16 // 게임이 총 몇 판 몇 선제일때의 몇 판
 	blueScore            uint16 // 라운드 승리 횟수
 	redScore             uint16
@@ -35,7 +36,7 @@ type GameManager struct {
 	game                 *game.Game
 }
 
-func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPacketFunc func(message *tcp.Message), listenUdpAddr string) *GameManager {
+func NewGameManager(playerNum int, userDb *db.UserDb, matchScore uint16, sendTcpPacketFunc func(message *tcp.Message), listenUdpAddr string) *GameManager {
 	userSpawnPositionArr := make([]int, playerNum)
 	for i := 0; i < playerNum; i++ {
 		userSpawnPositionArr[i] = i + 1
@@ -54,17 +55,15 @@ func NewGameManager(playerNum int, userDb *db.Db, matchScore uint16, sendTcpPack
 	}
 }
 
-//func (gm *GameManager) InitAlivePlayer() {
-//	gm.blueAlivePlayerCount = uint16(gm.userDb.GetTeamAliveCount(db.BlueTeam))
-//	gm.redAlivePlayerCount = gm.userDb.GetTeamAlivePlayerCount(db.RedTeam)
-//}
-
 func (gm *GameManager) StartGameManager() {
 	gm.gameNetwork.ReadyUdp()
 	go gm.gameNetwork.UdpReceiver.StartUdp()
+	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundStartPacket()))
+	fmt.Println("라운드 시작 패킷 보냄 맨 처음")
 	gm.initGame()
 	gm.gameTick = internal.NewGameTick(60, gm.game, gm.gameNetwork.UdpSender, gm.userDb.CheckLogin)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
+	fmt.Println("라운드 이니셜라이저 패킷 보냄 맨 처음")
 	gm.GameStatus = RoundStart
 	go gm.gameTick.StartGameLoop()
 }
@@ -72,8 +71,12 @@ func (gm *GameManager) StartGameManager() {
 func (gm *GameManager) initGame() {
 	util.ShuffleIntArr(gm.userSpawnPositionArr)
 	gameInstance := game.NewGame(gm.userDb.BlueTeamDb, gm.userDb.RedTeamDb, gm.userSpawnPositionArr, gm.decreasePlayer)
+	gm.userDb.ResetTeamAliveCount()
+	fmt.Println("BlueTeam", gm.userDb.GetTeamAliveCount(game_type.BlueTeam))
+	fmt.Println("RedTeam", gm.userDb.GetTeamAliveCount(game_type.RedTeam))
 	gm.game = gameInstance.ReadyGame()
 	if gm.GameStatus != GameReady {
+		gm.gameTick.SetGame(gm.game)
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewGameInitPacket(gm.gameTick.TickTime, gm.blueScore, gm.redScore, gm.game.GetPlayerSpawnStatusList())))
 		gm.GameStatus = RoundStart
 	}
@@ -95,6 +98,7 @@ func (gm *GameManager) readyNextRound(winnerTeam game_type.Team) {
 	gm.matchScore -= 1
 	gm.increaseTeamScore(winnerTeam)
 	gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundEndPacket(winnerTeam, gm.blueScore, gm.redScore)))
+	fmt.Println("라운드 종료 패킷 보냄")
 	time.Sleep(5 * time.Second)
 	if gm.matchScore == 0 {
 		gm.GameStatus = GameEnd
@@ -103,12 +107,14 @@ func (gm *GameManager) readyNextRound(winnerTeam game_type.Team) {
 		gm.game = nil
 	} else {
 		gm.sendTcpPacketFunc(tcp.NewBroadCastMessage(tserver.NewRoundStartPacket()))
+		fmt.Println("라운드 시작 패킷 보냄 중간")
 		gm.initGame()
 	}
 }
 
 func (gm *GameManager) decreasePlayer(deadPlayerTeam game_type.Team) {
 	gm.userDb.DecreaseTeamAliveCount(deadPlayerTeam)
+	fmt.Println(gm.userDb.GetTeamAliveCount(deadPlayerTeam))
 	if gm.userDb.GetTeamAliveCount(deadPlayerTeam) == 0 {
 		gm.GameStatus = RoundEnd
 		go gm.readyNextRound(!deadPlayerTeam)

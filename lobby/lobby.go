@@ -10,7 +10,7 @@ import (
 )
 
 type Lobby struct {
-	userDb        *db.Db
+	userDb        *db.UserDb
 	tcpListener   *net.TCPListener
 	tcpReceiver   *internal.TcpReceiver
 	tcpSender     *internal.TcpSender
@@ -20,7 +20,7 @@ type Lobby struct {
 	gameManager   *game_manager.GameManager
 }
 
-func NewLobby(userDb *db.Db, listenUdpAddr string, listenTcpAddr string, matchScore uint16) *Lobby {
+func NewLobby(userDb *db.UserDb, listenUdpAddr string, listenTcpAddr string, matchScore uint16) *Lobby {
 	return &Lobby{
 		userDb:        userDb,
 		tcpReceiver:   nil,

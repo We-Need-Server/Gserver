@@ -8,7 +8,6 @@ import (
 	"WeNeedGameServer/protocol/udp/uclient"
 	"WeNeedGameServer/protocol/udp/userver"
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -89,7 +88,6 @@ func (gt *GameTick) StartGameLoop() {
 }
 
 func (gt *GameTick) dequeuePacket() {
-	fmt.Println()
 	playerStateMap := make(map[uint32]*game_type.PlayerState)
 	for {
 		p := <-gt.udpSender.NChan
@@ -98,27 +96,24 @@ func (gt *GameTick) dequeuePacket() {
 			tempMap := playerStateMap
 			playerStateMap = make(map[uint32]*game_type.PlayerState)
 			gt.playerStateMap = tempMap
-			break
 		case 'I':
-			if p, ok := p.(*uclient.TickIPacket); ok {
-				gt.iActorStatus(p)
+			if tickIPacket, ok := p.(*uclient.TickIPacket); ok {
+				gt.iActorStatus(tickIPacket)
 			}
-			break
 		case 'R':
-			fmt.Println("왔다잉 재전송 패킷")
-			if p, ok := p.(*uclient.TickRPacket); ok {
-				gt.rActorStatus(p)
+			if tickRPacket, ok := p.(*uclient.TickRPacket); ok {
+				gt.rActorStatus(tickRPacket)
 			}
 			break
 		case 'D':
-			fmt.Println("delta")
-			if _, exists := playerStateMap[p.GetQPort()]; !exists {
-				playerStateMap[p.GetQPort()] = game_type.NewPlayerStateDefault()
+			if _, exists := playerStateMap[gt.udpSender.ConnTable[p.GetQPort()].UserId]; !exists {
+				playerStateMap[gt.udpSender.ConnTable[p.GetQPort()].UserId] = game_type.NewPlayerStateDefault()
 			}
-			if p, ok := p.(*userver.DeltaPacket); ok {
-				playerStateMap[p.GetQPort()].CalculatePlayerState(p.PlayerPosition)
-				for key, val := range *p.HitInformationMap {
-					if _, exists := playerStateMap[p.GetQPort()]; !exists {
+			if deltaPacket, ok := p.(*userver.DeltaPacket); ok {
+				playerStateMap[gt.udpSender.ConnTable[deltaPacket.GetQPort()].UserId].CalculatePlayerState(deltaPacket.PlayerPosition)
+				for key, val := range deltaPacket.HitInformationMap {
+					fmt.Println("hit information map", key, val)
+					if _, exists := playerStateMap[key]; !exists {
 						playerStateMap[key] = game_type.NewPlayerStateDefault()
 					}
 					playerStateMap[key].Damage += val
@@ -129,17 +124,18 @@ func (gt *GameTick) dequeuePacket() {
 	}
 }
 
+func (gt *GameTick) SetGame(g *game.Game) {
+	gt.game = g
+}
+
 func (gt *GameTick) processTick() {
 	gt.udpSender.NChan <- userver.NewStopPacket()
 	for gt.playerStateMap == nil {
-		//fmt.Println("while", gt.playerStateMap)
 	}
-	//fmt.Println("out", *gt.playerStateMap)
 	gt.ticks[gt.TickTime%60] = gt.playerStateMap
+	fmt.Printf("자세한 맵: %+v\n", gt.playerStateMap)
+	// game 포인터가 갈아치워진 걸 인식하지 못했음
 	gt.game.ReflectPlayers(gt.playerStateMap)
-	//fmt.Println("out2", *gt.playerStateMap)
-	// 여기서 종료까지 같은 스레드에서 해버리는게 문제
-	// 이거 때문에 이전 라운드에 대한 정보를 다음 라운드가 가져가버림
 	gameState := gt.game.GetGameState()
 
 	for qPort, userConnStatus := range gt.udpSender.ConnTable {
@@ -179,17 +175,14 @@ func (gt *GameTick) processTick() {
 					tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, cloneGameDeltaState)
 				}
 			} else {
-				fmt.Println("game_tick packet", gt.playerStateMap)
 				tickPacket = userver.NewTickPacket(gt.TickTime, time.Now().Unix(), gt.udpSender.NextSeqTable[qPort]-1, actorStatus.Flags, gt.playerStateMap)
 			}
 			_, err := gt.udpSender.SendUdpPacket(tickPacket.Serialize(), userConnStatus.Conn)
 			if err != nil {
-				log.Println("Failed to send message:", err)
 			}
 			actorStatus.Flags = 0
 			actorStatus.RTickNumber = 0
 		} else {
-			// 여기서는 게임 인스턴스를 죽이는 것보다는 connTable에서 제거하는 게 낫나?
 			gt.game.DeletePlayer(userConnStatus.UserId)
 		}
 	}

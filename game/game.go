@@ -4,6 +4,7 @@ import (
 	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/game/entity"
 	"WeNeedGameServer/game_type"
+	"fmt"
 )
 
 type Game struct {
@@ -29,12 +30,14 @@ func (g *Game) ReadyGame() *Game {
 	playerPositionIndex := 0
 	// 블루팀 스폰
 	for key, _ := range g.blueTeam {
+		fmt.Println("add player", key)
 		g.addPlayer(key, -1*g.userSpawnPositionArr[playerPositionIndex], game_type.BlueTeam)
 		playerPositionIndex += 1
 	}
 	playerPositionIndex = 0
 	// 레드팀 스폰
 	for key, _ := range g.redTeam {
+		fmt.Println("add player", key)
 		g.addPlayer(key, g.userSpawnPositionArr[playerPositionIndex], game_type.RedTeam)
 		playerPositionIndex += 1
 	}
@@ -63,16 +66,22 @@ func (g *Game) GetPlayerSpawnStatusList() []*game_type.UserSpawnStatus {
 
 func (g *Game) addPlayer(userId uint32, respawnPosition int, team game_type.Team) {
 	g.players[userId] = entity.NewPlayer(respawnPosition, team)
+	fmt.Println(g.players[userId])
 }
 
 func (g *Game) DeletePlayer(userId uint32) {
+	fmt.Println("플레이어 제거")
 	delete(g.players, userId)
 }
 
-func (g *Game) ReflectPlayers(playerPositionMap map[uint32]*game_type.PlayerState) {
-	for key, val := range playerPositionMap {
+func (g *Game) ReflectPlayers(playerStateMap map[uint32]*game_type.PlayerState) {
+	fmt.Printf("자세한 맵2: %+v\n", playerStateMap)
+	for key, val := range playerStateMap {
 		if _, exists := g.players[key]; exists {
+			fmt.Println("reflect player", key, val.Damage)
 			g.players[key].ReflectPlayer(val)
+		} else {
+			fmt.Println("not reflect player", key)
 		}
 	}
 }

@@ -106,5 +106,5 @@ func (na *UdpActor) processCommandPayload(payload []byte, payLoadEndpoint int) {
 		}
 	}
 
-	na.qmChan <- userver.NewDeltaPacket(na.qPort, playerPosition, &hitInformationMap)
+	na.qmChan <- userver.NewDeltaPacket(na.qPort, playerPosition, hitInformationMap)
 }
