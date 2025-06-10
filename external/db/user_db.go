@@ -9,7 +9,7 @@ import (
 )
 
 type UserDb struct {
-	qPortArr           []uint32
+	qPortList          []uint32
 	userList           map[uint32]*User
 	RedTeamDb          map[uint32]*User
 	BlueTeamDb         map[uint32]*User
@@ -24,7 +24,7 @@ func NewUserDb() *UserDb {
 	}
 	util.ShuffleUint32Arr(qPortArr)
 	return &UserDb{
-		qPortArr:   qPortArr,
+		qPortList:  qPortArr,
 		userList:   make(map[uint32]*User), // 회원 가입 한 유저들
 		RedTeamDb:  make(map[uint32]*User), // 현재 레드팀에서 활성화된 유저들 => 2명
 		BlueTeamDb: make(map[uint32]*User), // 현재 블루팀에서 활성화된 유저들 => 1명
@@ -82,8 +82,8 @@ func (db *UserDb) increaseTeamAliveCount(team game_type.Team) {
 func (db *UserDb) Login(userId uint32, userConn net.Conn) (uint32, game_type.Team, error) {
 	if u, exists := db.userList[userId]; exists {
 		u.TcpConn = userConn
-		u.QPort = db.qPortArr[len(db.qPortArr)-1]
-		db.qPortArr = db.qPortArr[:len(db.qPortArr)-1]
+		u.QPort = db.qPortList[len(db.qPortList)-1]
+		db.qPortList = db.qPortList[:len(db.qPortList)-1]
 		if u.Team == game_type.RedTeam {
 			db.RedTeamDb[userId] = u
 		} else {

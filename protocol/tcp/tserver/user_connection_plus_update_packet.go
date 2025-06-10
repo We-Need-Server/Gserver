@@ -2,6 +2,7 @@ package tserver
 
 import (
 	"WeNeedGameServer/game_type"
+	"encoding/binary"
 	"encoding/json"
 )
 
@@ -25,8 +26,9 @@ func NewUserTeamStatus(userId uint32, team game_type.Team) UserTeamStatus {
 }
 
 type UserConnectionPUpdatePacket struct {
-	PKind    uint8            `json:"-"`
-	UserList []UserTeamStatus `json:"userList"`
+	ContentLength uint32           `json:"-"`
+	PKind         uint8            `json:"-"`
+	UserList      []UserTeamStatus `json:"userList"`
 }
 
 func NewUserConnectionPUpdatePacket(userList []UserTeamStatus) *UserConnectionPUpdatePacket {
@@ -41,9 +43,11 @@ func (p *UserConnectionPUpdatePacket) Serialize() []byte {
 	if err != nil {
 		return []byte{}
 	}
-	result := make([]byte, 1+len(data))
-	result[0] = p.PKind
-	copy(result[1:], data)
-
+	p.ContentLength = uint32(len(data) + 1)
+	result := make([]byte, 9+len(data))
+	binary.LittleEndian.PutUint32(result[0:4], p.ContentLength)
+	result[4] = p.PKind
+	copy(result[5:len(result)-4], data)
+	copy(result[len(result)-4:], "\r\n\r\n")
 	return result
 }

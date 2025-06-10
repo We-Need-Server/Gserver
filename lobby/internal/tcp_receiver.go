@@ -25,14 +25,10 @@ type TcpReceiver struct {
 	startGameFunc          func()
 	gameStatus             *game_manager.GameStatus
 	sendGameInitPacketFunc func(uint32)
-
-	// 타이머 관련 필드
-	gameTimer     *time.Timer
-	timerMutex    sync.Mutex
-	isTimerActive bool
-
-	// startGameFunc 한 번만 실행을 위한 필드
-	startGameOnce sync.Once
+	gameTimer              *time.Timer
+	timerMutex             sync.Mutex
+	isTimerActive          bool
+	startGameOnce          sync.Once
 }
 
 func NewTcpReceiver(tcpListener *net.TCPListener, loginFunc func(uint32, net.Conn) (uint32, game_type.Team, error), blueTeamDb map[uint32]*db.User, redTeamDb map[uint32]*db.User, communicateSenderFunc func(*tcp.Message), matchScore uint16, listenUdpAddr string, startGameFunc func(), gameStatus *game_manager.GameStatus, sendGameInitPacketFunc func(uint32)) *TcpReceiver {
@@ -75,7 +71,6 @@ func (r *TcpReceiver) handleConnection(conn net.Conn) {
 	}
 }
 
-// startGameFunc를 안전하게 한 번만 실행하는 함수
 func (r *TcpReceiver) safeStartGame() {
 	r.startGameOnce.Do(func() {
 		fmt.Println("게임 시작!")
@@ -83,18 +78,15 @@ func (r *TcpReceiver) safeStartGame() {
 	})
 }
 
-// 5초 타이머 시작 함수
 func (r *TcpReceiver) startGameTimer() {
 	fmt.Println("실행 준비")
 	r.timerMutex.Lock()
 	defer r.timerMutex.Unlock()
 
-	// 기존 타이머가 있다면 정지
 	if r.gameTimer != nil {
 		r.gameTimer.Stop()
 	}
 
-	// 새로운 5초 타이머 시작
 	r.gameTimer = time.NewTimer(5 * time.Second)
 	r.isTimerActive = true
 
@@ -104,12 +96,10 @@ func (r *TcpReceiver) startGameTimer() {
 		r.isTimerActive = false
 		r.timerMutex.Unlock()
 
-		// 안전하게 게임 시작 (한 번만 실행됨)
 		r.safeStartGame()
 	}()
 }
 
-// 타이머 취소 함수
 func (r *TcpReceiver) cancelGameTimer() {
 	r.timerMutex.Lock()
 	defer r.timerMutex.Unlock()
