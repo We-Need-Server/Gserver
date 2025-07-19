@@ -2,7 +2,6 @@ package tserver
 
 import (
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 )
 
@@ -18,12 +17,12 @@ func NewRoundStartPacket() *RoundStartPacket {
 }
 
 func (p *RoundStartPacket) Serialize() []byte {
-	data, err := json.Marshal(p)
-	if err != nil {
-		return []byte{}
-	}
-	p.ContentLength = uint32(len(data) + 1)
-	result := make([]byte, 5+len(data))
+	//data, err := json.Marshal(p)
+	//if err != nil {
+	//	return []byte{}
+	//}
+	p.ContentLength = 1
+	result := make([]byte, 5)
 	binary.LittleEndian.PutUint32(result[0:4], p.ContentLength)
 	result[4] = p.PKind
 	//copy(result[5:], data)
