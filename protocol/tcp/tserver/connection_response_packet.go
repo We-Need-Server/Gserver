@@ -27,7 +27,7 @@ func (p *ConnectionResponsePacket) Serialize() []byte {
 		return []byte{}
 	}
 	p.ContentLength = uint32(len(data) + 1)
-	result := make([]byte, 9+len(data))
+	result := make([]byte, 5+len(data))
 	binary.LittleEndian.PutUint32(result[0:4], p.ContentLength)
 	result[4] = p.PKind
 	copy(result[5:len(result)-4], data)
