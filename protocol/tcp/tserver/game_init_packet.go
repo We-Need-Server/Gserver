@@ -36,9 +36,8 @@ func (p *GameInitPacket) Serialize() []byte {
 	binary.LittleEndian.PutUint32(result[0:4], p.ContentLength)
 	result[4] = p.PKind
 	copy(result[5:], data)
-	fmt.Println('R')
-	fmt.Println(len(result))
+	fmt.Println("R")
 	fmt.Println(p.ContentLength)
-	fmt.Print(len(data))
+	fmt.Println(result)
 	return result
 }
