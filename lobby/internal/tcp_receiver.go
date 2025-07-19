@@ -9,6 +9,7 @@ import (
 	"WeNeedGameServer/protocol/tcp/tserver"
 	"WeNeedGameServer/util"
 	"fmt"
+	"io"
 	"net"
 	"sync"
 	"time"
@@ -61,13 +62,18 @@ func (r *TcpReceiver) StartTcp() {
 
 func (r *TcpReceiver) handleConnection(conn net.Conn) {
 	for {
-		buffer := make([]byte, 1024)
-		n, err := conn.Read(buffer)
+		contentLengthBuffer := make([]byte, 4)
+		_, err := io.ReadFull(conn, contentLengthBuffer)
+		if err != nil {
+			return
+		}
+		packetBuffer := make([]byte, util.ConvertBinaryToUint32(contentLengthBuffer))
+		n, err := io.ReadFull(conn, packetBuffer)
 		if err != nil {
 			return
 		}
 
-		r.processData(conn, buffer[:n])
+		r.processData(conn, packetBuffer[:n])
 	}
 }
 
