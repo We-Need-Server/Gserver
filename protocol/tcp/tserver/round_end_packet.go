@@ -4,6 +4,7 @@ import (
 	"WeNeedGameServer/game_type"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 )
 
 type RoundEndPacket struct {
@@ -42,6 +43,8 @@ func (p *RoundEndPacket) Serialize() []byte {
 	binary.LittleEndian.PutUint32(result[0:4], p.ContentLength)
 	result[4] = p.PKind
 	copy(result[5:len(result)-4], data)
-	copy(result[len(result)-4:], "\r\n\r\n")
+	fmt.Println(len(result))
+	fmt.Println(p.ContentLength)
+	fmt.Print(len(data))
 	return result
 }
