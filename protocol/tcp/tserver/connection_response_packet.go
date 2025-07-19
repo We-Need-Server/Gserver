@@ -23,12 +23,25 @@ func NewConnectionResponsePacket(qPort uint32, udpAddr string, matchScore uint16
 }
 
 func (p *ConnectionResponsePacket) Serialize() []byte {
+	//data, err := json.Marshal(p)
+	//if err != nil {
+	//	return []byte{}
+	//}
+	//p.ContentLength = 1
+	//result := make([]byte, 5)
+	//binary.LittleEndian.PutUint32(result[0:4], p.ContentLength)
+	//result[4] = p.PKind
+	//copy(result[5:], data)
+	//fmt.Println("I")
+	//fmt.Println(p.ContentLength)
+	//fmt.Println(result)
+	//return result
 	data, err := json.Marshal(p)
 	if err != nil {
 		return []byte{}
 	}
-	p.ContentLength = 1
-	result := make([]byte, 5)
+	p.ContentLength = uint32(len(data) + 1)
+	result := make([]byte, 5+len(data))
 	binary.LittleEndian.PutUint32(result[0:4], p.ContentLength)
 	result[4] = p.PKind
 	copy(result[5:], data)
