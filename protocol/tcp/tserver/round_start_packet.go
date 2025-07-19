@@ -26,7 +26,7 @@ func (p *RoundStartPacket) Serialize() []byte {
 	result := make([]byte, 5+len(data))
 	binary.LittleEndian.PutUint32(result[0:4], p.ContentLength)
 	result[4] = p.PKind
-	copy(result[5:len(result)-4], data)
+	copy(result[5:], data)
 	fmt.Println(len(result))
 	fmt.Println(p.ContentLength)
 	fmt.Print(len(data))
