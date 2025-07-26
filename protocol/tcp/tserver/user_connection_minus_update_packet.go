@@ -1,10 +1,15 @@
 package tserver
 
-import "encoding/json"
+import (
+	"encoding/binary"
+	"encoding/json"
+	"fmt"
+)
 
 type UserConnectionMUpdatePacket struct {
-	PKind    uint8    `json:"-"`
-	UserList []uint32 `json:"userList"`
+	ContentLength uint32   `json:"-"`
+	PKind         uint8    `json:"-"`
+	UserList      []uint32 `json:"userList"`
 }
 
 func NewUserConnectionMUpdatePacket(userList []uint32) *UserConnectionMUpdatePacket {
@@ -19,9 +24,13 @@ func (p *UserConnectionMUpdatePacket) Serialize() []byte {
 	if err != nil {
 		return []byte{}
 	}
-	result := make([]byte, 1+len(data))
-	result[0] = p.PKind
-	copy(result[1:], data)
-
+	p.ContentLength = uint32(len(data) + 1)
+	result := make([]byte, 5+len(data))
+	binary.LittleEndian.PutUint32(result[0:4], p.ContentLength)
+	result[4] = p.PKind
+	copy(result[5:], data)
+	fmt.Println("M")
+	fmt.Println(p.ContentLength)
+	fmt.Println(result)
 	return result
 }

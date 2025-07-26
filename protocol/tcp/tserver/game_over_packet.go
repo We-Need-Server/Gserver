@@ -1,9 +1,13 @@
 package tserver
 
-import "encoding/json"
+import (
+	"encoding/binary"
+	"fmt"
+)
 
 type GameOverPacket struct {
-	PKind uint8 `json:"-"`
+	ContentLength uint32 `json:"-"`
+	PKind         uint8  `json:"-"`
 }
 
 func NewGameOverPacket() *GameOverPacket {
@@ -11,13 +15,13 @@ func NewGameOverPacket() *GameOverPacket {
 }
 
 func (p *GameOverPacket) Serialize() []byte {
-	data, err := json.Marshal(p)
-	if err != nil {
-		return []byte{}
-	}
-	result := make([]byte, 1+len(data))
-	result[0] = p.PKind
-	copy(result[1:], data)
-
+	p.ContentLength = 1
+	result := make([]byte, 5)
+	binary.LittleEndian.PutUint32(result[0:4], p.ContentLength)
+	result[4] = p.PKind
+	//copy(result[5:], data)
+	fmt.Println("O")
+	fmt.Println(p.ContentLength)
+	fmt.Println(result)
 	return result
 }

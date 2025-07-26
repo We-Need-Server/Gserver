@@ -4,7 +4,6 @@ import (
 	"WeNeedGameServer/external/db"
 	"WeNeedGameServer/protocol/tcp"
 	"fmt"
-	"time"
 )
 
 type TcpSender struct {
@@ -22,7 +21,6 @@ func NewTcpSender(listenUdpAddr string, blueTeamDb map[uint32]*db.User, redTeamD
 }
 
 func (s *TcpSender) ProcessMessage(message *tcp.Message) {
-	time.Sleep(3 * time.Second)
 	switch message.SenderType {
 	case tcp.SendByBroadCast:
 		s.sendByBroadCast(message.Data)
@@ -35,27 +33,6 @@ func (s *TcpSender) ProcessMessage(message *tcp.Message) {
 		break
 	}
 }
-
-//func (s *TcpSender) makePacket(pKind uint8, userId uint32) tcp.PacketI {
-//	switch pKind {
-//	case 'I':
-//		if u := s.getUser(userId); u != nil {
-//			return tserver.NewConnectionResponsePacket(u.QPort, s.listenUdpAddr)
-//		}
-//	case 'U':
-//		var userList []uint32
-//		for key, _ := range s.blueTeamDb {
-//			userList = append(userList, key)
-//		}
-//		for key, _ := range s.redTeamDb {
-//			userList = append(userList, key)
-//		}
-//		return tserver.NewUserConnectionUpdatePacket(userList)
-//	case 'S':
-//		break
-//	}
-//	return nil
-//}
 
 func (s *TcpSender) sendByBroadCast(packet tcp.PacketI) {
 	if packet != nil {

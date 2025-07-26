@@ -9,7 +9,7 @@ import (
 )
 
 type UserDb struct {
-	qPortArr           []uint32
+	qPortList          []uint32
 	userList           map[uint32]*User
 	RedTeamDb          map[uint32]*User
 	BlueTeamDb         map[uint32]*User
@@ -24,7 +24,7 @@ func NewUserDb() *UserDb {
 	}
 	util.ShuffleUint32Arr(qPortArr)
 	return &UserDb{
-		qPortArr:   qPortArr,
+		qPortList:  qPortArr,
 		userList:   make(map[uint32]*User), // 회원 가입 한 유저들
 		RedTeamDb:  make(map[uint32]*User), // 현재 레드팀에서 활성화된 유저들 => 2명
 		BlueTeamDb: make(map[uint32]*User), // 현재 블루팀에서 활성화된 유저들 => 1명
@@ -71,7 +71,7 @@ func (db *UserDb) DecreaseTeamAliveCount(team game_type.Team) {
 	fmt.Println(db.blueTeamAliveCount, db.redTeamAliveCount)
 }
 
-func (db *UserDb) IncreaseTeamAliveCount(team game_type.Team) {
+func (db *UserDb) increaseTeamAliveCount(team game_type.Team) {
 	if team == game_type.RedTeam {
 		atomic.AddInt64(&db.redTeamAliveCount, 1)
 	} else {
@@ -82,14 +82,14 @@ func (db *UserDb) IncreaseTeamAliveCount(team game_type.Team) {
 func (db *UserDb) Login(userId uint32, userConn net.Conn) (uint32, game_type.Team, error) {
 	if u, exists := db.userList[userId]; exists {
 		u.TcpConn = userConn
-		u.QPort = db.qPortArr[len(db.qPortArr)-1]
-		db.qPortArr = db.qPortArr[:len(db.qPortArr)-1]
+		u.QPort = db.qPortList[len(db.qPortList)-1]
+		db.qPortList = db.qPortList[:len(db.qPortList)-1]
 		if u.Team == game_type.RedTeam {
 			db.RedTeamDb[userId] = u
 		} else {
 			db.BlueTeamDb[userId] = u
 		}
-		db.IncreaseTeamAliveCount(u.Team)
+		db.increaseTeamAliveCount(u.Team)
 		return u.QPort, u.Team, nil
 	} else {
 		return 0, false, fmt.Errorf("login failed")
@@ -116,18 +116,23 @@ func (db *UserDb) CheckLogin(userId uint32) bool {
 func (db *UserDb) ResetUser(userId uint32, team game_type.Team) {
 	db.userList[userId].QPort = 0
 	db.userList[userId].TcpConn = nil
-	if team {
+	if team == game_type.RedTeam {
 		delete(db.RedTeamDb, userId)
 	} else {
 		delete(db.BlueTeamDb, userId)
 	}
 }
 
-// 더 이상 사용하지 않음(그리고 로직도 명확하지 않음)
-//func (db *UserDb) GetTeamAlivePlayerCount(team Team) uint16 {
-//	if team {
-//		return uint16(len(db.BlueTeamDb))
-//	} else {
-//		return uint16(len(db.RedTeamDb))
-//	}
-//}
+func (db *UserDb) GetTeamUserIdList(team game_type.Team) []uint32 {
+	var userIdList []uint32
+	if team == game_type.RedTeam {
+		for userId, _ := range db.RedTeamDb {
+			userIdList = append(userIdList, userId)
+		}
+	} else {
+		for userId, _ := range db.BlueTeamDb {
+			userIdList = append(userIdList, userId)
+		}
+	}
+	return userIdList
+}
