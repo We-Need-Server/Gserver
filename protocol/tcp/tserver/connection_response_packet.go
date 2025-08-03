@@ -17,6 +17,7 @@ type ConnectionResponsePacket struct {
 func NewConnectionResponsePacket(qPort uint32, udpAddr string, matchScore uint16) *ConnectionResponsePacket {
 	return &ConnectionResponsePacket{
 		QPort:      qPort,
+		PKind:      'I',
 		UdpAddr:    udpAddr,
 		MatchScore: matchScore,
 	}

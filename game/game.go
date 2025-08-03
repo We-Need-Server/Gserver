@@ -47,7 +47,11 @@ func (g *Game) GetGameState() map[uint32]*game_type.PlayerState {
 func (g *Game) GetPlayerSpawnStatusList() []*game_type.UserSpawnStatus {
 	var userSpawnStatusArr []*game_type.UserSpawnStatus
 	for key, val := range g.playerList {
-		userSpawnStatusArr = append(userSpawnStatusArr, game_type.NewUserSpawnStatus(key, int16(val.RespawnPoint)))
+		if val.GetPlayerState().Team == game_type.RedTeam {
+			userSpawnStatusArr = append(userSpawnStatusArr, game_type.NewUserSpawnStatus(key, int16(val.RespawnPoint)))
+		} else {
+			userSpawnStatusArr = append(userSpawnStatusArr, game_type.NewUserSpawnStatus(key, int16(-1*val.RespawnPoint)))
+		}
 	}
 	return userSpawnStatusArr
 }
